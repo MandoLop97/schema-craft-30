@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-interface NexoraBuilderAppProps {
+export interface NexoraBuilderAppProps {
   domain: string;
   supabaseUrl: string;
   supabaseAnonKey: string;
