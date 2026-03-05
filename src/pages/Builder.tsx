@@ -26,6 +26,7 @@ export default function Builder() {
   const [dirty, setDirty] = useState(false);
   const [activeDragType, setActiveDragType] = useState<string | null>(null);
   const [publishOpen, setPublishOpen] = useState(false);
+  const [publishMode, setPublishMode] = useState<'draft' | 'published'>('published');
 
   useEffect(() => {
     SchemaStore.init();
@@ -54,15 +55,16 @@ export default function Builder() {
       setActiveDragType={setActiveDragType}
       navigate={navigate}
       pageSlug={pageSlug}
-      onPublish={() => setPublishOpen(true)}
+      onPublish={() => { setPublishMode('published'); setPublishOpen(true); }}
+      onSaveDraft={() => { setPublishMode('draft'); setPublishOpen(true); }}
     />
-    <PublishDialog open={publishOpen} onOpenChange={setPublishOpen} schema={initialSchema} />
+    <PublishDialog open={publishOpen} onOpenChange={setPublishOpen} schema={initialSchema} mode={publishMode} />
   </>;
 }
 
 function BuilderInner({
   initialSchema, selectedNodeId, setSelectedNodeId, device, setDevice,
-  dirty, setDirty, activeDragType, setActiveDragType, navigate, pageSlug, onPublish,
+  dirty, setDirty, activeDragType, setActiveDragType, navigate, pageSlug, onPublish, onSaveDraft,
 }: {
   initialSchema: Schema;
   selectedNodeId: string | null;
@@ -76,6 +78,7 @@ function BuilderInner({
   navigate: ReturnType<typeof useNavigate>;
   pageSlug: string;
   onPublish: () => void;
+  onSaveDraft: () => void;
 }) {
   const { schema, setSchema, undo, redo, canUndo, canRedo } = useSchemaHistory(initialSchema);
 
@@ -220,6 +223,7 @@ function BuilderInner({
           onDeviceChange={setDevice}
           dirty={dirty}
           onPublish={onPublish}
+          onSaveDraft={onSaveDraft}
         />
 
         <div className="flex flex-1 overflow-hidden">
