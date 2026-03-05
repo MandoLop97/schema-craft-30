@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SchemaStore } from "@/lib/schema-store";
 import Index from "./pages/Index";
 import Preview from "./pages/Preview";
+import Builder from "./pages/Builder";
 import ExportSchema from "./pages/ExportSchema";
 import LicenseBlocked from "./pages/LicenseBlocked";
 import NotFound from "./pages/NotFound";
@@ -29,6 +30,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/preview" element={<Preview />} />
+          <Route path="/admin/builder" element={<AdminRoute><Builder /></AdminRoute>} />
           <Route path="/admin/export" element={<AdminRoute><ExportSchema /></AdminRoute>} />
           <Route path="/license-blocked" element={<LicenseBlocked />} />
           <Route path="*" element={<NotFound />} />
