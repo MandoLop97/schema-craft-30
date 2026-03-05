@@ -16,6 +16,7 @@
   "files": ["dist"],
   "scripts": {
     "build": "tsc -p tsconfig.json --emitDeclarationOnly && vite build",
+    "build:dev": "vite build --mode development",
     "prepublishOnly": "npm run build",
     "dev": "vite",
     "preview": "vite preview",
