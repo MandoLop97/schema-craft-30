@@ -12,9 +12,10 @@ interface PublishDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   schema: Schema;
+  mode: 'draft' | 'published';
 }
 
-export function PublishDialog({ open, onOpenChange, schema }: PublishDialogProps) {
+export function PublishDialog({ open, onOpenChange, schema, mode }: PublishDialogProps) {
   const [domain, setDomain] = useState('');
   const [publishing, setPublishing] = useState(false);
 
@@ -33,14 +34,14 @@ export function PublishDialog({ open, onOpenChange, schema }: PublishDialogProps
           {
             domain: trimmed,
             content_json: schema as any,
-            status: 'published',
+            status: mode,
           },
           { onConflict: 'domain' }
         );
 
       if (error) throw error;
 
-      toast.success(`Página publicada para ${trimmed}`);
+      toast.success(mode === 'published' ? `Página publicada para ${trimmed}` : `Borrador guardado para ${trimmed}`);
       onOpenChange(false);
     } catch (err: any) {
       toast.error(`Error al publicar: ${err.message}`);
@@ -54,7 +55,7 @@ export function PublishDialog({ open, onOpenChange, schema }: PublishDialogProps
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Globe className="h-5 w-5" /> Publicar página
+            <Globe className="h-5 w-5" /> {mode === 'published' ? 'Publicar página' : 'Guardar borrador'}
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-3 py-2">
@@ -76,7 +77,7 @@ export function PublishDialog({ open, onOpenChange, schema }: PublishDialogProps
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
           <Button onClick={handlePublish} disabled={publishing}>
             {publishing && <Loader2 className="h-4 w-4 animate-spin" />}
-            Publicar
+            {mode === 'published' ? 'Publicar' : 'Guardar borrador'}
           </Button>
         </DialogFooter>
       </DialogContent>
