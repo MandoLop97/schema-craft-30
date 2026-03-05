@@ -9,6 +9,7 @@ import { TopBar } from '@/components/builder/TopBar';
 import { BlocksPalette } from '@/components/builder/BlocksPalette';
 import { LayersPanel } from '@/components/builder/LayersPanel';
 import { Inspector } from '@/components/builder/Inspector';
+import { PublishDialog } from '@/components/builder/PublishDialog';
 import { BuilderCanvas } from '@/components/builder/BuilderCanvas';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -24,6 +25,7 @@ export default function Builder() {
   const [device, setDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [dirty, setDirty] = useState(false);
   const [activeDragType, setActiveDragType] = useState<string | null>(null);
+  const [publishOpen, setPublishOpen] = useState(false);
 
   useEffect(() => {
     SchemaStore.init();
@@ -38,25 +40,29 @@ export default function Builder() {
     return <div className="flex min-h-screen items-center justify-center"><p className="text-muted-foreground text-sm">Loading builder...</p></div>;
   }
 
-  return <BuilderInner
-    key={initialSchema.id}
-    initialSchema={initialSchema}
-    selectedNodeId={selectedNodeId}
-    setSelectedNodeId={setSelectedNodeId}
-    device={device}
-    setDevice={setDevice}
-    dirty={dirty}
-    setDirty={setDirty}
-    activeDragType={activeDragType}
-    setActiveDragType={setActiveDragType}
-    navigate={navigate}
-    pageSlug={pageSlug}
-  />;
+  return <>
+    <BuilderInner
+      key={initialSchema.id}
+      initialSchema={initialSchema}
+      selectedNodeId={selectedNodeId}
+      setSelectedNodeId={setSelectedNodeId}
+      device={device}
+      setDevice={setDevice}
+      dirty={dirty}
+      setDirty={setDirty}
+      activeDragType={activeDragType}
+      setActiveDragType={setActiveDragType}
+      navigate={navigate}
+      pageSlug={pageSlug}
+      onPublish={() => setPublishOpen(true)}
+    />
+    <PublishDialog open={publishOpen} onOpenChange={setPublishOpen} schema={initialSchema} />
+  </>;
 }
 
 function BuilderInner({
   initialSchema, selectedNodeId, setSelectedNodeId, device, setDevice,
-  dirty, setDirty, activeDragType, setActiveDragType, navigate, pageSlug,
+  dirty, setDirty, activeDragType, setActiveDragType, navigate, pageSlug, onPublish,
 }: {
   initialSchema: Schema;
   selectedNodeId: string | null;
@@ -69,6 +75,7 @@ function BuilderInner({
   setActiveDragType: (t: string | null) => void;
   navigate: ReturnType<typeof useNavigate>;
   pageSlug: string;
+  onPublish: () => void;
 }) {
   const { schema, setSchema, undo, redo, canUndo, canRedo } = useSchemaHistory(initialSchema);
 
@@ -212,6 +219,7 @@ function BuilderInner({
           device={device}
           onDeviceChange={setDevice}
           dirty={dirty}
+          onPublish={onPublish}
         />
 
         <div className="flex flex-1 overflow-hidden">

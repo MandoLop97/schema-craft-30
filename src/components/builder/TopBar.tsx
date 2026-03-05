@@ -1,4 +1,4 @@
-import { Undo2, Redo2, Save, Eye, Download, Monitor, Tablet, Smartphone } from 'lucide-react';
+import { Undo2, Redo2, Save, Eye, Download, Monitor, Tablet, Smartphone, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 
@@ -10,12 +10,13 @@ interface TopBarProps {
   canRedo: boolean;
   onPreview: () => void;
   onExport: () => void;
+  onPublish: () => void;
   device: 'desktop' | 'tablet' | 'mobile';
   onDeviceChange: (d: 'desktop' | 'tablet' | 'mobile') => void;
   dirty: boolean;
 }
 
-export function TopBar({ onSave, onUndo, onRedo, canUndo, canRedo, onPreview, onExport, device, onDeviceChange, dirty }: TopBarProps) {
+export function TopBar({ onSave, onUndo, onRedo, canUndo, canRedo, onPreview, onExport, onPublish, device, onDeviceChange, dirty }: TopBarProps) {
   return (
     <div className="h-12 border-b bg-background flex items-center px-3 gap-1 shrink-0">
       <span className="text-sm font-semibold tracking-tight mr-3">NEXORA</span>
@@ -50,6 +51,9 @@ export function TopBar({ onSave, onUndo, onRedo, canUndo, canRedo, onPreview, on
       </Button>
       <Button size="sm" onClick={onSave} className="gap-1.5">
         <Save className="h-4 w-4" /> {dirty ? 'Save*' : 'Save'}
+      </Button>
+      <Button size="sm" onClick={onPublish} className="gap-1.5 bg-green-600 hover:bg-green-700 text-white">
+        <Globe className="h-4 w-4" /> Publicar
       </Button>
     </div>
   );
