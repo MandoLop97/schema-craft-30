@@ -1,18 +1,16 @@
 {
+  "files": [],
+  "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }],
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "declarationDir": "dist",
-    "jsx": "react-jsx",
-    "moduleResolution": "Bundler",
-    "target": "ES2020",
-    "module": "ESNext",
-    "strict": true,
-    "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
-    }
-  },
-  "include": ["src/index.ts", "src/NexoraBuilderApp.tsx"]
+    },
+    "noImplicitAny": false,
+    "noUnusedParameters": false,
+    "skipLibCheck": true,
+    "allowJs": true,
+    "noUnusedLocals": false,
+    "strictNullChecks": false
+  }
 }

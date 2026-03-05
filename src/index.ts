@@ -1,2 +1,2 @@
 export { NexoraBuilderApp } from './NexoraBuilderApp';
-export type { NexoraBuilderAppProps } from './NexoraBuilderApp';
+export type { } from './NexoraBuilderApp';
