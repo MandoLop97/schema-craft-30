@@ -64,6 +64,10 @@ export interface NodeProps {
   level?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span';
   copyright?: string;
   items?: { icon?: string; title: string; description: string }[];
+  subtitle?: string;
+  ctaText?: string;
+  ctaHref?: string;
+  overlayOpacity?: string;
 }
 
 export interface SchemaNode {
