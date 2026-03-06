@@ -92,8 +92,14 @@ export function NexoraBuilderApp({
   onPageChange,
   onSaveWithSlug,
 }: NexoraBuilderAppProps) {
-  // When pages are provided but no activePage, show PageManager
-  const showPageManager = pages && pages.length > 0 && !activePage;
+  // When pages are provided but no activePage, auto-select the first page
+  useEffect(() => {
+    if (pages && pages.length > 0 && !activePage && onPageChange) {
+      onPageChange(pages[0].slug);
+    }
+  }, [pages, activePage, onPageChange]);
+
+  const showPageManager = false;
 
   // Resolve schema: initialSchema > active page schema > default
   const { resolvedSchema, validationErrors } = useMemo(() => {
