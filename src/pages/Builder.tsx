@@ -3,6 +3,8 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { SchemaStore } from '@/lib/schema-store';
 import { Schema } from '@/types/schema';
 import { NexoraBuilderApp } from '@/NexoraBuilderApp';
+import { supabase } from '@/integrations/supabase/client';
+import { PublishPayload } from '@/components/builder/PublishDialog';
 
 export default function Builder() {
   const [searchParams] = useSearchParams();
