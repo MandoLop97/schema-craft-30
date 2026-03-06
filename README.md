@@ -21,11 +21,53 @@ import '@mandolop97/constructor-nexora/styles.css';
 />
 ```
 
-## Integración multi-página
+## Integración multi-página (páginas reales)
 
 > **Importante:** Las páginas que aparecen en el editor son las **rutas reales de tu aplicación**. La base de datos solo almacena el contenido (schema) de cada página, **no define qué páginas existen**.
 
 El array `pages` debe construirse a partir de las rutas reales definidas en tu template (React Router, etc.), no de registros de base de datos.
+
+### Opción A: Usar PAGE_DEFINITIONS del paquete
+
+El paquete exporta `PAGE_DEFINITIONS` con 8 páginas predefinidas y `getDefaultSchemaForSlug()` para obtener schemas por defecto.
+
+```tsx
+import {
+  NexoraBuilderApp,
+  PAGE_DEFINITIONS,
+  getDefaultSchemaForSlug,
+} from '@mandolop97/constructor-nexora';
+import '@mandolop97/constructor-nexora/styles.css';
+
+function BuilderPage() {
+  const [currentSlug, setCurrentSlug] = useState('/');
+  const [savedSchemas, setSavedSchemas] = useState<Record<string, Schema>>({});
+
+  // Construir páginas desde PAGE_DEFINITIONS (las páginas compiladas del paquete)
+  const pages = PAGE_DEFINITIONS.map((def) => ({
+    slug: def.slug,
+    title: def.title,
+    schema: savedSchemas[def.slug] ?? getDefaultSchemaForSlug(def.slug),
+    status: savedSchemas[def.slug] ? 'published' as const : 'draft' as const,
+  }));
+
+  return (
+    <NexoraBuilderApp
+      pages={pages}
+      activePage={currentSlug}
+      onPageChange={setCurrentSlug}
+      onSave={(schema) => console.log('Saved:', schema)}
+      onSaveWithSlug={(slug, schema) => {
+        // Guardar en tu base de datos
+        setSavedSchemas((prev) => ({ ...prev, [slug]: schema }));
+      }}
+      onPublish={(schema) => console.log('Published:', schema)}
+    />
+  );
+}
+```
+
+### Opción B: Definir tus propias rutas reales
 
 ```tsx
 import {
@@ -67,6 +109,17 @@ function BuilderPage() {
 }
 ```
 
+---
+
+## 🔧 Prompt para integrar en tu proyecto template
+
+Copia y pega el siguiente prompt en tu proyecto template para implementar la integración con páginas reales:
+
+> **Prompt:**
+> Integra el constructor `@mandolop97/constructor-nexora` en la ruta `/admin/builder` usando el componente `NexoraBuilderApp`. Importa `PAGE_DEFINITIONS` y `getDefaultSchemaForSlug` del paquete para construir la lista de páginas. NO consultes la base de datos para obtener la lista de páginas — solo úsala para persistir y cargar los schemas editados por el usuario. Las páginas se definen en código (PAGE_DEFINITIONS), la BD solo guarda el contenido editado. Implementa `onSaveWithSlug` para guardar el schema de cada página por su slug, y `onPublishSubmit` para manejar la publicación con tu propia lógica de base de datos. Importa los estilos con `import '@mandolop97/constructor-nexora/styles.css'`.
+
+---
+
 ## Props API
 
 | Prop | Tipo | Descripción |
@@ -90,10 +143,12 @@ function BuilderPage() {
 // Renderer independiente (para renderizar schemas sin el editor)
 import { PageRenderer } from '@mandolop97/constructor-nexora';
 
+// Definiciones de páginas predefinidas
+import { PAGE_DEFINITIONS, getDefaultSchemaForSlug } from '@mandolop97/constructor-nexora';
+
 // Utilidades de schema
 import {
   createDefaultHomeSchema,
-  getDefaultSchemaForSlug,
   validateSchema,
   createNode,
   blockRegistry,
