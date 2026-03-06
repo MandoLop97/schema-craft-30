@@ -56,6 +56,10 @@ export const blockRegistry: BlockDefinition[] = [
   { type: 'Button', label: 'Button', category: 'UI', icon: Square, canHaveChildren: false, defaultProps: { text: 'Button', variant: 'default' }, defaultStyle: {} },
   { type: 'Card', label: 'Card', category: 'UI', icon: CreditCard, canHaveChildren: false, defaultProps: { items: [{ title: 'Card Title', description: 'Card description goes here.' }] }, defaultStyle: { padding: '1.5rem' } },
   { type: 'Input', label: 'Input', category: 'UI', icon: TextCursorInput, canHaveChildren: false, defaultProps: { placeholder: 'Enter text...' }, defaultStyle: {} },
+  // ── Interactive ──
+  { type: 'Accordion', label: 'Accordion', category: 'Interactive', icon: ListCollapse, canHaveChildren: false, defaultProps: { panels: [{ title: 'What is this?', description: 'This is an accordion panel with collapsible content.' }, { title: 'How does it work?', description: 'Click on the header to expand or collapse each panel.' }] }, defaultStyle: {} },
+  { type: 'TabsBlock', label: 'Tabs', category: 'Interactive', icon: LayoutDashboard, canHaveChildren: false, defaultProps: { panels: [{ title: 'Overview', description: 'This is the overview tab content.' }, { title: 'Details', description: 'Detailed information goes here.' }] }, defaultStyle: {} },
+  { type: 'VideoEmbed', label: 'Video', category: 'Interactive', icon: Play, canHaveChildren: false, defaultProps: { videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', alt: 'Video' }, defaultStyle: { borderRadius: '0.5rem' } },
 
   // ── Commerce ──
   { type: 'ProductCard', label: 'Product Card', category: 'Commerce', icon: ShoppingBag, canHaveChildren: false, defaultProps: { text: 'Product Name', price: '$99', src: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop' }, defaultStyle: {} },
