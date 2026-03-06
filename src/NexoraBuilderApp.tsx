@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { Schema, PageDefinition } from '@/types/schema';
 import { createDefaultHomeSchema } from '@/lib/default-schema';
 import { validateSchema } from '@/lib/schema-validator';
@@ -92,8 +92,14 @@ export function NexoraBuilderApp({
   onPageChange,
   onSaveWithSlug,
 }: NexoraBuilderAppProps) {
-  // When pages are provided but no activePage, show PageManager
-  const showPageManager = pages && pages.length > 0 && !activePage;
+  // When pages are provided but no activePage, auto-select the first page
+  useEffect(() => {
+    if (pages && pages.length > 0 && !activePage && onPageChange) {
+      onPageChange(pages[0].slug);
+    }
+  }, [pages, activePage, onPageChange]);
+
+  const showPageManager = false;
 
   // Resolve schema: initialSchema > active page schema > default
   const { resolvedSchema, validationErrors } = useMemo(() => {
@@ -169,9 +175,6 @@ export function NexoraBuilderApp({
   return (
     <TooltipProvider>
       <Toaster />
-      <div className="fixed bottom-2 left-2 z-[9999] px-2 py-1 rounded bg-foreground/80 text-background text-[10px] font-mono pointer-events-none select-none opacity-70">
-        schema-craft runtime: {EDITOR_VERSION}
-      </div>
       <BuilderEditorShell
         key={resolvedSchema.id}
         initialSchema={resolvedSchema}
