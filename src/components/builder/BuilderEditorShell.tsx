@@ -8,7 +8,7 @@ import { TopBar } from '@/components/builder/TopBar';
 import { BlocksPalette } from '@/components/builder/BlocksPalette';
 import { LayersPanel } from '@/components/builder/LayersPanel';
 import { Inspector } from '@/components/builder/Inspector';
-import { PublishDialog } from '@/components/builder/PublishDialog';
+import { PublishDialog, PublishPayload } from '@/components/builder/PublishDialog';
 import { BuilderCanvas } from '@/components/builder/BuilderCanvas';
 import { PageManager } from '@/components/builder/PageManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
