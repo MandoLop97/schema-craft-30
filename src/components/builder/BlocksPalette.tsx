@@ -27,7 +27,7 @@ export function BlocksPalette() {
   const categories = getCategories();
 
   return (
-    <div className="p-3 space-y-4">
+    <div className="p-3 space-y-4 flex flex-col h-full">
       {categories.map((cat) => (
         <div key={cat}>
           <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">{cat}</p>
@@ -38,6 +38,9 @@ export function BlocksPalette() {
           </div>
         </div>
       ))}
+      <div className="mt-auto pt-4 border-t">
+        <span className="text-[10px] text-muted-foreground font-mono">v1.0.8</span>
+      </div>
     </div>
   );
 }
