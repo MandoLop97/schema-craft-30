@@ -5,7 +5,7 @@ import { TextNode, ImageNode, DividerNode, BadgeNode } from './nodes/ContentNode
 import { ButtonNode, CardNode, InputNode } from './nodes/UINodes';
 import { ProductCardNode } from './nodes/CommerceNodes';
 import { NavbarNode, FooterNode } from './nodes/SiteNodes';
-import { AnnouncementBarNode, FeatureBarNode, TestimonialCardNode, NewsletterSectionNode } from './nodes/TemplateNodes';
+import { AnnouncementBarNode, FeatureBarNode, TestimonialCardNode, NewsletterSectionNode, HeroSectionNode } from './nodes/TemplateNodes';
 
 export interface NodeComponentProps {
   node: SchemaNode;
@@ -34,6 +34,7 @@ const registry: Record<NodeType, NodeComponent> = {
   FeatureBar: FeatureBarNode,
   TestimonialCard: TestimonialCardNode,
   NewsletterSection: NewsletterSectionNode,
+  HeroSection: HeroSectionNode,
 };
 
 export function getNodeComponent(type: NodeType): NodeComponent | undefined {

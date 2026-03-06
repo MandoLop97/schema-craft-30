@@ -2,6 +2,8 @@ import React from 'react';
 import { Schema, RenderMode } from '@/types/schema';
 import { getNodeComponent } from './NodeRegistry';
 import { EditableDropZone } from './EditableDropZone';
+import { SortableNodeWrapper } from './SortableNodeWrapper';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { getBlockDef } from '@/lib/block-registry';
 
 interface PageRendererProps {
@@ -19,24 +21,112 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode }: Pag
     const Component = getNodeComponent(node.type);
     if (!Component) return null;
 
-    const renderChildren = (childIds: string[]) =>
-      childIds.map((cid) => <React.Fragment key={cid}>{renderNode(cid)}</React.Fragment>);
-
-    const element = <Component node={node} mode={mode} renderChildren={renderChildren} />;
-
-    if (mode !== 'edit') return element;
-
-    const isSelected = selectedNodeId === node.id;
     const blockDef = getBlockDef(node.type);
     const canHaveChildren = blockDef?.canHaveChildren ?? false;
 
-    const wrappedElement = canHaveChildren ? (
-      <EditableDropZone nodeId={node.id} isEmpty={node.children.length === 0}>
-        {element}
-      </EditableDropZone>
-    ) : (
-      element
-    );
+    const renderChildren = (childIds: string[]) => {
+      if (mode !== 'edit' || !canHaveChildren) {
+        return childIds.map((cid) => <React.Fragment key={cid}>{renderNode(cid)}</React.Fragment>);
+      }
+
+      // In edit mode, wrap children in SortableContext for reordering
+      return (
+        <SortableContext items={childIds} strategy={verticalListSortingStrategy}>
+          {childIds.map((cid) => {
+            const childNode = schema.nodes[cid];
+            if (!childNode || childNode.hidden) return null;
+
+            const ChildComponent = getNodeComponent(childNode.type);
+            if (!ChildComponent) return null;
+
+            const childBlockDef = getBlockDef(childNode.type);
+            const childCanHaveChildren = childBlockDef?.canHaveChildren ?? false;
+
+            const childElement = <ChildComponent node={childNode} mode={mode} renderChildren={(ids: string[]) => renderChildren2(ids)} />;
+
+            const wrappedChild = childCanHaveChildren ? (
+              <EditableDropZone nodeId={childNode.id} isEmpty={childNode.children.length === 0}>
+                {childElement}
+              </EditableDropZone>
+            ) : (
+              childElement
+            );
+
+            return (
+              <SortableNodeWrapper
+                key={cid}
+                nodeId={cid}
+                isSelected={selectedNodeId === cid}
+                nodeType={childNode.type}
+                onSelect={(id) => onSelectNode?.(id)}
+              >
+                {wrappedChild}
+              </SortableNodeWrapper>
+            );
+          })}
+        </SortableContext>
+      );
+    };
+
+    // Non-sortable renderChildren for nested levels
+    const renderChildren2 = (childIds: string[]): React.ReactNode => {
+      if (mode !== 'edit') {
+        return childIds.map((cid) => <React.Fragment key={cid}>{renderNode(cid)}</React.Fragment>);
+      }
+
+      return (
+        <SortableContext items={childIds} strategy={verticalListSortingStrategy}>
+          {childIds.map((cid) => {
+            const childNode = schema.nodes[cid];
+            if (!childNode || childNode.hidden) return null;
+
+            const ChildComponent = getNodeComponent(childNode.type);
+            if (!ChildComponent) return null;
+
+            const childBlockDef = getBlockDef(childNode.type);
+            const childCanHaveChildren = childBlockDef?.canHaveChildren ?? false;
+
+            const childElement = <ChildComponent node={childNode} mode={mode} renderChildren={(ids: string[]) => renderChildren2(ids)} />;
+
+            const wrappedChild = childCanHaveChildren ? (
+              <EditableDropZone nodeId={childNode.id} isEmpty={childNode.children.length === 0}>
+                {childElement}
+              </EditableDropZone>
+            ) : (
+              childElement
+            );
+
+            return (
+              <SortableNodeWrapper
+                key={cid}
+                nodeId={cid}
+                isSelected={selectedNodeId === cid}
+                nodeType={childNode.type}
+                onSelect={(id) => onSelectNode?.(id)}
+              >
+                {wrappedChild}
+              </SortableNodeWrapper>
+            );
+          })}
+        </SortableContext>
+      );
+    };
+
+    const element = <Component node={node} mode={mode} renderChildren={renderChildren} />;
+
+    // Root node: don't wrap in sortable
+    if (mode !== 'edit') return element;
+
+    if (nodeId === schema.rootNodeId) {
+      return (
+        <EditableDropZone nodeId={node.id} isEmpty={node.children.length === 0}>
+          {element}
+        </EditableDropZone>
+      );
+    }
+
+    // Non-root nodes at top level (shouldn't happen normally, but safety)
+    const isSelected = selectedNodeId === node.id;
 
     return (
       <div
@@ -70,7 +160,13 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode }: Pag
             {node.type}
           </div>
         )}
-        {wrappedElement}
+        {canHaveChildren ? (
+          <EditableDropZone nodeId={node.id} isEmpty={node.children.length === 0}>
+            {element}
+          </EditableDropZone>
+        ) : (
+          element
+        )}
       </div>
     );
   };

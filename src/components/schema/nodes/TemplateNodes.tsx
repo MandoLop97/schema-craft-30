@@ -142,3 +142,98 @@ export function NewsletterSectionNode({ node }: NodeComponentProps) {
     </div>
   );
 }
+
+export function HeroSectionNode({ node }: NodeComponentProps) {
+  const opacity = parseFloat(node.props.overlayOpacity || '0.55');
+  return (
+    <div
+      style={{
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        textAlign: 'center',
+        minHeight: node.style.minHeight || '32rem',
+        padding: node.style.padding || '4rem 2rem',
+        overflow: 'hidden',
+        ...s(node.style),
+        backgroundImage: undefined,
+        backgroundColor: undefined,
+      }}
+      data-node-id={node.id}
+    >
+      {/* Background image */}
+      {node.props.src && (
+        <img
+          src={node.props.src}
+          alt=""
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            zIndex: 0,
+          }}
+        />
+      )}
+      {/* Overlay */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundColor: `rgba(0, 0, 0, ${opacity})`,
+          zIndex: 1,
+        }}
+      />
+      {/* Content */}
+      <div style={{ position: 'relative', zIndex: 2, maxWidth: '48rem', width: '100%' }}>
+        <h1
+          style={{
+            fontSize: 'clamp(2rem, 5vw, 3.5rem)',
+            fontWeight: 800,
+            color: '#fff',
+            lineHeight: 1.1,
+            marginBottom: '1.25rem',
+            letterSpacing: '-0.025em',
+          }}
+        >
+          {node.props.text || 'Hero Title'}
+        </h1>
+        <p
+          style={{
+            fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
+            color: 'rgba(255,255,255,0.85)',
+            lineHeight: 1.6,
+            marginBottom: '2rem',
+            maxWidth: '36rem',
+            marginLeft: 'auto',
+            marginRight: 'auto',
+          }}
+        >
+          {node.props.subtitle || 'Subtitle goes here'}
+        </p>
+        {node.props.ctaText && (
+          <a
+            href={node.props.ctaHref || '#'}
+            style={{
+              display: 'inline-block',
+              padding: '0.875rem 2.5rem',
+              backgroundColor: 'hsl(var(--primary))',
+              color: 'hsl(var(--primary-foreground))',
+              borderRadius: '0.5rem',
+              fontWeight: 600,
+              fontSize: '1rem',
+              textDecoration: 'none',
+              transition: 'transform 150ms ease, box-shadow 150ms ease',
+              boxShadow: '0 4px 14px rgba(0,0,0,0.25)',
+            }}
+          >
+            {node.props.ctaText}
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}

@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
-import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors, closestCenter } from '@dnd-kit/core';
+import { arrayMove } from '@dnd-kit/sortable';
 import { useSchemaHistory } from '@/hooks/use-schema-history';
 import { Schema, NodeType, SchemaNode } from '@/types/schema';
 import { createNode, isContainerType } from '@/lib/node-factory';
@@ -61,6 +62,8 @@ export function BuilderEditorShell({
     const data = event.active.data.current;
     if (data?.type === 'palette') {
       setActiveDragType(data.nodeType);
+    } else if (data?.type === 'sortable') {
+      setActiveDragType(null); // No overlay for reorder
     }
   };
 
@@ -69,19 +72,18 @@ export function BuilderEditorShell({
     const { active, over } = event;
     if (!over) return;
 
-    const data = active.data.current;
-    if (data?.type === 'palette') {
-      const nodeType = data.nodeType as NodeType;
+    const activeData = active.data.current;
+
+    // Handle palette drops (new blocks)
+    if (activeData?.type === 'palette') {
+      const nodeType = activeData.nodeType as NodeType;
       const newNode = createNode(nodeType);
 
       updateSchema((s) => {
-        // Use the droppable id (container node id) as the parent
         let parentId = String(over.id);
         const parentNode = s.nodes[parentId];
 
-        // If the drop target isn't a valid container, walk up to find one
         if (!parentNode || !isContainerType(parentNode.type)) {
-          // Try to find the parent of this node
           const actualParent = Object.values(s.nodes).find((n) => n.children.includes(parentId));
           parentId = actualParent ? actualParent.id : s.rootNodeId;
         }
@@ -92,6 +94,28 @@ export function BuilderEditorShell({
       });
 
       setSelectedNodeId(newNode.id);
+      return;
+    }
+
+    // Handle sortable reordering
+    if (activeData?.type === 'sortable') {
+      const activeId = String(active.id);
+      const overId = String(over.id);
+      if (activeId === overId) return;
+
+      updateSchema((s) => {
+        // Find parent that contains the active node
+        const parent = Object.values(s.nodes).find((n) => n.children.includes(activeId));
+        if (!parent) return s;
+
+        const oldIndex = parent.children.indexOf(activeId);
+        const newIndex = parent.children.indexOf(overId);
+
+        if (oldIndex === -1 || newIndex === -1) return s;
+
+        parent.children = arrayMove(parent.children, oldIndex, newIndex);
+        return s;
+      });
     }
   };
 
@@ -164,7 +188,7 @@ export function BuilderEditorShell({
   }, [undo, redo, handleSave, handleDelete, selectedNodeId, schema.rootNodeId]);
 
   return (
-    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className={`h-screen flex flex-col bg-background overflow-hidden ${className || ''}`}>
         <TopBar
           onSave={handleSave}

@@ -2,7 +2,7 @@ import {
   Square, AlignVerticalJustifyStart, LayoutGrid, Columns,
   Type, ImageIcon, Minus, Tag,
   CreditCard, TextCursorInput, ShoppingBag, Navigation, PanelBottom,
-  Megaphone, Sparkles, MessageSquareQuote, Mail,
+  Megaphone, Sparkles, MessageSquareQuote, Mail, Layers,
 } from 'lucide-react';
 import { NodeType, NodeProps, NodeStyle } from '@/types/schema';
 import React from 'react';
@@ -47,6 +47,7 @@ export const blockRegistry: BlockDefinition[] = [
   { type: 'FeatureBar', label: 'Feature Bar', category: 'Template', icon: Sparkles, canHaveChildren: false, defaultProps: { items: [{ icon: 'truck', title: 'Free Shipping', description: 'On orders over $50' }, { icon: 'shield', title: 'Secure Payment', description: '100% protected' }, { icon: 'refresh', title: 'Easy Returns', description: '30 day return policy' }] }, defaultStyle: {} },
   { type: 'TestimonialCard', label: 'Testimonial', category: 'Template', icon: MessageSquareQuote, canHaveChildren: false, defaultProps: { text: '"This product changed my life!"', label: 'Jane Doe', variant: '5' }, defaultStyle: {} },
   { type: 'NewsletterSection', label: 'Newsletter', category: 'Template', icon: Mail, canHaveChildren: false, defaultProps: { text: 'Stay in the loop', label: 'Get the latest updates delivered to your inbox.', placeholder: 'Enter your email' }, defaultStyle: { padding: '3rem 2rem', textAlign: 'center' } },
+  { type: 'HeroSection', label: 'Hero Section', category: 'Template', icon: Layers, canHaveChildren: false, defaultProps: { text: 'Build Something Amazing', subtitle: 'The all-in-one platform to launch your next big idea — fast, beautiful, and effortless.', ctaText: 'Get Started', ctaHref: '#', src: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&h=800&fit=crop', overlayOpacity: '0.55' }, defaultStyle: { minHeight: '32rem', padding: '4rem 2rem' } },
 ];
 
 const registryMap = new Map<NodeType, BlockDefinition>();
