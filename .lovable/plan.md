@@ -1,81 +1,48 @@
 
-## Instrucción permanente: Versionado automático
 
-**IMPORTANTE**: Cada vez que se haga un cambio en el proyecto, incrementar la versión en:
-1. `package.json` → campo `"version"`
-2. `src/components/builder/BuilderEditorShell.tsx` → texto de versión en el status bar
+## Plan: Arreglar el PageManager en sidebar + documentar integración con páginas reales
 
-Formato: semver (major.minor.patch). Incrementar el **patch** (+1) en cada cambio. Versión actual: **1.0.7**
+### Problema 1: PageManager se ve mal en el sidebar
+El `PageManager` actual tiene `p-8 max-w-2xl mx-auto` — diseñado para pantalla completa, no para un panel lateral de 240px. Los botones con iconos de 36px, badges de status y chevrons desbordan el espacio.
 
----
+### Problema 2: El template debe usar páginas reales
+El constructor ya exporta `PAGE_DEFINITIONS` y `getDefaultSchemaForSlug()` con 8 páginas predefinidas. El template debe usar estas definiciones (o sus propias rutas reales) como fuente de verdad, no consultar la base de datos para saber qué páginas existen.
 
-## Phase 1: Schema-First Foundation + eCommerce Home
+### Cambios
 
-### Overview
-Build the core schema system, page renderer, storage layer, and a clean eCommerce Home page — all driven by JSON schema. This foundation makes Phase 2 (Builder UI) straightforward to add.
+**1. Rediseñar `PageManager` para funcionar en sidebar (240px)**
+- Quitar `p-8 max-w-2xl mx-auto` — usar `p-3` compacto
+- Reducir header: quitar icono grande, usar texto más pequeño
+- Simplificar botones de página: eliminar el icono de 36px, reducir padding, hacer badges más compactos
+- Quitar el `ChevronRight` para ahorrar espacio
+- Mantener: nombre de página, slug, indicador de activo, badge de status
 
----
+**2. Actualizar `README.md` con prompt/guía para el template**
+- Agregar sección clara explicando que el template debe usar `PAGE_DEFINITIONS` exportado por el paquete (o sus rutas reales)
+- Incluir un bloque de código listo para copiar que el usuario pueda usar como prompt en el proyecto template
+- Enfatizar: las páginas NO se traen de base de datos, se definen en código
 
-### 1. Schema Types & Data Model
-Define TypeScript types for the entire schema system:
-- **Page** (id, slug, name, schemaId)
-- **Schema** (id, version, updatedAt, themeTokens, rootNodeId, nodes map)
-- **Node** (id, type, props, style, children, locked, hidden)
-- **ThemeTokens** (colors, typography, radius, spacing)
-- Support all node types: Section, Container, Grid, Stack, Text, Image, Button, Card, Badge, Divider, Input, ProductCard, Navbar, Footer
+**3. Bump versión a `1.0.5`**
 
-### 2. Schema Store (LocalStorage)
-Create an abstraction layer (`SchemaStore`) with clean API:
-- `getPages()`, `getPageBySlug()`, `getSchema()`, `saveSchema()`
-- `createPage()`, `duplicatePage()`, `deletePage()`, `renamePage()`
-- All backed by LocalStorage, designed so swapping to a database later only changes the store internals
+### Resultado esperado del PageManager en sidebar
 
-### 3. Node Registry & Components
-Build a component for each node type, all receiving props/style from schema:
-- **Layout**: Section, Container, Grid, Stack
-- **Content**: Text, Image, Divider, Badge
-- **UI**: Button, Card, Input
-- **Commerce**: ProductCard (mock with image, title, price, CTA)
-- **Site**: Navbar, Footer
+```text
+┌──────────────────────┐
+│ Pages                │
+│ Select a page        │
+├──────────────────────┤
+│ ● Inicio         Live│
+│   /                  │
+├──────────────────────┤
+│   Tienda        Draft│
+│   /products          │
+├──────────────────────┤
+│   Contacto      Draft│
+│   /contact           │
+└──────────────────────┘
+```
 
-### 4. PageRenderer
-Core rendering engine:
-- Takes a schema + mode (`public` | `preview` | `edit`)
-- Recursively renders nodes from the tree using the Node Registry
-- In `public`/`preview` mode: clean output, no editing UI
-- In `edit` mode: adds selection outlines and drop zones (prepared for Phase 2)
-- Applies ThemeTokens as CSS variables
+### Ejemplo de prompt para el template
 
-### 5. eCommerce Home Page (Schema-based)
-Create a default `home` schema that produces a modern eCommerce landing page:
-- **Navbar** with logo and navigation links
-- **Hero section** with headline, subtext, and CTA button
-- **Featured products grid** with 3-4 ProductCard mocks
-- **Value propositions** section (icons + text)
-- **Footer** with links and copyright
-- Clean, minimal design inspired by modern eCommerce (think Stripe/Linear aesthetics)
-
-### 6. Route Setup
-- `/` → Renders Home from schema via PageRenderer (public mode)
-- `/preview?page=home` → Same but in preview mode
-- `/admin/export?page=home` → Shows raw JSON schema with copy button
-- `/license-blocked` → Placeholder lock screen
-
-### 7. License Gate (Mock)
-- `license_status` stored in LocalStorage (active/inactive/exceeded)
-- Admin routes check license; public site always works
-- `/license-blocked` shows status, reason, and placeholder "Enter License" button
-
----
-
-### What's NOT in Phase 1 (saved for Phase 2)
-- Full Builder UI (drag & drop canvas, left/right sidebars, inspector)
-- Undo/Redo history
-- AI Edit feature
-- Templates management (`/admin/templates`)
-- Theme editor (`/admin/theme`)
-- Device toggle & responsive overrides
-
-### Design Style
-Minimal, professional SaaS aesthetic — light background, clean typography, subtle borders, polished hover states.
+Se incluirá en el README un bloque que el usuario puede copiar y pegar directamente en el proyecto template, indicando cómo importar `PAGE_DEFINITIONS` y `getDefaultSchemaForSlug` del paquete y construir el array de `pages` a partir de las rutas reales, usando la BD solo para persistencia de schemas editados.
 
