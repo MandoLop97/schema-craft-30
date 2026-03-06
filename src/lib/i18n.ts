@@ -16,6 +16,7 @@ export interface BuilderLocale {
   blocks: string;
   layers: string;
   pages: string;
+  theme: string;
 
   // Inspector
   props: string;
