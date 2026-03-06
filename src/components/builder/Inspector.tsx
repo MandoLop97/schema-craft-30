@@ -133,7 +133,12 @@ function FeatureBarPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate:
     <>
       <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Features</Label>
       {items.map((item, i) => (
-        <div key={i} className="space-y-1 border rounded-md p-2">
+        <div key={i} className="space-y-1 border rounded-md p-2 relative">
+          <Button variant="ghost" size="icon" className="absolute top-1 right-1 h-5 w-5 text-muted-foreground hover:text-destructive" onClick={() => {
+            onUpdate({ items: items.filter((_, idx) => idx !== i) });
+          }}>
+            <Trash2 className="h-3 w-3" />
+          </Button>
           <Input className="h-7 text-xs" placeholder="Icon" value={item.icon || ''} onChange={(e) => {
             const updated = [...items]; updated[i] = { ...item, icon: e.target.value }; onUpdate({ items: updated });
           }} />
@@ -146,6 +151,19 @@ function FeatureBarPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate:
         </div>
       ))}
       <Button variant="outline" size="sm" className="text-xs w-full" onClick={() => onUpdate({ items: [...items, { icon: 'star', title: 'Feature', description: 'Description' }] })}>+ Add Feature</Button>
+    </>
+  );
+}
+
+function HeroSectionPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: Partial<NodeProps>) => void }) {
+  return (
+    <>
+      <PropField label="Heading" value={node.props.text || ''} onChange={(v) => onUpdate({ text: v })} />
+      <PropField label="Subtitle" value={node.props.subtitle || ''} onChange={(v) => onUpdate({ subtitle: v })} />
+      <PropField label="CTA Text" value={node.props.ctaText || ''} onChange={(v) => onUpdate({ ctaText: v })} />
+      <PropField label="CTA Link" value={node.props.ctaHref || ''} onChange={(v) => onUpdate({ ctaHref: v })} />
+      <PropField label="Background Image" value={node.props.src || ''} onChange={(v) => onUpdate({ src: v })} />
+      <PropField label="Overlay Opacity (0-1)" value={node.props.overlayOpacity || '0.55'} onChange={(v) => onUpdate({ overlayOpacity: v })} />
     </>
   );
 }
