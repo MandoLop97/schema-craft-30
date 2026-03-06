@@ -1,4 +1,13 @@
 
+## Instrucción permanente: Versionado automático
+
+**IMPORTANTE**: Cada vez que se haga un cambio en el proyecto, incrementar la versión en:
+1. `package.json` → campo `"version"`
+2. `src/components/builder/BuilderEditorShell.tsx` → texto de versión en el status bar
+
+Formato: semver (major.minor.patch). Incrementar el **patch** (+1) en cada cambio. Versión actual: **1.0.7**
+
+---
 
 ## Phase 1: Schema-First Foundation + eCommerce Home
 
