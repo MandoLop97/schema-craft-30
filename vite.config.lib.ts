@@ -15,8 +15,14 @@ export default defineConfig({
       formats: ["es"],
       fileName: "index",
     },
+    cssCodeSplit: false,
     rollupOptions: {
-      external: ["react", "react-dom", "@supabase/supabase-js"],
+      external: [
+        "react",
+        "react-dom",
+        "react/jsx-runtime",
+        "@supabase/supabase-js",
+      ],
       output: {
         globals: {
           react: "React",
