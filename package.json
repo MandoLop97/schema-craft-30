@@ -1,7 +1,7 @@
 {
   "name": "@mandolop97/schema-craft-30",
   "private": false,
-  "version": "1.1.0",
+  "version": "1.2.0",
   "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.js",

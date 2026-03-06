@@ -1,63 +1,81 @@
 
+## Instrucción permanente: Versionado automático
 
-## Plan: Multi-page system + Default schemas (v1.2.0)
+**IMPORTANTE**: Cada vez que se haga un cambio en el proyecto, incrementar la versión en:
+1. `package.json` → campo `"version"`
+2. `src/components/builder/BuilderEditorShell.tsx` → texto de versión en el status bar
 
-### Summary
+Formato: semver (major.minor.patch). Incrementar el **patch** (+1) en cada cambio. Versión actual: **1.0.7**
 
-Add `PageDefinition` type, `pages`/`activePage`/`onPageChange`/`onSaveWithSlug` props to `NexoraBuilderApp`, a `PageManager` component shown when `pages` are provided but no `activePage` is set (or as a new left-sidebar tab), and a `defaultSchemas.ts` file with all 8 page schemas. Export everything from `src/index.ts`.
+---
 
-### Files to create
+## Phase 1: Schema-First Foundation + eCommerce Home
 
-**`src/lib/default-schemas.ts`**
-- Contains `sharedNavbar()`, `sharedFooter()`, and all 8 schema factory functions (Home, Products, FAQ, Contact, Help, Privacy, Terms, Wishlist)
-- Exports `PAGE_DEFINITIONS` array, `getDefaultSchemaForSlug()`, and each individual `create*Schema()` function
-- Uses existing `Schema` type with proper typing on `Record<string, SchemaNode>`
+### Overview
+Build the core schema system, page renderer, storage layer, and a clean eCommerce Home page — all driven by JSON schema. This foundation makes Phase 2 (Builder UI) straightforward to add.
 
-**`src/components/builder/PageManager.tsx`**
-- Renders the page list UI provided by the user (styled with Tailwind instead of inline styles for consistency)
-- Props: `pages: PageDefinition[]`, `activePage?: string`, `onSelectPage: (slug: string) => void`
-- Shows page title, slug, status badge, and selection indicator
+---
 
-### Files to modify
+### 1. Schema Types & Data Model
+Define TypeScript types for the entire schema system:
+- **Page** (id, slug, name, schemaId)
+- **Schema** (id, version, updatedAt, themeTokens, rootNodeId, nodes map)
+- **Node** (id, type, props, style, children, locked, hidden)
+- **ThemeTokens** (colors, typography, radius, spacing)
+- Support all node types: Section, Container, Grid, Stack, Text, Image, Button, Card, Badge, Divider, Input, ProductCard, Navbar, Footer
 
-**`src/types/schema.ts`**
-- Add `PageDefinition` interface: `{ slug: string; title: string; schema: Schema; status?: 'published' | 'draft' }`
+### 2. Schema Store (LocalStorage)
+Create an abstraction layer (`SchemaStore`) with clean API:
+- `getPages()`, `getPageBySlug()`, `getSchema()`, `saveSchema()`
+- `createPage()`, `duplicatePage()`, `deletePage()`, `renamePage()`
+- All backed by LocalStorage, designed so swapping to a database later only changes the store internals
 
-**`src/NexoraBuilderApp.tsx`**
-- Add new props: `pages?`, `activePage?`, `onPageChange?`, `onSaveWithSlug?`
-- When `pages` is provided and `activePage` is set, resolve `initialSchema` from `pages.find(p => p.slug === activePage)?.schema` (with `initialSchema` prop as override)
-- When `pages` is provided but no `activePage`, show `PageManager` instead of the editor
-- Pass `onSaveWithSlug` down: wrap `onSave` to also call `onSaveWithSlug(activePage, schema)` when available
+### 3. Node Registry & Components
+Build a component for each node type, all receiving props/style from schema:
+- **Layout**: Section, Container, Grid, Stack
+- **Content**: Text, Image, Divider, Badge
+- **UI**: Button, Card, Input
+- **Commerce**: ProductCard (mock with image, title, price, CTA)
+- **Site**: Navbar, Footer
 
-**`src/components/builder/BuilderEditorShell.tsx`**
-- Add `pages?` and `activePage?` and `onPageChange?` props
-- Add a "Pages" tab in the left sidebar (alongside Blocks/Layers) that shows `PageManager` when `pages` is provided
-- TopBar receives optional page title context
+### 4. PageRenderer
+Core rendering engine:
+- Takes a schema + mode (`public` | `preview` | `edit`)
+- Recursively renders nodes from the tree using the Node Registry
+- In `public`/`preview` mode: clean output, no editing UI
+- In `edit` mode: adds selection outlines and drop zones (prepared for Phase 2)
+- Applies ThemeTokens as CSS variables
 
-**`src/components/builder/TopBar.tsx`**
-- Add optional `pageTitle?: string` and `onBackToPages?: () => void` props
-- Show a back arrow + page title in the top bar when editing a specific page
+### 5. eCommerce Home Page (Schema-based)
+Create a default `home` schema that produces a modern eCommerce landing page:
+- **Navbar** with logo and navigation links
+- **Hero section** with headline, subtext, and CTA button
+- **Featured products grid** with 3-4 ProductCard mocks
+- **Value propositions** section (icons + text)
+- **Footer** with links and copyright
+- Clean, minimal design inspired by modern eCommerce (think Stripe/Linear aesthetics)
 
-**`src/index.ts`**
-- Export `PageDefinition` type
-- Export `PageManager` component
-- Export all functions from `default-schemas.ts`: `PAGE_DEFINITIONS`, `getDefaultSchemaForSlug`, individual schema creators
+### 6. Route Setup
+- `/` → Renders Home from schema via PageRenderer (public mode)
+- `/preview?page=home` → Same but in preview mode
+- `/admin/export?page=home` → Shows raw JSON schema with copy button
+- `/license-blocked` → Placeholder lock screen
 
-**`src/components/builder/BlocksPalette.tsx`**
-- Bump version to `v1.2.0`
+### 7. License Gate (Mock)
+- `license_status` stored in LocalStorage (active/inactive/exceeded)
+- Admin routes check license; public site always works
+- `/license-blocked` shows status, reason, and placeholder "Enter License" button
 
-**`package.json`**
-- Bump version to `1.2.0`
+---
 
-### Behavior
+### What's NOT in Phase 1 (saved for Phase 2)
+- Full Builder UI (drag & drop canvas, left/right sidebars, inspector)
+- Undo/Redo history
+- AI Edit feature
+- Templates management (`/admin/templates`)
+- Theme editor (`/admin/theme`)
+- Device toggle & responsive overrides
 
-1. **No `pages` prop** -- builder works exactly as before (single schema editor)
-2. **`pages` + `activePage`** -- editor loads the active page's schema, left sidebar gets a "Pages" tab, TopBar shows page name with back button
-3. **`pages` without `activePage`** -- shows `PageManager` full-screen for page selection
-4. **`onPageChange(slug)`** -- called when user clicks a page in the Pages tab or back button; host controls navigation
-5. **`onSaveWithSlug(slug, schema)`** -- called on save alongside `onSave`, providing slug context
-
-### Version: 1.2.0
-
-Minor bump for new public API surface (PageDefinition, PageManager, multi-page props, default schemas).
+### Design Style
+Minimal, professional SaaS aesthetic — light background, clean typography, subtle borders, polished hover states.
 

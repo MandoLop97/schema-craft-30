@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors, closestCenter } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { useSchemaHistory } from '@/hooks/use-schema-history';
-import { Schema, NodeType, SchemaNode } from '@/types/schema';
+import { Schema, NodeType, SchemaNode, PageDefinition } from '@/types/schema';
 import { createNode, isContainerType } from '@/lib/node-factory';
 import { TopBar } from '@/components/builder/TopBar';
 import { BlocksPalette } from '@/components/builder/BlocksPalette';
@@ -10,23 +10,23 @@ import { LayersPanel } from '@/components/builder/LayersPanel';
 import { Inspector } from '@/components/builder/Inspector';
 import { PublishDialog } from '@/components/builder/PublishDialog';
 import { BuilderCanvas } from '@/components/builder/BuilderCanvas';
+import { PageManager } from '@/components/builder/PageManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 
 export interface BuilderEditorShellProps {
-  /** The initial schema to load into the editor. */
   initialSchema: Schema;
-  /** Called when the user clicks Save. Receives the current schema. */
   onSave: (schema: Schema) => void;
-  /** Called when the user clicks Publish. If provided, bypasses the internal PublishDialog. */
   onPublish?: (schema: Schema) => void;
-  /** Called when the user clicks Preview. */
   onPreview?: (schema: Schema) => void;
-  /** Called when the user clicks Export. */
   onExport?: (schema: Schema) => void;
-  /** CSS class name applied to the root container. */
   className?: string;
+  // Multi-page
+  pages?: PageDefinition[];
+  activePage?: string;
+  onPageChange?: (slug: string) => void;
+  pageTitle?: string;
 }
 
 export function BuilderEditorShell({
@@ -36,6 +36,10 @@ export function BuilderEditorShell({
   onPreview,
   onExport,
   className,
+  pages,
+  activePage,
+  onPageChange,
+  pageTitle,
 }: BuilderEditorShellProps) {
   const { schema, setSchema, undo, redo, canUndo, canRedo } = useSchemaHistory(initialSchema);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
@@ -45,6 +49,7 @@ export function BuilderEditorShell({
   const [publishOpen, setPublishOpen] = useState(false);
   const [publishMode, setPublishMode] = useState<'draft' | 'published'>('published');
 
+  const hasPages = pages && pages.length > 0;
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   const updateSchema = useCallback((updater: (s: Schema) => Schema) => {
@@ -63,7 +68,7 @@ export function BuilderEditorShell({
     if (data?.type === 'palette') {
       setActiveDragType(data.nodeType);
     } else if (data?.type === 'sortable') {
-      setActiveDragType(null); // No overlay for reorder
+      setActiveDragType(null);
     }
   };
 
@@ -74,7 +79,6 @@ export function BuilderEditorShell({
 
     const activeData = active.data.current;
 
-    // Handle palette drops (new blocks)
     if (activeData?.type === 'palette') {
       const nodeType = activeData.nodeType as NodeType;
       const newNode = createNode(nodeType);
@@ -97,20 +101,17 @@ export function BuilderEditorShell({
       return;
     }
 
-    // Handle sortable reordering
     if (activeData?.type === 'sortable') {
       const activeId = String(active.id);
       const overId = String(over.id);
       if (activeId === overId) return;
 
       updateSchema((s) => {
-        // Find parent that contains the active node
         const parent = Object.values(s.nodes).find((n) => n.children.includes(activeId));
         if (!parent) return s;
 
         const oldIndex = parent.children.indexOf(activeId);
         const newIndex = parent.children.indexOf(overId);
-
         if (oldIndex === -1 || newIndex === -1) return s;
 
         parent.children = arrayMove(parent.children, oldIndex, newIndex);
@@ -146,17 +147,11 @@ export function BuilderEditorShell({
     updateSchema((s) => {
       for (const node of Object.values(s.nodes)) {
         const idx = node.children.indexOf(selectedNodeId);
-        if (idx !== -1) {
-          node.children.splice(idx, 1);
-          break;
-        }
+        if (idx !== -1) { node.children.splice(idx, 1); break; }
       }
       const removeRecursive = (id: string) => {
         const n = s.nodes[id];
-        if (n) {
-          n.children.forEach(removeRecursive);
-          delete s.nodes[id];
-        }
+        if (n) { n.children.forEach(removeRecursive); delete s.nodes[id]; }
       };
       removeRecursive(selectedNodeId);
       return s;
@@ -169,8 +164,7 @@ export function BuilderEditorShell({
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
         e.preventDefault();
-        if (e.shiftKey) redo();
-        else undo();
+        if (e.shiftKey) redo(); else undo();
       }
       if ((e.metaKey || e.ctrlKey) && e.key === 's') {
         e.preventDefault();
@@ -178,9 +172,7 @@ export function BuilderEditorShell({
       }
       if (e.key === 'Delete' || e.key === 'Backspace') {
         if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') return;
-        if (selectedNodeId && selectedNodeId !== schema.rootNodeId) {
-          handleDelete();
-        }
+        if (selectedNodeId && selectedNodeId !== schema.rootNodeId) handleDelete();
       }
     };
     window.addEventListener('keydown', handler);
@@ -203,6 +195,8 @@ export function BuilderEditorShell({
           dirty={dirty}
           onPublish={() => { onPublish ? onPublish(schema) : (setPublishMode('published'), setPublishOpen(true)); }}
           onSaveDraft={() => { setPublishMode('draft'); setPublishOpen(true); }}
+          pageTitle={pageTitle}
+          onBackToPages={hasPages && onPageChange ? () => onPageChange('') : undefined}
         />
 
         <div className="flex flex-1 overflow-hidden">
@@ -212,6 +206,7 @@ export function BuilderEditorShell({
               <TabsList className="mx-2 mt-2 w-auto">
                 <TabsTrigger value="blocks" className="text-xs">Blocks</TabsTrigger>
                 <TabsTrigger value="layers" className="text-xs">Layers</TabsTrigger>
+                {hasPages && <TabsTrigger value="pages" className="text-xs">Pages</TabsTrigger>}
               </TabsList>
               <ScrollArea className="flex-1">
                 <TabsContent value="blocks" className="mt-0">
@@ -220,6 +215,15 @@ export function BuilderEditorShell({
                 <TabsContent value="layers" className="mt-0">
                   <LayersPanel schema={schema} selectedNodeId={selectedNodeId} onSelectNode={setSelectedNodeId} />
                 </TabsContent>
+                {hasPages && (
+                  <TabsContent value="pages" className="mt-0">
+                    <PageManager
+                      pages={pages!}
+                      activePage={activePage}
+                      onSelectPage={(slug) => onPageChange?.(slug)}
+                    />
+                  </TabsContent>
+                )}
               </ScrollArea>
             </Tabs>
           </div>
@@ -250,7 +254,6 @@ export function BuilderEditorShell({
             )}
           </div>
         </div>
-
       </div>
 
       <DragOverlay>

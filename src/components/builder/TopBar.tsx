@@ -1,4 +1,4 @@
-import { Undo2, Redo2, Save, Eye, Download, Monitor, Tablet, Smartphone, Globe } from 'lucide-react';
+import { Undo2, Redo2, Save, Eye, Download, Monitor, Tablet, Smartphone, Globe, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 
@@ -15,13 +15,26 @@ interface TopBarProps {
   device: 'desktop' | 'tablet' | 'mobile';
   onDeviceChange: (d: 'desktop' | 'tablet' | 'mobile') => void;
   dirty: boolean;
+  pageTitle?: string;
+  onBackToPages?: () => void;
 }
 
-export function TopBar({ onSave, onUndo, onRedo, canUndo, canRedo, onPreview, onExport, onPublish, onSaveDraft, device, onDeviceChange, dirty }: TopBarProps) {
+export function TopBar({ onSave, onUndo, onRedo, canUndo, canRedo, onPreview, onExport, onPublish, onSaveDraft, device, onDeviceChange, dirty, pageTitle, onBackToPages }: TopBarProps) {
   return (
     <div className="h-12 border-b flex items-center px-3 gap-1 shrink-0" style={{ backgroundColor: 'hsla(210, 60%, 50%, 0.08)' }}>
-      <span className="text-sm font-semibold tracking-tight mr-3">NEXORA</span>
-      <Separator orientation="vertical" className="h-6" />
+      {onBackToPages && (
+        <Button variant="ghost" size="icon" onClick={onBackToPages} title="Back to Pages" className="mr-1">
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+      )}
+      <span className="text-sm font-semibold tracking-tight mr-1">NEXORA</span>
+      {pageTitle && (
+        <>
+          <span className="text-muted-foreground text-sm">/</span>
+          <span className="text-sm text-muted-foreground truncate max-w-[150px]">{pageTitle}</span>
+        </>
+      )}
+      <Separator orientation="vertical" className="h-6 ml-2" />
 
       <Button variant="ghost" size="icon" onClick={onUndo} disabled={!canUndo} title="Undo">
         <Undo2 className="h-4 w-4" />
@@ -32,7 +45,7 @@ export function TopBar({ onSave, onUndo, onRedo, canUndo, canRedo, onPreview, on
 
       <Separator orientation="vertical" className="h-6" />
 
-      <Button variant="ghost" size="icon" onClick={() => onDeviceChange('desktop')} data-active={device === 'desktop'} className={device === 'desktop' ? 'bg-muted' : ''}>
+      <Button variant="ghost" size="icon" onClick={() => onDeviceChange('desktop')} className={device === 'desktop' ? 'bg-muted' : ''}>
         <Monitor className="h-4 w-4" />
       </Button>
       <Button variant="ghost" size="icon" onClick={() => onDeviceChange('tablet')} className={device === 'tablet' ? 'bg-muted' : ''}>
