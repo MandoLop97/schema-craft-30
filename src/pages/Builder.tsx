@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { SchemaStore } from '@/lib/schema-store';
 import { Schema } from '@/types/schema';
-import { BuilderEditorShell } from '@/components/builder/BuilderEditorShell';
+import { NexoraBuilderApp } from '@/NexoraBuilderApp';
 
 export default function Builder() {
   const [searchParams] = useSearchParams();
@@ -29,12 +29,11 @@ export default function Builder() {
   }
 
   return (
-    <BuilderEditorShell
+    <NexoraBuilderApp
       key={initialSchema.id}
       initialSchema={initialSchema}
-      onSave={(schema) => {
-        SchemaStore.saveSchema(schema);
-      }}
+      pageSlug={pageSlug}
+      onSave={(schema) => SchemaStore.saveSchema(schema)}
       onPreview={() => navigate(`/preview?page=${pageSlug}`)}
       onExport={() => navigate(`/admin/export?page=${pageSlug}`)}
     />
