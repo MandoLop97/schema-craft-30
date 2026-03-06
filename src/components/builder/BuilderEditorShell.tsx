@@ -188,7 +188,7 @@ export function BuilderEditorShell({
   }, [undo, redo, handleSave, handleDelete, selectedNodeId, schema.rootNodeId]);
 
   return (
-    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className={`h-screen flex flex-col bg-background overflow-hidden ${className || ''}`}>
         <TopBar
           onSave={handleSave}
