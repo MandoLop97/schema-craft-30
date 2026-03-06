@@ -16,6 +16,7 @@ export interface BuilderLocale {
   blocks: string;
   layers: string;
   pages: string;
+  theme: string;
 
   // Inspector
   props: string;
@@ -85,6 +86,7 @@ export const es: BuilderLocale = {
   blocks: 'Bloques',
   layers: 'Capas',
   pages: 'Páginas',
+  theme: 'Tema',
 
   props: 'Propiedades',
   style: 'Estilo',
@@ -145,6 +147,7 @@ export const en: BuilderLocale = {
   blocks: 'Blocks',
   layers: 'Layers',
   pages: 'Pages',
+  theme: 'Theme',
 
   props: 'Props',
   style: 'Style',

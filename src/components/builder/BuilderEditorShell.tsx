@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors, closestCenter } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { useSchemaHistory } from '@/hooks/use-schema-history';
-import { Schema, NodeType, SchemaNode, PageDefinition } from '@/types/schema';
+import { Schema, NodeType, SchemaNode, PageDefinition, ThemeTokens } from '@/types/schema';
 import { createNode, isContainerType } from '@/lib/node-factory';
 import { canDropInto } from '@/lib/block-registry';
 import { t } from '@/lib/i18n';
@@ -10,6 +10,7 @@ import { TopBar } from '@/components/builder/TopBar';
 import { BlocksPalette } from '@/components/builder/BlocksPalette';
 import { LayersPanel } from '@/components/builder/LayersPanel';
 import { Inspector } from '@/components/builder/Inspector';
+import { ThemeEditor } from '@/components/builder/ThemeEditor';
 import { PublishDialog, PublishPayload } from '@/components/builder/PublishDialog';
 import { PreviewDialog } from '@/components/builder/PreviewDialog';
 import { ExportDialog } from '@/components/builder/ExportDialog';
@@ -242,6 +243,7 @@ export function BuilderEditorShell({
               <TabsList className="mx-2 mt-2 w-auto">
                 <TabsTrigger value="blocks" className="text-xs">{locale.blocks}</TabsTrigger>
                 <TabsTrigger value="layers" className="text-xs">{locale.layers}</TabsTrigger>
+                <TabsTrigger value="theme" className="text-xs">{locale.theme}</TabsTrigger>
                 {hasPages && <TabsTrigger value="pages" className="text-xs">{locale.pages}</TabsTrigger>}
               </TabsList>
               <ScrollArea className="flex-1">
@@ -250,6 +252,14 @@ export function BuilderEditorShell({
                 </TabsContent>
                 <TabsContent value="layers" className="mt-0">
                   <LayersPanel schema={schema} selectedNodeId={selectedNodeId} onSelectNode={setSelectedNodeId} />
+                </TabsContent>
+                <TabsContent value="theme" className="mt-0">
+                  <ThemeEditor
+                    themeTokens={schema.themeTokens}
+                    onUpdate={(tokens) => {
+                      updateSchema((s) => { s.themeTokens = tokens; return s; });
+                    }}
+                  />
                 </TabsContent>
                 {hasPages && (
                   <TabsContent value="pages" className="mt-0">
