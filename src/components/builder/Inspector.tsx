@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 
 interface InspectorProps {
   node: SchemaNode;
@@ -18,7 +19,7 @@ function PropField({ label, value, onChange }: { label: string; value: string; o
   return (
     <div className="grid gap-1">
       <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</Label>
-      <Input className="h-8 text-xs" value={value} onChange={(e) => onChange(e.target.value)} />
+      <Input className="h-8 text-xs transition-shadow duration-200 focus:ring-2 focus:ring-primary/20" value={value} onChange={(e) => onChange(e.target.value)} />
     </div>
   );
 }
@@ -180,29 +181,23 @@ function PropsTab({ node, onUpdateProps }: { node: SchemaNode; onUpdateProps: (p
       {node.type === 'Badge' && <PropField label="Text" value={p.text || ''} onChange={(v) => onUpdateProps({ text: v })} />}
       {node.type === 'Input' && <PropField label="Placeholder" value={p.placeholder || ''} onChange={(v) => onUpdateProps({ placeholder: v })} />}
       {node.type === 'Section' && (
-        <>
-          <div className="grid gap-1">
-            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Align Items</Label>
-            <Select value={p.direction || 'stretch'} onValueChange={(v) => onUpdateProps({ direction: v as any })}>
-              <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {['stretch', 'flex-start', 'center', 'flex-end'].map((v) => (
-                  <SelectItem key={v} value={v}>{v}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </>
+        <div className="grid gap-1">
+          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Align Items</Label>
+          <Select value={p.direction || 'stretch'} onValueChange={(v) => onUpdateProps({ direction: v as any })}>
+            <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {['stretch', 'flex-start', 'center', 'flex-end'].map((v) => (
+                <SelectItem key={v} value={v}>{v}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       )}
       {node.type === 'Container' && (
-        <>
-          <PropField label="Max Width" value={p.text || '72rem'} onChange={(v) => onUpdateProps({ text: v })} />
-        </>
+        <PropField label="Max Width" value={p.text || '72rem'} onChange={(v) => onUpdateProps({ text: v })} />
       )}
       {node.type === 'Grid' && (
-        <>
-          <PropField label="Columns" value={String(p.columns || 3)} onChange={(v) => onUpdateProps({ columns: parseInt(v) || 3 })} />
-        </>
+        <PropField label="Columns" value={String(p.columns || 3)} onChange={(v) => onUpdateProps({ columns: parseInt(v) || 3 })} />
       )}
       {node.type === 'Stack' && (
         <>
@@ -264,38 +259,66 @@ function PropsTab({ node, onUpdateProps }: { node: SchemaNode; onUpdateProps: (p
 
 /* ── Style tab ── */
 
-const STYLE_FIELDS: { label: string; key: keyof NodeStyle }[] = [
-  { label: 'Padding', key: 'padding' },
-  { label: 'Margin', key: 'margin' },
-  { label: 'Gap', key: 'gap' },
-  { label: 'Width', key: 'width' },
-  { label: 'Height', key: 'height' },
-  { label: 'Min Height', key: 'minHeight' },
-  { label: 'Max Width', key: 'maxWidth' },
-  { label: 'Font Size', key: 'fontSize' },
-  { label: 'Font Weight', key: 'fontWeight' },
-  { label: 'Line Height', key: 'lineHeight' },
-  { label: 'Letter Spacing', key: 'letterSpacing' },
-  { label: 'Text Align', key: 'textAlign' },
-  { label: 'Color', key: 'color' },
-  { label: 'Background', key: 'backgroundColor' },
-  { label: 'Border Color', key: 'borderColor' },
-  { label: 'Border Width', key: 'borderWidth' },
-  { label: 'Border Radius', key: 'borderRadius' },
-  { label: 'Box Shadow', key: 'boxShadow' },
-  { label: 'Opacity', key: 'opacity' },
+const STYLE_GROUPS: { title: string; fields: { label: string; key: keyof NodeStyle }[] }[] = [
+  {
+    title: 'Spacing',
+    fields: [
+      { label: 'Padding', key: 'padding' },
+      { label: 'Margin', key: 'margin' },
+      { label: 'Gap', key: 'gap' },
+    ],
+  },
+  {
+    title: 'Size',
+    fields: [
+      { label: 'Width', key: 'width' },
+      { label: 'Height', key: 'height' },
+      { label: 'Min Height', key: 'minHeight' },
+      { label: 'Max Width', key: 'maxWidth' },
+    ],
+  },
+  {
+    title: 'Typography',
+    fields: [
+      { label: 'Font Size', key: 'fontSize' },
+      { label: 'Font Weight', key: 'fontWeight' },
+      { label: 'Line Height', key: 'lineHeight' },
+      { label: 'Letter Spacing', key: 'letterSpacing' },
+      { label: 'Text Align', key: 'textAlign' },
+      { label: 'Color', key: 'color' },
+    ],
+  },
+  {
+    title: 'Appearance',
+    fields: [
+      { label: 'Background', key: 'backgroundColor' },
+      { label: 'Border Color', key: 'borderColor' },
+      { label: 'Border Width', key: 'borderWidth' },
+      { label: 'Border Radius', key: 'borderRadius' },
+      { label: 'Box Shadow', key: 'boxShadow' },
+      { label: 'Opacity', key: 'opacity' },
+    ],
+  },
 ];
 
 function StyleTab({ node, onUpdateStyle }: { node: SchemaNode; onUpdateStyle: (s: Partial<NodeStyle>) => void }) {
   return (
-    <div className="space-y-3 p-3">
-      {STYLE_FIELDS.map((f) => (
-        <PropField
-          key={f.key}
-          label={f.label}
-          value={(node.style as any)[f.key] || ''}
-          onChange={(v) => onUpdateStyle({ [f.key]: v || undefined })}
-        />
+    <div className="p-3 space-y-1">
+      {STYLE_GROUPS.map((group, gi) => (
+        <div key={group.title}>
+          {gi > 0 && <Separator className="my-3" />}
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">{group.title}</p>
+          <div className="space-y-2">
+            {group.fields.map((f) => (
+              <PropField
+                key={f.key}
+                label={f.label}
+                value={(node.style as any)[f.key] || ''}
+                onChange={(v) => onUpdateStyle({ [f.key]: v || undefined })}
+              />
+            ))}
+          </div>
+        </div>
       ))}
     </div>
   );
@@ -306,12 +329,23 @@ function StyleTab({ node, onUpdateStyle }: { node: SchemaNode; onUpdateStyle: (s
 export function Inspector({ node, onUpdateProps, onUpdateStyle, onDelete }: InspectorProps) {
   return (
     <div className="h-full flex flex-col">
-      <div className="px-3 py-2 border-b flex items-center justify-between">
+      <div
+        className="px-3 py-2.5 border-b flex items-center justify-between"
+        style={{
+          background: 'linear-gradient(180deg, hsl(var(--muted) / 0.4) 0%, hsl(var(--background)) 100%)',
+        }}
+      >
         <div>
           <p className="text-xs font-semibold">{node.type}</p>
-          <p className="text-[10px] text-muted-foreground">{node.id}</p>
+          <p className="text-[10px] text-muted-foreground font-mono">{node.id.slice(0, 12)}…</p>
         </div>
-        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={onDelete} title="Delete node">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors duration-200"
+          onClick={onDelete}
+          title="Delete node"
+        >
           <Trash2 className="h-3.5 w-3.5" />
         </Button>
       </div>

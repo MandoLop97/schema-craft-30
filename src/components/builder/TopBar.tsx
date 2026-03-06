@@ -30,43 +30,55 @@ export function TopBar({ onSave, onUndo, onRedo, canUndo, canRedo, onPreview, on
       )}
       <Separator orientation="vertical" className="h-5 ml-2" />
 
-      <Button variant="ghost" size="icon" onClick={onUndo} disabled={!canUndo} title="Undo">
+      <Button variant="ghost" size="icon" onClick={onUndo} disabled={!canUndo} title="Undo" className="transition-transform active:scale-90">
         <Undo2 className="h-3.5 w-3.5" />
       </Button>
-      <Button variant="ghost" size="icon" onClick={onRedo} disabled={!canRedo} title="Redo">
+      <Button variant="ghost" size="icon" onClick={onRedo} disabled={!canRedo} title="Redo" className="transition-transform active:scale-90">
         <Redo2 className="h-3.5 w-3.5" />
       </Button>
 
       <Separator orientation="vertical" className="h-5" />
 
       <div className="flex items-center bg-muted/50 rounded-md p-0.5 gap-0.5">
-        <Button variant="ghost" size="icon" onClick={() => onDeviceChange('desktop')} className={`h-7 w-7 ${device === 'desktop' ? 'bg-background shadow-sm' : ''}`}>
-          <Monitor className="h-3.5 w-3.5" />
-        </Button>
-        <Button variant="ghost" size="icon" onClick={() => onDeviceChange('tablet')} className={`h-7 w-7 ${device === 'tablet' ? 'bg-background shadow-sm' : ''}`}>
-          <Tablet className="h-3.5 w-3.5" />
-        </Button>
-        <Button variant="ghost" size="icon" onClick={() => onDeviceChange('mobile')} className={`h-7 w-7 ${device === 'mobile' ? 'bg-background shadow-sm' : ''}`}>
-          <Smartphone className="h-3.5 w-3.5" />
-        </Button>
+        {(['desktop', 'tablet', 'mobile'] as const).map((d) => {
+          const Icon = d === 'desktop' ? Monitor : d === 'tablet' ? Tablet : Smartphone;
+          return (
+            <Button
+              key={d}
+              variant="ghost"
+              size="icon"
+              onClick={() => onDeviceChange(d)}
+              className={`h-7 w-7 transition-all duration-200 active:scale-90 ${device === d ? 'bg-background shadow-sm' : ''}`}
+            >
+              <Icon className="h-3.5 w-3.5" />
+            </Button>
+          );
+        })}
       </div>
 
       <div className="flex-1" />
 
-      <Button variant="ghost" size="sm" onClick={onPreview} className="gap-1.5 text-xs">
+      <Button variant="ghost" size="sm" onClick={onPreview} className="gap-1.5 text-xs transition-transform active:scale-95">
         <Eye className="h-3.5 w-3.5" /> Preview
       </Button>
-      <Button variant="ghost" size="sm" onClick={onExport} className="gap-1.5 text-xs">
+      <Button variant="ghost" size="sm" onClick={onExport} className="gap-1.5 text-xs transition-transform active:scale-95">
         <Download className="h-3.5 w-3.5" /> Export
       </Button>
       <Separator orientation="vertical" className="h-5" />
-      <Button size="sm" variant="outline" onClick={onSave} className="gap-1.5 text-xs h-7">
-        <Save className="h-3.5 w-3.5" /> {dirty ? 'Save*' : 'Save'}
+      <Button size="sm" variant="outline" onClick={onSave} className="gap-1.5 text-xs h-7 transition-transform active:scale-95">
+        <Save className="h-3.5 w-3.5" />
+        Save
+        {dirty && (
+          <span
+            className="nxr-dirty-dot inline-block w-1.5 h-1.5 rounded-full ml-0.5"
+            style={{ backgroundColor: 'hsl(var(--primary))' }}
+          />
+        )}
       </Button>
-      <Button size="sm" variant="outline" onClick={onSaveDraft} className="gap-1.5 text-xs h-7">
+      <Button size="sm" variant="outline" onClick={onSaveDraft} className="gap-1.5 text-xs h-7 transition-transform active:scale-95">
         Borrador
       </Button>
-      <Button size="sm" onClick={onPublish} className="gap-1.5 text-xs h-7 bg-primary text-primary-foreground hover:bg-primary/90">
+      <Button size="sm" onClick={onPublish} className="gap-1.5 text-xs h-7 bg-primary text-primary-foreground hover:bg-primary/90 transition-transform active:scale-95">
         <Globe className="h-3.5 w-3.5" /> Publicar
       </Button>
     </div>
