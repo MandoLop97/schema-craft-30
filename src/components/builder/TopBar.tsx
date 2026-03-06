@@ -1,6 +1,5 @@
-import { Undo2, Redo2, Save, Eye, Download, Monitor, Tablet, Smartphone, Globe, ArrowLeft } from 'lucide-react';
+import { Undo2, Redo2, Save, Eye, Download, Monitor, Tablet, Smartphone, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { EDITOR_VERSION } from '@/lib/version';
 import { Separator } from '@/components/ui/separator';
 
 interface TopBarProps {
@@ -17,19 +16,12 @@ interface TopBarProps {
   onDeviceChange: (d: 'desktop' | 'tablet' | 'mobile') => void;
   dirty: boolean;
   pageTitle?: string;
-  onBackToPages?: () => void;
 }
 
-export function TopBar({ onSave, onUndo, onRedo, canUndo, canRedo, onPreview, onExport, onPublish, onSaveDraft, device, onDeviceChange, dirty, pageTitle, onBackToPages }: TopBarProps) {
+export function TopBar({ onSave, onUndo, onRedo, canUndo, canRedo, onPreview, onExport, onPublish, onSaveDraft, device, onDeviceChange, dirty, pageTitle }: TopBarProps) {
   return (
     <div className="h-12 border-b flex items-center px-3 gap-1 shrink-0" style={{ backgroundColor: 'hsla(210, 60%, 50%, 0.08)' }}>
-      {onBackToPages && (
-        <Button variant="ghost" size="icon" onClick={onBackToPages} title="Back to Pages" className="mr-1 hover:bg-primary/10">
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-      )}
       <span className="text-sm font-bold tracking-tight mr-0.5 text-foreground">NEXORA</span>
-      <span className="text-[9px] font-mono text-muted-foreground/60 bg-muted/60 px-1.5 py-0.5 rounded mr-1">v{EDITOR_VERSION}</span>
       {pageTitle && (
         <>
           <span className="text-muted-foreground/50 text-sm mx-0.5">/</span>
