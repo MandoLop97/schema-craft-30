@@ -267,7 +267,7 @@ export function BuilderEditorShell({
         )}
       </DragOverlay>
 
-      <PublishDialog open={publishOpen} onOpenChange={setPublishOpen} schema={schema} mode={publishMode} />
+      <PublishDialog open={publishOpen} onOpenChange={setPublishOpen} schema={schema} mode={publishMode} onPublishSubmit={onPublishSubmit} />
     </DndContext>
   );
 }
