@@ -77,6 +77,12 @@ export interface NexoraBuilderAppProps {
    * Called on save alongside `onSave`, providing the active page slug for routing-aware persistence.
    */
   onSaveWithSlug?: (slug: string, schema: Schema) => void;
+
+  /**
+   * Handler for the built-in publish dialog. Receives domain, schema and mode.
+   * Required if `onPublish` is not provided and the internal dialog is used.
+   */
+  onPublishSubmit?: (payload: PublishPayload) => Promise<void>;
 }
 
 export function NexoraBuilderApp({
