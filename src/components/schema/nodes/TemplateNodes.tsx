@@ -118,6 +118,8 @@ export function TestimonialCardNode({ node }: NodeComponentProps) {
 }
 
 export function NewsletterSectionNode({ node }: NodeComponentProps) {
+  const heading = node.props.heading || node.props.text || 'Subscribe';
+  const subtitle = node.props.subtitle || node.props.label || 'Get updates delivered to your inbox.';
   return (
     <div
       style={{
@@ -132,10 +134,10 @@ export function NewsletterSectionNode({ node }: NodeComponentProps) {
       data-node-id={node.id}
     >
       <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>
-        {node.props.text || 'Subscribe'}
+        {heading}
       </h3>
       <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.9rem', marginBottom: '1.5rem', maxWidth: '28rem', marginLeft: 'auto', marginRight: 'auto', lineHeight: '1.6' }}>
-        {node.props.label || 'Get updates delivered to your inbox.'}
+        {subtitle}
       </p>
       <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', maxWidth: '24rem', margin: '0 auto' }}>
         <input
