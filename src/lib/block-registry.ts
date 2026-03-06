@@ -2,7 +2,7 @@ import {
   Square, AlignVerticalJustifyStart, LayoutGrid, Columns,
   Type, ImageIcon, Minus, Tag,
   CreditCard, TextCursorInput, ShoppingBag, Navigation, PanelBottom,
-  Megaphone, Sparkles, MessageSquareQuote, Mail,
+  Megaphone, Sparkles, MessageSquareQuote, Mail, Layers,
 } from 'lucide-react';
 import { NodeType, NodeProps, NodeStyle } from '@/types/schema';
 import React from 'react';
