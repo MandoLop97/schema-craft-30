@@ -37,7 +37,10 @@ export function AnnouncementBarNode({ node }: NodeComponentProps) {
 }
 
 export function FeatureBarNode({ node }: NodeComponentProps) {
-  const items = node.props.items || [];
+  const items = (node.props.items || []).map(item => ({
+    ...item,
+    description: item.description || '',
+  }));
   return (
     <div
       style={{
@@ -53,21 +56,27 @@ export function FeatureBarNode({ node }: NodeComponentProps) {
       }}
       data-node-id={node.id}
     >
-      {items.map((item, i) => (
-        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
-          <span style={{ fontSize: '1.25rem', flexShrink: 0 }}>
-            {item.icon === 'truck' && '🚚'}
-            {item.icon === 'shield' && '🛡️'}
-            {item.icon === 'refresh' && '🔄'}
-            {item.icon === 'star' && '⭐'}
-            {!['truck', 'shield', 'refresh', 'star'].includes(item.icon || '') && '✨'}
-          </span>
-          <div style={{ minWidth: 0 }}>
-            <p style={{ fontWeight: 600, fontSize: '0.8125rem', whiteSpace: 'nowrap' }}>{item.title}</p>
-            <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.7rem', whiteSpace: 'nowrap' }}>{item.description}</p>
+      {items.map((item, i) => {
+        const iconKey = (item.icon || '').toLowerCase();
+        return (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
+            <span style={{ fontSize: '1.25rem', flexShrink: 0 }}>
+              {iconKey === 'truck' && '🚚'}
+              {iconKey === 'shield' && '🛡️'}
+              {iconKey === 'refresh' && '🔄'}
+              {iconKey === 'rotateccw' && '🔄'}
+              {iconKey === 'star' && '⭐'}
+              {!['truck', 'shield', 'refresh', 'rotateccw', 'star'].includes(iconKey) && '✨'}
+            </span>
+            <div style={{ minWidth: 0 }}>
+              <p style={{ fontWeight: 600, fontSize: '0.8125rem', whiteSpace: 'nowrap' }}>{item.title}</p>
+              {item.description && (
+                <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.7rem', whiteSpace: 'nowrap' }}>{item.description}</p>
+              )}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
