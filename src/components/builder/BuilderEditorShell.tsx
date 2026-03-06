@@ -178,7 +178,7 @@ export function BuilderEditorShell({
           device={device}
           onDeviceChange={setDevice}
           dirty={dirty}
-          onPublish={() => { setPublishMode('published'); setPublishOpen(true); }}
+          onPublish={() => { onPublish ? onPublish(schema) : (setPublishMode('published'), setPublishOpen(true)); }}
           onSaveDraft={() => { setPublishMode('draft'); setPublishOpen(true); }}
         />
 
