@@ -73,45 +73,47 @@ function ImagePropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: 
   );
 }
 
+function LinksEditor({ links, onChange }: { links: { text: string; href: string }[]; onChange: (links: { text: string; href: string }[]) => void }) {
+  return (
+    <>
+      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Links</Label>
+      {links.map((link, i) => (
+        <div key={i} className="flex gap-1 items-start">
+          <div className="grid grid-cols-2 gap-1 flex-1">
+            <Input className="h-7 text-xs" placeholder="Text" value={link.text} onChange={(e) => {
+              const updated = [...links]; updated[i] = { ...link, text: e.target.value }; onChange(updated);
+            }} />
+            <Input className="h-7 text-xs" placeholder="Href" value={link.href} onChange={(e) => {
+              const updated = [...links]; updated[i] = { ...link, href: e.target.value }; onChange(updated);
+            }} />
+          </div>
+          <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive" onClick={() => {
+            onChange(links.filter((_, idx) => idx !== i));
+          }}>
+            <Trash2 className="h-3 w-3" />
+          </Button>
+        </div>
+      ))}
+      <Button variant="outline" size="sm" className="text-xs w-full" onClick={() => onChange([...links, { text: 'Link', href: '#' }])}>+ Add Link</Button>
+    </>
+  );
+}
+
 function NavbarPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: Partial<NodeProps>) => void }) {
-  const links = node.props.links || [];
   return (
     <>
       <PropField label="Logo Text" value={node.props.logoText || ''} onChange={(v) => onUpdate({ logoText: v })} />
-      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Links</Label>
-      {links.map((link, i) => (
-        <div key={i} className="grid grid-cols-2 gap-1">
-          <Input className="h-7 text-xs" placeholder="Text" value={link.text} onChange={(e) => {
-            const updated = [...links]; updated[i] = { ...link, text: e.target.value }; onUpdate({ links: updated });
-          }} />
-          <Input className="h-7 text-xs" placeholder="Href" value={link.href} onChange={(e) => {
-            const updated = [...links]; updated[i] = { ...link, href: e.target.value }; onUpdate({ links: updated });
-          }} />
-        </div>
-      ))}
-      <Button variant="outline" size="sm" className="text-xs w-full" onClick={() => onUpdate({ links: [...links, { text: 'Link', href: '#' }] })}>+ Add Link</Button>
+      <LinksEditor links={node.props.links || []} onChange={(links) => onUpdate({ links })} />
     </>
   );
 }
 
 function FooterPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: Partial<NodeProps>) => void }) {
-  const links = node.props.links || [];
   return (
     <>
       <PropField label="Logo Text" value={node.props.logoText || ''} onChange={(v) => onUpdate({ logoText: v })} />
       <PropField label="Copyright" value={node.props.copyright || ''} onChange={(v) => onUpdate({ copyright: v })} />
-      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Links</Label>
-      {links.map((link, i) => (
-        <div key={i} className="grid grid-cols-2 gap-1">
-          <Input className="h-7 text-xs" placeholder="Text" value={link.text} onChange={(e) => {
-            const updated = [...links]; updated[i] = { ...link, text: e.target.value }; onUpdate({ links: updated });
-          }} />
-          <Input className="h-7 text-xs" placeholder="Href" value={link.href} onChange={(e) => {
-            const updated = [...links]; updated[i] = { ...link, href: e.target.value }; onUpdate({ links: updated });
-          }} />
-        </div>
-      ))}
-      <Button variant="outline" size="sm" className="text-xs w-full" onClick={() => onUpdate({ links: [...links, { text: 'Link', href: '#' }] })}>+ Add Link</Button>
+      <LinksEditor links={node.props.links || []} onChange={(links) => onUpdate({ links })} />
     </>
   );
 }
