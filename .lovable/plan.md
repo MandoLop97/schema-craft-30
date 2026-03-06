@@ -1,81 +1,52 @@
 
-## Instrucción permanente: Versionado automático
 
-**IMPORTANTE**: Cada vez que se haga un cambio en el proyecto, incrementar la versión en:
-1. `package.json` → campo `"version"`
-2. `src/components/builder/BuilderEditorShell.tsx` → texto de versión en el status bar
+## Plan: Asegurar que el builder npm sea un editor puro del schema host
 
-Formato: semver (major.minor.patch). Incrementar el **patch** (+1) en cada cambio. Versión actual: **1.0.7**
+### Diagnóstico
 
----
+El código actual ya cumple la mayoría de los requisitos. `NexoraBuilderApp` prioriza `initialSchema` sobre el demo, usa `key={resolvedSchema.id}` para reinicializar, y expone la API pública correcta. Sin embargo hay puntos a reforzar:
 
-## Phase 1: Schema-First Foundation + eCommerce Home
+1. **`createDefaultHomeSchema` se importa siempre** — aunque solo se usa como fallback, su presencia en el bundle de la librería agrega peso y confusión.
+2. **La página standalone `Builder.tsx`** usa `SchemaStore` (localStorage) directamente, mezclando lógica demo con el editor base.
+3. **No se exporta `createNode` ni `isContainerType`** — el host podría necesitarlos para manipular schemas programáticamente.
+4. **No hay validación del schema entrante** — si el host pasa un schema malformado (sin `rootNodeId`, sin `nodes`), el builder crashea silenciosamente.
 
-### Overview
-Build the core schema system, page renderer, storage layer, and a clean eCommerce Home page — all driven by JSON schema. This foundation makes Phase 2 (Builder UI) straightforward to add.
+### Cambios propuestos
 
----
+| Archivo | Cambio |
+|---|---|
+| `src/NexoraBuilderApp.tsx` | Lazy-import de `createDefaultHomeSchema` para que no se cargue si llega `initialSchema`. Agregar validación mínima del schema entrante (verificar `rootNodeId` existe en `nodes`). |
+| `src/index.ts` | Exportar `createNode`, `isContainerType`, y `createDefaultHomeSchema` para que el host pueda usarlos si lo necesita. |
+| `src/pages/Builder.tsx` | Refactorizar para que sea un wrapper demo que usa `NexoraBuilderApp` en vez de `BuilderEditorShell` directamente — así el standalone y el embebido usan exactamente el mismo componente. |
+| `src/lib/schema-validator.ts` | Crear función `validateSchema(schema)` que verifica estructura mínima y retorna errores o el schema limpio. Usada en `NexoraBuilderApp` antes de pasar al shell. |
 
-### 1. Schema Types & Data Model
-Define TypeScript types for the entire schema system:
-- **Page** (id, slug, name, schemaId)
-- **Schema** (id, version, updatedAt, themeTokens, rootNodeId, nodes map)
-- **Node** (id, type, props, style, children, locked, hidden)
-- **ThemeTokens** (colors, typography, radius, spacing)
-- Support all node types: Section, Container, Grid, Stack, Text, Image, Button, Card, Badge, Divider, Input, ProductCard, Navbar, Footer
+### Detalle técnico
 
-### 2. Schema Store (LocalStorage)
-Create an abstraction layer (`SchemaStore`) with clean API:
-- `getPages()`, `getPageBySlug()`, `getSchema()`, `saveSchema()`
-- `createPage()`, `duplicatePage()`, `deletePage()`, `renamePage()`
-- All backed by LocalStorage, designed so swapping to a database later only changes the store internals
+**Validación de schema** (`schema-validator.ts`):
+- Verificar que `rootNodeId` existe en `nodes`
+- Verificar que cada `children` referencia nodos existentes
+- Si falla, mostrar un mensaje de error en el canvas en vez de crashear
 
-### 3. Node Registry & Components
-Build a component for each node type, all receiving props/style from schema:
-- **Layout**: Section, Container, Grid, Stack
-- **Content**: Text, Image, Divider, Badge
-- **UI**: Button, Card, Input
-- **Commerce**: ProductCard (mock with image, title, price, CTA)
-- **Site**: Navbar, Footer
+**Lazy fallback** en `NexoraBuilderApp`:
+```ts
+const resolvedSchema = useMemo<Schema>(() => {
+  if (initialSchema) return initialSchema;
+  // Solo importar el demo si no hay schema externo
+  return createDefaultHomeSchema().schema;
+}, [initialSchema]);
+```
+Esto ya es así, pero agregaremos un guard de validación antes de pasarlo al shell.
 
-### 4. PageRenderer
-Core rendering engine:
-- Takes a schema + mode (`public` | `preview` | `edit`)
-- Recursively renders nodes from the tree using the Node Registry
-- In `public`/`preview` mode: clean output, no editing UI
-- In `edit` mode: adds selection outlines and drop zones (prepared for Phase 2)
-- Applies ThemeTokens as CSS variables
+**Builder.tsx como wrapper demo**:
+```tsx
+export default function Builder() {
+  // ... load from SchemaStore ...
+  return <NexoraBuilderApp initialSchema={schema} onSave={...} />;
+}
+```
+Esto asegura que standalone y embebido comparten exactamente el mismo flujo.
 
-### 5. eCommerce Home Page (Schema-based)
-Create a default `home` schema that produces a modern eCommerce landing page:
-- **Navbar** with logo and navigation links
-- **Hero section** with headline, subtext, and CTA button
-- **Featured products grid** with 3-4 ProductCard mocks
-- **Value propositions** section (icons + text)
-- **Footer** with links and copyright
-- Clean, minimal design inspired by modern eCommerce (think Stripe/Linear aesthetics)
+### Versión resultante: v1.1.0
 
-### 6. Route Setup
-- `/` → Renders Home from schema via PageRenderer (public mode)
-- `/preview?page=home` → Same but in preview mode
-- `/admin/export?page=home` → Shows raw JSON schema with copy button
-- `/license-blocked` → Placeholder lock screen
-
-### 7. License Gate (Mock)
-- `license_status` stored in LocalStorage (active/inactive/exceeded)
-- Admin routes check license; public site always works
-- `/license-blocked` shows status, reason, and placeholder "Enter License" button
-
----
-
-### What's NOT in Phase 1 (saved for Phase 2)
-- Full Builder UI (drag & drop canvas, left/right sidebars, inspector)
-- Undo/Redo history
-- AI Edit feature
-- Templates management (`/admin/templates`)
-- Theme editor (`/admin/theme`)
-- Device toggle & responsive overrides
-
-### Design Style
-Minimal, professional SaaS aesthetic — light background, clean typography, subtle borders, polished hover states.
+Bump a minor por cambio de API pública (nuevas exports).
 
