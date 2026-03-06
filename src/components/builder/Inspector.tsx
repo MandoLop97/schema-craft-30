@@ -7,6 +7,7 @@ import { Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { t } from '@/lib/i18n';
 
 interface InspectorProps {
   node: SchemaNode;
@@ -23,8 +24,6 @@ function PropField({ label, value, onChange }: { label: string; value: string; o
     </div>
   );
 }
-
-/* ── Per-type prop editors ── */
 
 function TextPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: Partial<NodeProps>) => void }) {
   return (
@@ -133,7 +132,7 @@ function FeatureBarPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate:
       <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Features</Label>
       {items.map((item, i) => (
         <div key={i} className="space-y-1 border rounded-md p-2">
-          <Input className="h-7 text-xs" placeholder="Icon (truck, shield, refresh, star)" value={item.icon || ''} onChange={(e) => {
+          <Input className="h-7 text-xs" placeholder="Icon" value={item.icon || ''} onChange={(e) => {
             const updated = [...items]; updated[i] = { ...item, icon: e.target.value }; onUpdate({ items: updated });
           }} />
           <Input className="h-7 text-xs" placeholder="Title" value={item.title} onChange={(e) => {
@@ -168,8 +167,6 @@ function NewsletterPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate:
     </>
   );
 }
-
-/* ── Props tab router ── */
 
 function PropsTab({ node, onUpdateProps }: { node: SchemaNode; onUpdateProps: (p: Partial<NodeProps>) => void }) {
   const p = node.props;
@@ -259,49 +256,51 @@ function PropsTab({ node, onUpdateProps }: { node: SchemaNode; onUpdateProps: (p
 
 /* ── Style tab ── */
 
-const STYLE_GROUPS: { title: string; fields: { label: string; key: keyof NodeStyle }[] }[] = [
-  {
-    title: 'Spacing',
-    fields: [
-      { label: 'Padding', key: 'padding' },
-      { label: 'Margin', key: 'margin' },
-      { label: 'Gap', key: 'gap' },
-    ],
-  },
-  {
-    title: 'Size',
-    fields: [
-      { label: 'Width', key: 'width' },
-      { label: 'Height', key: 'height' },
-      { label: 'Min Height', key: 'minHeight' },
-      { label: 'Max Width', key: 'maxWidth' },
-    ],
-  },
-  {
-    title: 'Typography',
-    fields: [
-      { label: 'Font Size', key: 'fontSize' },
-      { label: 'Font Weight', key: 'fontWeight' },
-      { label: 'Line Height', key: 'lineHeight' },
-      { label: 'Letter Spacing', key: 'letterSpacing' },
-      { label: 'Text Align', key: 'textAlign' },
-      { label: 'Color', key: 'color' },
-    ],
-  },
-  {
-    title: 'Appearance',
-    fields: [
-      { label: 'Background', key: 'backgroundColor' },
-      { label: 'Border Color', key: 'borderColor' },
-      { label: 'Border Width', key: 'borderWidth' },
-      { label: 'Border Radius', key: 'borderRadius' },
-      { label: 'Box Shadow', key: 'boxShadow' },
-      { label: 'Opacity', key: 'opacity' },
-    ],
-  },
-];
-
 function StyleTab({ node, onUpdateStyle }: { node: SchemaNode; onUpdateStyle: (s: Partial<NodeStyle>) => void }) {
+  const locale = t();
+
+  const STYLE_GROUPS: { title: string; fields: { label: string; key: keyof NodeStyle }[] }[] = [
+    {
+      title: locale.spacing,
+      fields: [
+        { label: 'Padding', key: 'padding' },
+        { label: 'Margin', key: 'margin' },
+        { label: 'Gap', key: 'gap' },
+      ],
+    },
+    {
+      title: locale.size,
+      fields: [
+        { label: 'Width', key: 'width' },
+        { label: 'Height', key: 'height' },
+        { label: 'Min Height', key: 'minHeight' },
+        { label: 'Max Width', key: 'maxWidth' },
+      ],
+    },
+    {
+      title: locale.typography,
+      fields: [
+        { label: 'Font Size', key: 'fontSize' },
+        { label: 'Font Weight', key: 'fontWeight' },
+        { label: 'Line Height', key: 'lineHeight' },
+        { label: 'Letter Spacing', key: 'letterSpacing' },
+        { label: 'Text Align', key: 'textAlign' },
+        { label: 'Color', key: 'color' },
+      ],
+    },
+    {
+      title: locale.appearance,
+      fields: [
+        { label: 'Background', key: 'backgroundColor' },
+        { label: 'Border Color', key: 'borderColor' },
+        { label: 'Border Width', key: 'borderWidth' },
+        { label: 'Border Radius', key: 'borderRadius' },
+        { label: 'Box Shadow', key: 'boxShadow' },
+        { label: 'Opacity', key: 'opacity' },
+      ],
+    },
+  ];
+
   return (
     <div className="p-3 space-y-1">
       {STYLE_GROUPS.map((group, gi) => (
@@ -327,6 +326,8 @@ function StyleTab({ node, onUpdateStyle }: { node: SchemaNode; onUpdateStyle: (s
 /* ── Main Inspector ── */
 
 export function Inspector({ node, onUpdateProps, onUpdateStyle, onDelete }: InspectorProps) {
+  const locale = t();
+
   return (
     <div className="h-full flex flex-col">
       <div
@@ -344,15 +345,15 @@ export function Inspector({ node, onUpdateProps, onUpdateStyle, onDelete }: Insp
           size="icon"
           className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors duration-200"
           onClick={onDelete}
-          title="Delete node"
+          title={locale.deleteNode}
         >
           <Trash2 className="h-3.5 w-3.5" />
         </Button>
       </div>
       <Tabs defaultValue="props" className="flex-1 overflow-hidden flex flex-col">
         <TabsList className="mx-3 mt-2 w-auto">
-          <TabsTrigger value="props" className="text-xs">Props</TabsTrigger>
-          <TabsTrigger value="style" className="text-xs">Style</TabsTrigger>
+          <TabsTrigger value="props" className="text-xs">{locale.props}</TabsTrigger>
+          <TabsTrigger value="style" className="text-xs">{locale.style}</TabsTrigger>
         </TabsList>
         <div className="flex-1 overflow-y-auto">
           <TabsContent value="props" className="mt-0">
