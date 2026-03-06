@@ -127,6 +127,9 @@ export function NexoraBuilderApp({
   return (
     <TooltipProvider>
       <Toaster />
+      <div className="fixed bottom-2 left-2 z-[9999] px-2 py-1 rounded bg-foreground/80 text-background text-[10px] font-mono pointer-events-none select-none opacity-70">
+        schema-craft runtime: 1.2.0
+      </div>
       <BuilderEditorShell
         key={resolvedSchema.id}
         initialSchema={resolvedSchema}
