@@ -332,8 +332,9 @@ function PropsTab({ node, onUpdateProps }: { node: SchemaNode; onUpdateProps: (p
       )}
       {node.type === 'ProductCard' && (
         <>
-          <ImagePropsEditor node={node} onUpdate={onUpdateProps} />
-          <PropField label="Name" value={p.text || ''} onChange={(v) => onUpdateProps({ text: v })} />
+          <PropField label="Image URL" value={p.image || p.src || ''} onChange={(v) => onUpdateProps({ src: v, image: v })} />
+          <PropField label="Alt Text" value={p.alt || ''} onChange={(v) => onUpdateProps({ alt: v })} />
+          <PropField label="Name" value={p.name || p.text || ''} onChange={(v) => onUpdateProps({ text: v, name: v })} />
           <PropField label="Price" value={p.price || ''} onChange={(v) => onUpdateProps({ price: v })} />
           <PropField label="Original Price" value={p.originalPrice || ''} onChange={(v) => onUpdateProps({ originalPrice: v })} />
           <PropField label="Badge" value={p.badge || ''} onChange={(v) => onUpdateProps({ badge: v })} />
