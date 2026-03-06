@@ -1,73 +1,104 @@
-# Welcome to your Lovable project
+# @mandolop97/constructor-nexora
 
-## Project info
+Editor visual de páginas basado en esquemas JSON para aplicaciones React.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Instalación
 
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```bash
+npm install @mandolop97/constructor-nexora
 ```
 
-**Edit a file directly in GitHub**
+## Uso rápido
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```tsx
+import { NexoraBuilderApp } from '@mandolop97/constructor-nexora';
+import '@mandolop97/constructor-nexora/styles.css';
 
-**Use GitHub Codespaces**
+<NexoraBuilderApp
+  initialSchema={mySchema}
+  onSave={(schema) => saveToDatabase(schema)}
+  onPublish={(schema) => publishSchema(schema)}
+/>
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Integración multi-página
 
-## What technologies are used for this project?
+> **Importante:** Las páginas que aparecen en el editor son las **rutas reales de tu aplicación**. La base de datos solo almacena el contenido (schema) de cada página, **no define qué páginas existen**.
 
-This project is built with:
+El array `pages` debe construirse a partir de las rutas reales definidas en tu template (React Router, etc.), no de registros de base de datos.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+```tsx
+import {
+  NexoraBuilderApp,
+  getDefaultSchemaForSlug,
+} from '@mandolop97/constructor-nexora';
+import '@mandolop97/constructor-nexora/styles.css';
 
-## How can I deploy this project?
+// 1. Define tus páginas REALES (las rutas de tu app)
+const REAL_PAGES = [
+  { slug: '/', title: 'Inicio' },
+  { slug: '/products', title: 'Tienda' },
+  { slug: '/faq', title: 'Preguntas frecuentes' },
+  { slug: '/contact', title: 'Contacto' },
+];
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+function BuilderPage() {
+  const [currentSlug, setCurrentSlug] = useState('/');
+  const [savedSchemas, setSavedSchemas] = useState<Record<string, Schema>>({});
 
-## Can I connect a custom domain to my Lovable project?
+  // 2. Para cada página real, busca su schema en BD o usa el default
+  const pages = REAL_PAGES.map((page) => ({
+    ...page,
+    schema: savedSchemas[page.slug] ?? getDefaultSchemaForSlug(page.slug),
+    status: savedSchemas[page.slug] ? 'published' as const : 'draft' as const,
+  }));
 
-Yes, you can!
+  // 3. Pasa las páginas reales al builder
+  return (
+    <NexoraBuilderApp
+      pages={pages}
+      activePage={currentSlug}
+      onPageChange={setCurrentSlug}
+      onSave={(schema) => saveToDatabase(currentSlug, schema)}
+      onSaveWithSlug={(slug, schema) => saveToDatabase(slug, schema)}
+      onPublish={(schema) => publishSchema(currentSlug, schema)}
+    />
+  );
+}
+```
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## Props API
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+| Prop | Tipo | Descripción |
+|------|------|-------------|
+| `initialSchema` | `Schema` | Schema inicial. Tiene prioridad sobre `pages`. |
+| `pages` | `PageDefinition[]` | Lista de páginas reales disponibles para editar. |
+| `activePage` | `string` | Slug de la página activa (debe existir en `pages`). |
+| `onPageChange` | `(slug: string) => void` | Callback al cambiar de página. |
+| `onSave` | `(schema: Schema) => void` | Callback al guardar. |
+| `onSaveWithSlug` | `(slug: string, schema: Schema) => void` | Callback al guardar con el slug de la página activa. |
+| `onPublish` | `(schema: Schema) => void` | Callback al publicar. Si se omite, se muestra un diálogo interno. |
+| `onPreview` | `(schema: Schema) => void` | Callback al previsualizar. |
+| `onExport` | `(schema: Schema) => void` | Callback al exportar. |
+| `domain` | `string` | Contexto de dominio para multi-tenant. |
+| `className` | `string` | Clase CSS para el contenedor raíz. |
+
+## Exports adicionales
+
+```tsx
+// Renderer independiente (para renderizar schemas sin el editor)
+import { PageRenderer } from '@mandolop97/constructor-nexora';
+
+// Utilidades de schema
+import {
+  createDefaultHomeSchema,
+  getDefaultSchemaForSlug,
+  validateSchema,
+  createNode,
+  blockRegistry,
+} from '@mandolop97/constructor-nexora';
+```
+
+## Tecnologías
+
+React · TypeScript · Tailwind CSS · Vite · shadcn/ui
