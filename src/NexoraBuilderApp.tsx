@@ -98,6 +98,7 @@ export function NexoraBuilderApp({
   activePage,
   onPageChange,
   onSaveWithSlug,
+  onPublishSubmit,
 }: NexoraBuilderAppProps) {
   // When pages are provided but no activePage, auto-select the first page
   useEffect(() => {
