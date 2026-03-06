@@ -195,6 +195,7 @@ export function NexoraBuilderApp({
         activePage={activePage}
         onPageChange={onPageChange}
         pageTitle={activePageTitle}
+        onPublishSubmit={onPublishSubmit}
       />
     </TooltipProvider>
   );
