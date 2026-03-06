@@ -84,6 +84,12 @@ export interface NexoraBuilderAppProps {
    * Required if `onPublish` is not provided and the internal dialog is used.
    */
   onPublishSubmit?: (payload: PublishPayload) => Promise<void>;
+
+  /**
+   * Locale code ('es' | 'en') or a full BuilderLocale object for custom translations.
+   * Defaults to 'es' (Spanish).
+   */
+  locale?: 'es' | 'en' | BuilderLocale;
 }
 
 export function NexoraBuilderApp({
