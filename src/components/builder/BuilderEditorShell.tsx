@@ -5,11 +5,14 @@ import { useSchemaHistory } from '@/hooks/use-schema-history';
 import { Schema, NodeType, SchemaNode, PageDefinition } from '@/types/schema';
 import { createNode, isContainerType } from '@/lib/node-factory';
 import { canDropInto } from '@/lib/block-registry';
+import { t } from '@/lib/i18n';
 import { TopBar } from '@/components/builder/TopBar';
 import { BlocksPalette } from '@/components/builder/BlocksPalette';
 import { LayersPanel } from '@/components/builder/LayersPanel';
 import { Inspector } from '@/components/builder/Inspector';
 import { PublishDialog, PublishPayload } from '@/components/builder/PublishDialog';
+import { PreviewDialog } from '@/components/builder/PreviewDialog';
+import { ExportDialog } from '@/components/builder/ExportDialog';
 import { BuilderCanvas } from '@/components/builder/BuilderCanvas';
 import { PageManager } from '@/components/builder/PageManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -23,9 +26,7 @@ export interface BuilderEditorShellProps {
   onPreview?: (schema: Schema) => void;
   onExport?: (schema: Schema) => void;
   className?: string;
-  /** Host-provided handler for the built-in publish dialog */
   onPublishSubmit?: (payload: PublishPayload) => Promise<void>;
-  // Multi-page
   pages?: PageDefinition[];
   activePage?: string;
   onPageChange?: (slug: string) => void;
@@ -45,6 +46,7 @@ export function BuilderEditorShell({
   onPageChange,
   pageTitle,
 }: BuilderEditorShellProps) {
+  const locale = t();
   const { schema, setSchema, undo, redo, canUndo, canRedo } = useSchemaHistory(initialSchema);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [device, setDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
@@ -52,6 +54,8 @@ export function BuilderEditorShell({
   const [activeDragType, setActiveDragType] = useState<string | null>(null);
   const [publishOpen, setPublishOpen] = useState(false);
   const [publishMode, setPublishMode] = useState<'draft' | 'published'>('published');
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
 
   const hasPages = pages && pages.length > 0;
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
@@ -64,8 +68,24 @@ export function BuilderEditorShell({
   const handleSave = useCallback(() => {
     onSaveExternal(schema);
     setDirty(false);
-    toast.success('Schema saved');
-  }, [schema, onSaveExternal]);
+    toast.success(locale.schemaSaved);
+  }, [schema, onSaveExternal, locale]);
+
+  const handlePreview = useCallback(() => {
+    if (onPreview) {
+      onPreview(schema);
+    } else {
+      setPreviewOpen(true);
+    }
+  }, [schema, onPreview]);
+
+  const handleExport = useCallback(() => {
+    if (onExport) {
+      onExport(schema);
+    } else {
+      setExportOpen(true);
+    }
+  }, [schema, onExport]);
 
   const handleDragStart = (event: DragStartEvent) => {
     const data = event.active.data.current;
@@ -101,7 +121,7 @@ export function BuilderEditorShell({
         const parentType = s.nodes[parentId].type;
 
         if (!canDropInto(nodeType, parentType, isRoot)) {
-          return s; // hierarchy violation — don't insert
+          return s;
         }
 
         s.nodes[newNode.id] = newNode;
@@ -113,7 +133,7 @@ export function BuilderEditorShell({
       if (dropped) {
         setSelectedNodeId(newNode.id);
       } else {
-        toast.error(`"${nodeType}" cannot be placed here`);
+        toast.error(locale.cannotPlaceHere(nodeType));
       }
       return;
     }
@@ -205,8 +225,8 @@ export function BuilderEditorShell({
           onRedo={redo}
           canUndo={canUndo}
           canRedo={canRedo}
-          onPreview={() => onPreview?.(schema)}
-          onExport={() => onExport?.(schema)}
+          onPreview={handlePreview}
+          onExport={handleExport}
           device={device}
           onDeviceChange={setDevice}
           dirty={dirty}
@@ -220,9 +240,9 @@ export function BuilderEditorShell({
           <div className="w-60 border-r bg-background flex flex-col shrink-0">
             <Tabs defaultValue="blocks" className="flex-1 flex flex-col overflow-hidden">
               <TabsList className="mx-2 mt-2 w-auto">
-                <TabsTrigger value="blocks" className="text-xs">Blocks</TabsTrigger>
-                <TabsTrigger value="layers" className="text-xs">Layers</TabsTrigger>
-                {hasPages && <TabsTrigger value="pages" className="text-xs">Pages</TabsTrigger>}
+                <TabsTrigger value="blocks" className="text-xs">{locale.blocks}</TabsTrigger>
+                <TabsTrigger value="layers" className="text-xs">{locale.layers}</TabsTrigger>
+                {hasPages && <TabsTrigger value="pages" className="text-xs">{locale.pages}</TabsTrigger>}
               </TabsList>
               <ScrollArea className="flex-1">
                 <TabsContent value="blocks" className="mt-0">
@@ -265,7 +285,7 @@ export function BuilderEditorShell({
               </ScrollArea>
             ) : (
               <div className="flex items-center justify-center h-full">
-                <p className="text-xs text-muted-foreground">Select an element to inspect</p>
+                <p className="text-xs text-muted-foreground">{locale.selectElement}</p>
               </div>
             )}
           </div>
@@ -290,6 +310,8 @@ export function BuilderEditorShell({
       </DragOverlay>
 
       <PublishDialog open={publishOpen} onOpenChange={setPublishOpen} schema={schema} mode={publishMode} onPublishSubmit={onPublishSubmit} />
+      <PreviewDialog open={previewOpen} onOpenChange={setPreviewOpen} schema={schema} />
+      <ExportDialog open={exportOpen} onOpenChange={setExportOpen} schema={schema} />
     </DndContext>
   );
 }

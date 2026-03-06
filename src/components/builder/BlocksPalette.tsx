@@ -1,6 +1,7 @@
 import { useDraggable } from '@dnd-kit/core';
 import { NodeType } from '@/types/schema';
 import { blockRegistry, getCategories, getBlocksByCategory, BlockDefinition } from '@/lib/block-registry';
+import { translateCategory } from '@/lib/i18n';
 import { EDITOR_VERSION } from '@/lib/version';
 
 function DraggableBlock({ block }: { block: BlockDefinition }) {
@@ -35,7 +36,7 @@ export function BlocksPalette() {
     <div className="p-3 space-y-4">
       {categories.map((cat) => (
         <div key={cat}>
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">{cat}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">{translateCategory(cat)}</p>
           <div className="grid grid-cols-2 gap-1.5">
             {getBlocksByCategory(cat).map((b) => (
               <DraggableBlock key={b.type} block={b} />

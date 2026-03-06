@@ -1,6 +1,7 @@
 import React from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { Plus } from 'lucide-react';
+import { t } from '@/lib/i18n';
 
 interface EditableDropZoneProps {
   nodeId: string;
@@ -10,6 +11,7 @@ interface EditableDropZoneProps {
 
 export function EditableDropZone({ nodeId, children, isEmpty }: EditableDropZoneProps) {
   const { setNodeRef, isOver } = useDroppable({ id: nodeId });
+  const locale = t();
 
   return (
     <div
@@ -50,7 +52,7 @@ export function EditableDropZone({ nodeId, children, isEmpty }: EditableDropZone
               transform: isOver ? 'rotate(90deg)' : 'rotate(0deg)',
             }}
           />
-          {isOver ? 'Release to drop' : 'Drop block here'}
+          {isOver ? locale.releaseToDrop : locale.dropHere}
         </div>
       )}
     </div>

@@ -8,6 +8,7 @@ import { PageManager } from '@/components/builder/PageManager';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from '@/components/ui/sonner';
 import { EDITOR_VERSION } from '@/lib/version';
+import { setLocaleByCode, BuilderLocale, setLocale } from '@/lib/i18n';
 
 export interface NexoraBuilderAppProps {
   /**
@@ -83,6 +84,12 @@ export interface NexoraBuilderAppProps {
    * Required if `onPublish` is not provided and the internal dialog is used.
    */
   onPublishSubmit?: (payload: PublishPayload) => Promise<void>;
+
+  /**
+   * Locale code ('es' | 'en') or a full BuilderLocale object for custom translations.
+   * Defaults to 'es' (Spanish).
+   */
+  locale?: 'es' | 'en' | BuilderLocale;
 }
 
 export function NexoraBuilderApp({
@@ -99,7 +106,17 @@ export function NexoraBuilderApp({
   onPageChange,
   onSaveWithSlug,
   onPublishSubmit,
+  locale: localeProp,
 }: NexoraBuilderAppProps) {
+  // Apply locale
+  useEffect(() => {
+    if (!localeProp) return;
+    if (typeof localeProp === 'string') {
+      setLocaleByCode(localeProp);
+    } else {
+      setLocale(localeProp);
+    }
+  }, [localeProp]);
   // When pages are provided but no activePage, auto-select the first page
   useEffect(() => {
     if (pages && pages.length > 0 && !activePage && onPageChange) {
