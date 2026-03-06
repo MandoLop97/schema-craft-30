@@ -221,6 +221,7 @@ const CATEGORY_MAP_ES: Record<string, string> = {
   Commerce: es.categoryCommerce,
   Site: es.categorySite,
   Template: es.categoryTemplate,
+  Interactive: es.categoryInteractive,
 };
 
 const CATEGORY_MAP_EN: Record<string, string> = {
