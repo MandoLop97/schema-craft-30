@@ -119,6 +119,7 @@ export const es: BuilderLocale = {
   categoryCommerce: 'Comercio',
   categorySite: 'Sitio',
   categoryTemplate: 'Plantilla',
+  categoryInteractive: 'Interactivo',
 
   spacing: 'Espaciado',
   size: 'Tamaño',
