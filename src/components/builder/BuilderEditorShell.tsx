@@ -227,10 +227,6 @@ export function BuilderEditorShell({
           </div>
         </div>
 
-        {/* Status Bar with Version */}
-        <div className="h-7 border-t bg-muted/30 flex items-center px-3 shrink-0">
-          <span className="text-[10px] text-muted-foreground ml-auto font-mono">v1.0.7</span>
-        </div>
       </div>
 
       <DragOverlay>
