@@ -3,6 +3,7 @@ import {
   Type, ImageIcon, Minus, Tag,
   CreditCard, TextCursorInput, ShoppingBag, Navigation, PanelBottom,
   Megaphone, Sparkles, MessageSquareQuote, Mail, Layers,
+  ListCollapse, LayoutDashboard, Play,
 } from 'lucide-react';
 import { NodeType, NodeProps, NodeStyle } from '@/types/schema';
 import React from 'react';
