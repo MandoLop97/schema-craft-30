@@ -54,6 +54,7 @@ export interface BuilderLocale {
   categoryCommerce: string;
   categorySite: string;
   categoryTemplate: string;
+  categoryInteractive: string;
 
   // Style groups
   spacing: string;
