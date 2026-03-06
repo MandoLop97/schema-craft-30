@@ -354,6 +354,8 @@ function PropsTab({ node, onUpdateProps }: { node: SchemaNode; onUpdateProps: (p
 
 /* ── Style tab ── */
 
+const COLOR_KEYS: (keyof NodeStyle)[] = ['color', 'backgroundColor', 'borderColor'];
+
 function StyleTab({ node, onUpdateStyle }: { node: SchemaNode; onUpdateStyle: (s: Partial<NodeStyle>) => void }) {
   const locale = t();
 
@@ -406,14 +408,23 @@ function StyleTab({ node, onUpdateStyle }: { node: SchemaNode; onUpdateStyle: (s
           {gi > 0 && <Separator className="my-3" />}
           <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">{group.title}</p>
           <div className="space-y-2">
-            {group.fields.map((f) => (
-              <PropField
-                key={f.key}
-                label={f.label}
-                value={(node.style as any)[f.key] || ''}
-                onChange={(v) => onUpdateStyle({ [f.key]: v || undefined })}
-              />
-            ))}
+            {group.fields.map((f) =>
+              COLOR_KEYS.includes(f.key) ? (
+                <ColorField
+                  key={f.key}
+                  label={f.label}
+                  value={(node.style as any)[f.key] || ''}
+                  onChange={(v) => onUpdateStyle({ [f.key]: v || undefined })}
+                />
+              ) : (
+                <PropField
+                  key={f.key}
+                  label={f.label}
+                  value={(node.style as any)[f.key] || ''}
+                  onChange={(v) => onUpdateStyle({ [f.key]: v || undefined })}
+                />
+              )
+            )}
           </div>
         </div>
       ))}
