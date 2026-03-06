@@ -7,7 +7,8 @@ export type NodeType =
   | 'ProductCard'
   | 'Navbar' | 'Footer'
   | 'AnnouncementBar' | 'FeatureBar' | 'TestimonialCard' | 'NewsletterSection'
-  | 'HeroSection';
+  | 'HeroSection'
+  | 'Accordion' | 'TabsBlock' | 'VideoEmbed';
 
 export interface NodeStyle {
   padding?: string;
