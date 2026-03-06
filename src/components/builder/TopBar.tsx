@@ -1,5 +1,6 @@
 import { Undo2, Redo2, Save, Eye, Download, Monitor, Tablet, Smartphone, Globe, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { EDITOR_VERSION } from '@/lib/version';
 import { Separator } from '@/components/ui/separator';
 
 interface TopBarProps {
