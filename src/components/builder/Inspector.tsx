@@ -233,33 +233,44 @@ function FeatureBarPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate:
 }
 
 function HeroSectionPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: Partial<NodeProps>) => void }) {
+  const heading = node.props.heading || node.props.text || '';
+  const ctaLink = node.props.ctaLink || node.props.ctaHref || '';
+  const bgImage = node.props.src || node.props.image || '';
   return (
     <>
-      <PropField label="Heading" value={node.props.text || ''} onChange={(v) => onUpdate({ text: v })} />
+      <PropField label="Heading" value={heading} onChange={(v) => onUpdate({ heading: v, text: v })} />
       <PropField label="Subtitle" value={node.props.subtitle || ''} onChange={(v) => onUpdate({ subtitle: v })} />
+      <PropField label="Overlay Text" value={node.props.overlayText || ''} onChange={(v) => onUpdate({ overlayText: v })} />
       <PropField label="CTA Text" value={node.props.ctaText || ''} onChange={(v) => onUpdate({ ctaText: v })} />
-      <PropField label="CTA Link" value={node.props.ctaHref || ''} onChange={(v) => onUpdate({ ctaHref: v })} />
-      <PropField label="Background Image" value={node.props.src || ''} onChange={(v) => onUpdate({ src: v })} />
+      <PropField label="CTA Link" value={ctaLink} onChange={(v) => onUpdate({ ctaLink: v, ctaHref: v })} />
+      <PropField label="Secondary CTA Text" value={node.props.secondaryCtaText || ''} onChange={(v) => onUpdate({ secondaryCtaText: v })} />
+      <PropField label="Secondary CTA Link" value={node.props.secondaryCtaLink || ''} onChange={(v) => onUpdate({ secondaryCtaLink: v })} />
+      <PropField label="Background Image" value={bgImage} onChange={(v) => onUpdate({ src: v, image: v })} />
       <PropField label="Overlay Opacity (0-1)" value={node.props.overlayOpacity || '0.55'} onChange={(v) => onUpdate({ overlayOpacity: v })} />
     </>
   );
 }
 
 function TestimonialPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: Partial<NodeProps>) => void }) {
+  const quote = node.props.quote || node.props.text || '';
+  const author = node.props.author || node.props.label || '';
+  const stars = String(node.props.stars ?? node.props.variant ?? '5');
   return (
     <>
-      <PropField label="Quote" value={node.props.text || ''} onChange={(v) => onUpdate({ text: v })} />
-      <PropField label="Author" value={node.props.label || ''} onChange={(v) => onUpdate({ label: v })} />
-      <PropField label="Stars (1-5)" value={node.props.variant || '5'} onChange={(v) => onUpdate({ variant: v })} />
+      <PropField label="Quote" value={quote} onChange={(v) => onUpdate({ quote: v, text: v })} />
+      <PropField label="Author" value={author} onChange={(v) => onUpdate({ author: v, label: v })} />
+      <PropField label="Stars (1-5)" value={stars} onChange={(v) => onUpdate({ stars: parseInt(v) || 5, variant: v })} />
     </>
   );
 }
 
 function NewsletterPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: Partial<NodeProps>) => void }) {
+  const heading = node.props.heading || node.props.text || '';
+  const subtitle = node.props.subtitle || node.props.label || '';
   return (
     <>
-      <PropField label="Heading" value={node.props.text || ''} onChange={(v) => onUpdate({ text: v })} />
-      <PropField label="Subtext" value={node.props.label || ''} onChange={(v) => onUpdate({ label: v })} />
+      <PropField label="Heading" value={heading} onChange={(v) => onUpdate({ heading: v, text: v })} />
+      <PropField label="Subtext" value={subtitle} onChange={(v) => onUpdate({ subtitle: v, label: v })} />
       <PropField label="Placeholder" value={node.props.placeholder || ''} onChange={(v) => onUpdate({ placeholder: v })} />
     </>
   );
