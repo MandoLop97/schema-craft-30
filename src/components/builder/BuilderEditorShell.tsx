@@ -22,6 +22,8 @@ export interface BuilderEditorShellProps {
   onPreview?: (schema: Schema) => void;
   onExport?: (schema: Schema) => void;
   className?: string;
+  /** Host-provided handler for the built-in publish dialog */
+  onPublishSubmit?: (payload: PublishPayload) => Promise<void>;
   // Multi-page
   pages?: PageDefinition[];
   activePage?: string;
