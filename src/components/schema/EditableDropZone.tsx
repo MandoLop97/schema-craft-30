@@ -17,10 +17,10 @@ export function EditableDropZone({ nodeId, children, isEmpty }: EditableDropZone
       style={{
         position: 'relative',
         minHeight: isEmpty ? '4rem' : undefined,
-        outline: isOver ? '2px dashed hsl(var(--primary))' : undefined,
-        outlineOffset: isOver ? '-2px' : undefined,
-        backgroundColor: isOver ? 'hsl(var(--primary) / 0.05)' : undefined,
-        transition: 'outline 150ms ease, background-color 150ms ease',
+        boxShadow: isOver ? 'inset 0 0 0 2px hsl(var(--primary) / 0.3)' : undefined,
+        backgroundColor: isOver ? 'hsl(var(--primary) / 0.04)' : undefined,
+        borderRadius: '4px',
+        transition: 'box-shadow 200ms ease, background-color 200ms ease',
       }}
     >
       {children}
@@ -32,17 +32,25 @@ export function EditableDropZone({ nodeId, children, isEmpty }: EditableDropZone
             justifyContent: 'center',
             gap: '0.5rem',
             padding: '1rem',
-            color: isOver ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))',
-            fontSize: '0.75rem',
+            color: isOver ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground) / 0.6)',
+            fontSize: '0.7rem',
             fontWeight: 500,
-            border: `1px dashed ${isOver ? 'hsl(var(--primary))' : 'hsl(var(--border))'}`,
-            borderRadius: '0.375rem',
+            border: `1.5px dashed ${isOver ? 'hsl(var(--primary) / 0.5)' : 'hsl(var(--border))'}`,
+            borderRadius: '0.5rem',
             margin: '0.5rem',
-            transition: 'color 150ms ease, border-color 150ms ease',
+            transition: 'all 200ms ease',
+            animation: isEmpty && !isOver ? 'breathe 3s ease-in-out infinite' : undefined,
+            letterSpacing: '0.02em',
           }}
         >
-          <Plus size={14} />
-          Drop block here
+          <Plus
+            size={14}
+            style={{
+              transition: 'transform 200ms ease',
+              transform: isOver ? 'rotate(90deg)' : 'rotate(0deg)',
+            }}
+          />
+          {isOver ? 'Release to drop' : 'Drop block here'}
         </div>
       )}
     </div>

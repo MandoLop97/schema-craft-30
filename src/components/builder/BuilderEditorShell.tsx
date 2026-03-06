@@ -260,7 +260,16 @@ export function BuilderEditorShell({
 
       <DragOverlay>
         {activeDragType && (
-          <div className="px-3 py-2 bg-background border shadow-lg rounded-md text-xs font-medium">
+          <div
+            className="px-3 py-2 rounded-lg text-xs font-semibold border"
+            style={{
+              backgroundColor: 'hsl(var(--background) / 0.95)',
+              backdropFilter: 'blur(8px)',
+              boxShadow: '0 12px 32px hsl(var(--foreground) / 0.12), 0 0 0 1px hsl(var(--primary) / 0.15)',
+              transform: 'scale(1.05)',
+              color: 'hsl(var(--primary))',
+            }}
+          >
             {activeDragType}
           </div>
         )}
