@@ -86,6 +86,7 @@ export const es: BuilderLocale = {
   blocks: 'Bloques',
   layers: 'Capas',
   pages: 'Páginas',
+  theme: 'Tema',
 
   props: 'Propiedades',
   style: 'Estilo',
