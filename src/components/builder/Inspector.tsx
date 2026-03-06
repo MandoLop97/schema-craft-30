@@ -139,6 +139,7 @@ function ButtonPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p:
       </div>
       <PropField label="Link (href)" value={linkValue} onChange={(v) => onUpdate({ href: v, link: v })} />
     </>
+  );
 }
 
 function ImagePropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: Partial<NodeProps>) => void }) {
