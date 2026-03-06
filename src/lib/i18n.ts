@@ -147,6 +147,7 @@ export const en: BuilderLocale = {
   blocks: 'Blocks',
   layers: 'Layers',
   pages: 'Pages',
+  theme: 'Theme',
 
   props: 'Props',
   style: 'Style',
