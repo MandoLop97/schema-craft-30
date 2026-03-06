@@ -197,12 +197,6 @@ export function LayersPanel({
   onSelectNode,
   onReorderChildren,
 }: LayersPanelProps) {
-  const root = schema.nodes[schema.rootNodeId];
-  if (!root)
-    return (
-      <p className="p-3 text-xs text-muted-foreground">No nodes</p>
-    );
-
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
@@ -218,6 +212,12 @@ export function LayersPanel({
     },
     [schema.nodes]
   );
+
+  const root = schema.nodes[schema.rootNodeId];
+  if (!root)
+    return (
+      <p className="p-3 text-xs text-muted-foreground">No nodes</p>
+    );
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveDragId(String(event.active.id));
