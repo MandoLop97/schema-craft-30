@@ -19,7 +19,7 @@ interface TopBarProps {
 
 export function TopBar({ onSave, onUndo, onRedo, canUndo, canRedo, onPreview, onExport, onPublish, onSaveDraft, device, onDeviceChange, dirty }: TopBarProps) {
   return (
-    <div className="h-12 border-b bg-background flex items-center px-3 gap-1 shrink-0">
+    <div className="h-12 border-b flex items-center px-3 gap-1 shrink-0" style={{ backgroundColor: 'hsla(210, 60%, 50%, 0.08)' }}>
       <span className="text-sm font-semibold tracking-tight mr-3">NEXORA</span>
       <Separator orientation="vertical" className="h-6" />
 
