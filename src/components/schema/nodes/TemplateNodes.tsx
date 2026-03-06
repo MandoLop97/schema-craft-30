@@ -177,6 +177,9 @@ export function NewsletterSectionNode({ node }: NodeComponentProps) {
 
 export function HeroSectionNode({ node }: NodeComponentProps) {
   const opacity = parseFloat(node.props.overlayOpacity || '0.55');
+  const heading = node.props.heading || node.props.text || 'Hero Title';
+  const bgSrc = node.props.src || node.props.image;
+  const ctaLink = node.props.ctaLink || node.props.ctaHref || '#';
   return (
     <div
       style={{
@@ -195,9 +198,9 @@ export function HeroSectionNode({ node }: NodeComponentProps) {
       }}
       data-node-id={node.id}
     >
-      {node.props.src && (
+      {bgSrc && (
         <img
-          src={node.props.src}
+          src={bgSrc}
           alt=""
           style={{
             position: 'absolute',
@@ -218,6 +221,22 @@ export function HeroSectionNode({ node }: NodeComponentProps) {
         }}
       />
       <div style={{ position: 'relative', zIndex: 2, maxWidth: '48rem', width: '100%' }}>
+        {node.props.overlayText && (
+          <span style={{
+            display: 'inline-block',
+            padding: '0.375rem 1rem',
+            borderRadius: '9999px',
+            fontSize: '0.75rem',
+            fontWeight: 600,
+            backgroundColor: 'rgba(255,255,255,0.15)',
+            color: '#fff',
+            marginBottom: '1.25rem',
+            backdropFilter: 'blur(4px)',
+            border: '1px solid rgba(255,255,255,0.2)',
+          }}>
+            {node.props.overlayText}
+          </span>
+        )}
         <h1
           style={{
             fontSize: 'clamp(2rem, 5vw, 3.5rem)',
@@ -228,7 +247,7 @@ export function HeroSectionNode({ node }: NodeComponentProps) {
             letterSpacing: '-0.025em',
           }}
         >
-          {node.props.text || 'Hero Title'}
+          {heading}
         </h1>
         <p
           style={{
@@ -243,25 +262,46 @@ export function HeroSectionNode({ node }: NodeComponentProps) {
         >
           {node.props.subtitle || 'Subtitle goes here'}
         </p>
-        {node.props.ctaText && (
-          <a
-            href={node.props.ctaHref || '#'}
-            style={{
-              display: 'inline-block',
-              padding: '0.875rem 2.5rem',
-              backgroundColor: 'hsl(var(--primary))',
-              color: 'hsl(var(--primary-foreground))',
-              borderRadius: '0.5rem',
-              fontWeight: 600,
-              fontSize: '1rem',
-              textDecoration: 'none',
-              transition: 'transform 150ms ease, box-shadow 150ms ease',
-              boxShadow: '0 4px 14px rgba(0,0,0,0.25)',
-            }}
-          >
-            {node.props.ctaText}
-          </a>
-        )}
+        <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+          {node.props.ctaText && (
+            <a
+              href={ctaLink}
+              style={{
+                display: 'inline-block',
+                padding: '0.875rem 2.5rem',
+                backgroundColor: 'hsl(var(--primary))',
+                color: 'hsl(var(--primary-foreground))',
+                borderRadius: '0.5rem',
+                fontWeight: 600,
+                fontSize: '1rem',
+                textDecoration: 'none',
+                transition: 'transform 150ms ease, box-shadow 150ms ease',
+                boxShadow: '0 4px 14px rgba(0,0,0,0.25)',
+              }}
+            >
+              {node.props.ctaText}
+            </a>
+          )}
+          {node.props.secondaryCtaText && (
+            <a
+              href={node.props.secondaryCtaLink || '#'}
+              style={{
+                display: 'inline-block',
+                padding: '0.875rem 2.5rem',
+                backgroundColor: 'transparent',
+                color: '#fff',
+                borderRadius: '0.5rem',
+                fontWeight: 600,
+                fontSize: '1rem',
+                textDecoration: 'none',
+                border: '1px solid rgba(255,255,255,0.4)',
+                transition: 'background-color 150ms ease',
+              }}
+            >
+              {node.props.secondaryCtaText}
+            </a>
+          )}
+        </div>
       </div>
     </div>
   );
