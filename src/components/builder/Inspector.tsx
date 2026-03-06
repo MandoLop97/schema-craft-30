@@ -179,18 +179,55 @@ function PropsTab({ node, onUpdateProps }: { node: SchemaNode; onUpdateProps: (p
       {node.type === 'Image' && <ImagePropsEditor node={node} onUpdate={onUpdateProps} />}
       {node.type === 'Badge' && <PropField label="Text" value={p.text || ''} onChange={(v) => onUpdateProps({ text: v })} />}
       {node.type === 'Input' && <PropField label="Placeholder" value={p.placeholder || ''} onChange={(v) => onUpdateProps({ placeholder: v })} />}
-      {node.type === 'Grid' && <PropField label="Columns" value={String(p.columns || 3)} onChange={(v) => onUpdateProps({ columns: parseInt(v) || 3 })} />}
+      {node.type === 'Section' && (
+        <>
+          <div className="grid gap-1">
+            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Align Items</Label>
+            <Select value={p.direction || 'stretch'} onValueChange={(v) => onUpdateProps({ direction: v as any })}>
+              <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {['stretch', 'flex-start', 'center', 'flex-end'].map((v) => (
+                  <SelectItem key={v} value={v}>{v}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </>
+      )}
+      {node.type === 'Container' && (
+        <>
+          <PropField label="Max Width" value={p.text || '72rem'} onChange={(v) => onUpdateProps({ text: v })} />
+        </>
+      )}
+      {node.type === 'Grid' && (
+        <>
+          <PropField label="Columns" value={String(p.columns || 3)} onChange={(v) => onUpdateProps({ columns: parseInt(v) || 3 })} />
+        </>
+      )}
       {node.type === 'Stack' && (
-        <div className="grid gap-1">
-          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Direction</Label>
-          <Select value={p.direction || 'vertical'} onValueChange={(v) => onUpdateProps({ direction: v as any })}>
-            <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="vertical">Vertical</SelectItem>
-              <SelectItem value="horizontal">Horizontal</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <>
+          <div className="grid gap-1">
+            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Direction</Label>
+            <Select value={p.direction || 'vertical'} onValueChange={(v) => onUpdateProps({ direction: v as any })}>
+              <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="vertical">Vertical</SelectItem>
+                <SelectItem value="horizontal">Horizontal</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid gap-1">
+            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Align Items</Label>
+            <Select value={p.variant || 'stretch'} onValueChange={(v) => onUpdateProps({ variant: v })}>
+              <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {['stretch', 'flex-start', 'center', 'flex-end', 'space-between'].map((v) => (
+                  <SelectItem key={v} value={v}>{v}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </>
       )}
       {node.type === 'ProductCard' && (
         <>
