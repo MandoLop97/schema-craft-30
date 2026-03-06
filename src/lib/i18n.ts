@@ -54,6 +54,7 @@ export interface BuilderLocale {
   categoryCommerce: string;
   categorySite: string;
   categoryTemplate: string;
+  categoryInteractive: string;
 
   // Style groups
   spacing: string;
@@ -118,6 +119,7 @@ export const es: BuilderLocale = {
   categoryCommerce: 'Comercio',
   categorySite: 'Sitio',
   categoryTemplate: 'Plantilla',
+  categoryInteractive: 'Interactivo',
 
   spacing: 'Espaciado',
   size: 'Tamaño',
@@ -179,6 +181,7 @@ export const en: BuilderLocale = {
   categoryCommerce: 'Commerce',
   categorySite: 'Site',
   categoryTemplate: 'Template',
+  categoryInteractive: 'Interactive',
 
   spacing: 'Spacing',
   size: 'Size',
@@ -218,6 +221,7 @@ const CATEGORY_MAP_ES: Record<string, string> = {
   Commerce: es.categoryCommerce,
   Site: es.categorySite,
   Template: es.categoryTemplate,
+  Interactive: es.categoryInteractive,
 };
 
 const CATEGORY_MAP_EN: Record<string, string> = {
@@ -227,6 +231,7 @@ const CATEGORY_MAP_EN: Record<string, string> = {
   Commerce: en.categoryCommerce,
   Site: en.categorySite,
   Template: en.categoryTemplate,
+  Interactive: en.categoryInteractive,
 };
 
 export function translateCategory(category: string): string {

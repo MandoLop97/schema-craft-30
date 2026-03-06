@@ -7,7 +7,8 @@ export type NodeType =
   | 'ProductCard'
   | 'Navbar' | 'Footer'
   | 'AnnouncementBar' | 'FeatureBar' | 'TestimonialCard' | 'NewsletterSection'
-  | 'HeroSection';
+  | 'HeroSection'
+  | 'Accordion' | 'TabsBlock' | 'VideoEmbed';
 
 export interface NodeStyle {
   padding?: string;
@@ -91,6 +92,14 @@ export interface NodeProps {
   stars?: number;
   /** Alias for `href` in Button */
   link?: string;
+  /** Accordion/Tabs panels: array of { title, description } */
+  panels?: { title: string; description: string }[];
+  /** Video embed URL */
+  videoUrl?: string;
+  /** Autoplay flag */
+  autoplay?: boolean;
+  /** Muted flag */
+  muted?: boolean;
 }
 
 export interface SchemaNode {

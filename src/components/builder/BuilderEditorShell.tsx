@@ -251,7 +251,19 @@ export function BuilderEditorShell({
                   <BlocksPalette />
                 </TabsContent>
                 <TabsContent value="layers" className="mt-0">
-                  <LayersPanel schema={schema} selectedNodeId={selectedNodeId} onSelectNode={setSelectedNodeId} />
+                  <LayersPanel
+                    schema={schema}
+                    selectedNodeId={selectedNodeId}
+                    onSelectNode={setSelectedNodeId}
+                    onReorderChildren={(parentId, newChildren) => {
+                      updateSchema((s) => {
+                        if (s.nodes[parentId]) {
+                          s.nodes[parentId].children = newChildren;
+                        }
+                        return s;
+                      });
+                    }}
+                  />
                 </TabsContent>
                 <TabsContent value="theme" className="mt-0">
                   <ThemeEditor

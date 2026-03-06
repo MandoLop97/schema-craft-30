@@ -3,6 +3,7 @@ import {
   Type, ImageIcon, Minus, Tag,
   CreditCard, TextCursorInput, ShoppingBag, Navigation, PanelBottom,
   Megaphone, Sparkles, MessageSquareQuote, Mail, Layers,
+  ListCollapse, LayoutDashboard, Play,
 } from 'lucide-react';
 import { NodeType, NodeProps, NodeStyle } from '@/types/schema';
 import React from 'react';
@@ -36,7 +37,7 @@ const LAYOUT_TYPES: NodeType[] = ['Section', 'Container', 'Grid', 'Stack'];
 /** Site-level blocks: should only be at root or inside Section */
 const SITE_TYPES: NodeType[] = ['Navbar', 'Footer', 'AnnouncementBar'];
 /** Content that goes inside any container */
-const CONTENT_TYPES: NodeType[] = ['Text', 'Image', 'Divider', 'Badge', 'Button', 'Card', 'Input', 'ProductCard', 'TestimonialCard', 'NewsletterSection', 'FeatureBar', 'HeroSection'];
+const CONTENT_TYPES: NodeType[] = ['Text', 'Image', 'Divider', 'Badge', 'Button', 'Card', 'Input', 'ProductCard', 'TestimonialCard', 'NewsletterSection', 'FeatureBar', 'HeroSection', 'Accordion', 'TabsBlock', 'VideoEmbed'];
 
 export const blockRegistry: BlockDefinition[] = [
   // ── Layout ── (can nest inside other layout, but Section is top-level preferred)
@@ -55,6 +56,10 @@ export const blockRegistry: BlockDefinition[] = [
   { type: 'Button', label: 'Button', category: 'UI', icon: Square, canHaveChildren: false, defaultProps: { text: 'Button', variant: 'default' }, defaultStyle: {} },
   { type: 'Card', label: 'Card', category: 'UI', icon: CreditCard, canHaveChildren: false, defaultProps: { items: [{ title: 'Card Title', description: 'Card description goes here.' }] }, defaultStyle: { padding: '1.5rem' } },
   { type: 'Input', label: 'Input', category: 'UI', icon: TextCursorInput, canHaveChildren: false, defaultProps: { placeholder: 'Enter text...' }, defaultStyle: {} },
+  // ── Interactive ──
+  { type: 'Accordion', label: 'Accordion', category: 'Interactive', icon: ListCollapse, canHaveChildren: false, defaultProps: { panels: [{ title: 'What is this?', description: 'This is an accordion panel with collapsible content.' }, { title: 'How does it work?', description: 'Click on the header to expand or collapse each panel.' }] }, defaultStyle: {} },
+  { type: 'TabsBlock', label: 'Tabs', category: 'Interactive', icon: LayoutDashboard, canHaveChildren: false, defaultProps: { panels: [{ title: 'Overview', description: 'This is the overview tab content.' }, { title: 'Details', description: 'Detailed information goes here.' }] }, defaultStyle: {} },
+  { type: 'VideoEmbed', label: 'Video', category: 'Interactive', icon: Play, canHaveChildren: false, defaultProps: { videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', alt: 'Video' }, defaultStyle: { borderRadius: '0.5rem' } },
 
   // ── Commerce ──
   { type: 'ProductCard', label: 'Product Card', category: 'Commerce', icon: ShoppingBag, canHaveChildren: false, defaultProps: { text: 'Product Name', price: '$99', src: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop' }, defaultStyle: {} },
@@ -104,7 +109,7 @@ export function canDropInto(childType: NodeType, parentType: NodeType, isRoot: b
   // If root (the Page-level container), allow layout and site blocks
   if (isRoot) {
     // Only layout and site-level blocks at root
-    const rootAllowed: NodeType[] = [...LAYOUT_TYPES, ...SITE_TYPES, 'HeroSection', 'NewsletterSection', 'FeatureBar'];
+    const rootAllowed: NodeType[] = [...LAYOUT_TYPES, ...SITE_TYPES, 'HeroSection', 'NewsletterSection', 'FeatureBar', 'Accordion', 'TabsBlock', 'VideoEmbed'];
     return rootAllowed.includes(childType);
   }
 

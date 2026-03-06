@@ -277,6 +277,40 @@ function NewsletterPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate:
   );
 }
 
+function PanelsPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: Partial<NodeProps>) => void }) {
+  const panels = node.props.panels || [];
+  return (
+    <>
+      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Panels</Label>
+      {panels.map((panel, i) => (
+        <div key={i} className="space-y-1 border rounded-md p-2 relative">
+          <Button variant="ghost" size="icon" className="absolute top-1 right-1 h-5 w-5 text-muted-foreground hover:text-destructive" onClick={() => {
+            onUpdate({ panels: panels.filter((_, idx) => idx !== i) });
+          }}>
+            <Trash2 className="h-3 w-3" />
+          </Button>
+          <Input className="h-7 text-xs" placeholder="Title" value={panel.title} onChange={(e) => {
+            const updated = [...panels]; updated[i] = { ...panel, title: e.target.value }; onUpdate({ panels: updated });
+          }} />
+          <Input className="h-7 text-xs" placeholder="Content" value={panel.description} onChange={(e) => {
+            const updated = [...panels]; updated[i] = { ...panel, description: e.target.value }; onUpdate({ panels: updated });
+          }} />
+        </div>
+      ))}
+      <Button variant="outline" size="sm" className="text-xs w-full" onClick={() => onUpdate({ panels: [...panels, { title: 'New Panel', description: 'Panel content' }] })}>+ Add Panel</Button>
+    </>
+  );
+}
+
+function VideoEmbedPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: Partial<NodeProps>) => void }) {
+  return (
+    <>
+      <PropField label="Video URL" value={node.props.videoUrl || ''} onChange={(v) => onUpdate({ videoUrl: v })} />
+      <PropField label="Alt Text" value={node.props.alt || ''} onChange={(v) => onUpdate({ alt: v })} />
+    </>
+  );
+}
+
 function PropsTab({ node, onUpdateProps }: { node: SchemaNode; onUpdateProps: (p: Partial<NodeProps>) => void }) {
   const p = node.props;
   return (
@@ -361,6 +395,8 @@ function PropsTab({ node, onUpdateProps }: { node: SchemaNode; onUpdateProps: (p
       {node.type === 'TestimonialCard' && <TestimonialPropsEditor node={node} onUpdate={onUpdateProps} />}
       {node.type === 'NewsletterSection' && <NewsletterPropsEditor node={node} onUpdate={onUpdateProps} />}
       {node.type === 'HeroSection' && <HeroSectionPropsEditor node={node} onUpdate={onUpdateProps} />}
+      {(node.type === 'Accordion' || node.type === 'TabsBlock') && <PanelsPropsEditor node={node} onUpdate={onUpdateProps} />}
+      {node.type === 'VideoEmbed' && <VideoEmbedPropsEditor node={node} onUpdate={onUpdateProps} />}
     </div>
   );
 }
