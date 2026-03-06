@@ -3,9 +3,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
 import { Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface InspectorProps {
   node: SchemaNode;
@@ -23,61 +23,163 @@ function PropField({ label, value, onChange }: { label: string; value: string; o
   );
 }
 
+/* ── Per-type prop editors ── */
+
+function TextPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: Partial<NodeProps>) => void }) {
+  return (
+    <>
+      <PropField label="Text" value={node.props.text || ''} onChange={(v) => onUpdate({ text: v })} />
+      <div className="grid gap-1">
+        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Level</Label>
+        <Select value={node.props.level || 'p'} onValueChange={(v) => onUpdate({ level: v as any })}>
+          <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'span'].map((l) => (
+              <SelectItem key={l} value={l}>{l}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </>
+  );
+}
+
+function ButtonPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: Partial<NodeProps>) => void }) {
+  return (
+    <>
+      <PropField label="Text" value={node.props.text || ''} onChange={(v) => onUpdate({ text: v })} />
+      <div className="grid gap-1">
+        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Variant</Label>
+        <Select value={node.props.variant || 'default'} onValueChange={(v) => onUpdate({ variant: v })}>
+          <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {['default', 'outline', 'secondary', 'ghost', 'link'].map((v) => (
+              <SelectItem key={v} value={v}>{v}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <PropField label="Link (href)" value={node.props.href || ''} onChange={(v) => onUpdate({ href: v })} />
+    </>
+  );
+}
+
+function ImagePropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: Partial<NodeProps>) => void }) {
+  return (
+    <>
+      <PropField label="Image URL" value={node.props.src || ''} onChange={(v) => onUpdate({ src: v })} />
+      <PropField label="Alt Text" value={node.props.alt || ''} onChange={(v) => onUpdate({ alt: v })} />
+    </>
+  );
+}
+
+function NavbarPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: Partial<NodeProps>) => void }) {
+  const links = node.props.links || [];
+  return (
+    <>
+      <PropField label="Logo Text" value={node.props.logoText || ''} onChange={(v) => onUpdate({ logoText: v })} />
+      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Links</Label>
+      {links.map((link, i) => (
+        <div key={i} className="grid grid-cols-2 gap-1">
+          <Input className="h-7 text-xs" placeholder="Text" value={link.text} onChange={(e) => {
+            const updated = [...links]; updated[i] = { ...link, text: e.target.value }; onUpdate({ links: updated });
+          }} />
+          <Input className="h-7 text-xs" placeholder="Href" value={link.href} onChange={(e) => {
+            const updated = [...links]; updated[i] = { ...link, href: e.target.value }; onUpdate({ links: updated });
+          }} />
+        </div>
+      ))}
+      <Button variant="outline" size="sm" className="text-xs w-full" onClick={() => onUpdate({ links: [...links, { text: 'Link', href: '#' }] })}>+ Add Link</Button>
+    </>
+  );
+}
+
+function FooterPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: Partial<NodeProps>) => void }) {
+  const links = node.props.links || [];
+  return (
+    <>
+      <PropField label="Logo Text" value={node.props.logoText || ''} onChange={(v) => onUpdate({ logoText: v })} />
+      <PropField label="Copyright" value={node.props.copyright || ''} onChange={(v) => onUpdate({ copyright: v })} />
+      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Links</Label>
+      {links.map((link, i) => (
+        <div key={i} className="grid grid-cols-2 gap-1">
+          <Input className="h-7 text-xs" placeholder="Text" value={link.text} onChange={(e) => {
+            const updated = [...links]; updated[i] = { ...link, text: e.target.value }; onUpdate({ links: updated });
+          }} />
+          <Input className="h-7 text-xs" placeholder="Href" value={link.href} onChange={(e) => {
+            const updated = [...links]; updated[i] = { ...link, href: e.target.value }; onUpdate({ links: updated });
+          }} />
+        </div>
+      ))}
+      <Button variant="outline" size="sm" className="text-xs w-full" onClick={() => onUpdate({ links: [...links, { text: 'Link', href: '#' }] })}>+ Add Link</Button>
+    </>
+  );
+}
+
+function AnnouncementBarPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: Partial<NodeProps>) => void }) {
+  return (
+    <>
+      <PropField label="Text" value={node.props.text || ''} onChange={(v) => onUpdate({ text: v })} />
+      <PropField label="Link (href)" value={node.props.href || ''} onChange={(v) => onUpdate({ href: v })} />
+    </>
+  );
+}
+
+function FeatureBarPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: Partial<NodeProps>) => void }) {
+  const items = node.props.items || [];
+  return (
+    <>
+      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Features</Label>
+      {items.map((item, i) => (
+        <div key={i} className="space-y-1 border rounded-md p-2">
+          <Input className="h-7 text-xs" placeholder="Icon (truck, shield, refresh, star)" value={item.icon || ''} onChange={(e) => {
+            const updated = [...items]; updated[i] = { ...item, icon: e.target.value }; onUpdate({ items: updated });
+          }} />
+          <Input className="h-7 text-xs" placeholder="Title" value={item.title} onChange={(e) => {
+            const updated = [...items]; updated[i] = { ...item, title: e.target.value }; onUpdate({ items: updated });
+          }} />
+          <Input className="h-7 text-xs" placeholder="Description" value={item.description} onChange={(e) => {
+            const updated = [...items]; updated[i] = { ...item, description: e.target.value }; onUpdate({ items: updated });
+          }} />
+        </div>
+      ))}
+      <Button variant="outline" size="sm" className="text-xs w-full" onClick={() => onUpdate({ items: [...items, { icon: 'star', title: 'Feature', description: 'Description' }] })}>+ Add Feature</Button>
+    </>
+  );
+}
+
+function TestimonialPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: Partial<NodeProps>) => void }) {
+  return (
+    <>
+      <PropField label="Quote" value={node.props.text || ''} onChange={(v) => onUpdate({ text: v })} />
+      <PropField label="Author" value={node.props.label || ''} onChange={(v) => onUpdate({ label: v })} />
+      <PropField label="Stars (1-5)" value={node.props.variant || '5'} onChange={(v) => onUpdate({ variant: v })} />
+    </>
+  );
+}
+
+function NewsletterPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: Partial<NodeProps>) => void }) {
+  return (
+    <>
+      <PropField label="Heading" value={node.props.text || ''} onChange={(v) => onUpdate({ text: v })} />
+      <PropField label="Subtext" value={node.props.label || ''} onChange={(v) => onUpdate({ label: v })} />
+      <PropField label="Placeholder" value={node.props.placeholder || ''} onChange={(v) => onUpdate({ placeholder: v })} />
+    </>
+  );
+}
+
+/* ── Props tab router ── */
+
 function PropsTab({ node, onUpdateProps }: { node: SchemaNode; onUpdateProps: (p: Partial<NodeProps>) => void }) {
   const p = node.props;
   return (
     <div className="space-y-3 p-3">
-      {(node.type === 'Text' || node.type === 'Button' || node.type === 'Badge') && (
-        <PropField label="Text" value={p.text || ''} onChange={(v) => onUpdateProps({ text: v })} />
-      )}
-      {node.type === 'Text' && (
-        <div className="grid gap-1">
-          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Level</Label>
-          <Select value={p.level || 'p'} onValueChange={(v) => onUpdateProps({ level: v as any })}>
-            <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'span'].map((l) => (
-                <SelectItem key={l} value={l}>{l}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
-      {node.type === 'Button' && (
-        <div className="grid gap-1">
-          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Variant</Label>
-          <Select value={p.variant || 'default'} onValueChange={(v) => onUpdateProps({ variant: v })}>
-            <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {['default', 'outline', 'secondary', 'ghost', 'link'].map((v) => (
-                <SelectItem key={v} value={v}>{v}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
-      {(node.type === 'Image' || node.type === 'ProductCard') && (
-        <>
-          <PropField label="Image URL" value={p.src || ''} onChange={(v) => onUpdateProps({ src: v })} />
-          <PropField label="Alt Text" value={p.alt || ''} onChange={(v) => onUpdateProps({ alt: v })} />
-        </>
-      )}
-      {node.type === 'ProductCard' && (
-        <>
-          <PropField label="Price" value={p.price || ''} onChange={(v) => onUpdateProps({ price: v })} />
-          <PropField label="Original Price" value={p.originalPrice || ''} onChange={(v) => onUpdateProps({ originalPrice: v })} />
-          <PropField label="Badge" value={p.badge || ''} onChange={(v) => onUpdateProps({ badge: v })} />
-        </>
-      )}
-      {node.type === 'Input' && (
-        <PropField label="Placeholder" value={p.placeholder || ''} onChange={(v) => onUpdateProps({ placeholder: v })} />
-      )}
-      {(node.type === 'Navbar' || node.type === 'Footer') && (
-        <PropField label="Logo Text" value={p.logoText || ''} onChange={(v) => onUpdateProps({ logoText: v })} />
-      )}
-      {node.type === 'Grid' && (
-        <PropField label="Columns" value={String(p.columns || 3)} onChange={(v) => onUpdateProps({ columns: parseInt(v) || 3 })} />
-      )}
+      {node.type === 'Text' && <TextPropsEditor node={node} onUpdate={onUpdateProps} />}
+      {node.type === 'Button' && <ButtonPropsEditor node={node} onUpdate={onUpdateProps} />}
+      {node.type === 'Image' && <ImagePropsEditor node={node} onUpdate={onUpdateProps} />}
+      {node.type === 'Badge' && <PropField label="Text" value={p.text || ''} onChange={(v) => onUpdateProps({ text: v })} />}
+      {node.type === 'Input' && <PropField label="Placeholder" value={p.placeholder || ''} onChange={(v) => onUpdateProps({ placeholder: v })} />}
+      {node.type === 'Grid' && <PropField label="Columns" value={String(p.columns || 3)} onChange={(v) => onUpdateProps({ columns: parseInt(v) || 3 })} />}
       {node.type === 'Stack' && (
         <div className="grid gap-1">
           <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Direction</Label>
@@ -90,12 +192,40 @@ function PropsTab({ node, onUpdateProps }: { node: SchemaNode; onUpdateProps: (p
           </Select>
         </div>
       )}
-      {node.type === 'Button' && (
-        <PropField label="Link (href)" value={p.href || ''} onChange={(v) => onUpdateProps({ href: v })} />
+      {node.type === 'ProductCard' && (
+        <>
+          <ImagePropsEditor node={node} onUpdate={onUpdateProps} />
+          <PropField label="Name" value={p.text || ''} onChange={(v) => onUpdateProps({ text: v })} />
+          <PropField label="Price" value={p.price || ''} onChange={(v) => onUpdateProps({ price: v })} />
+          <PropField label="Original Price" value={p.originalPrice || ''} onChange={(v) => onUpdateProps({ originalPrice: v })} />
+          <PropField label="Badge" value={p.badge || ''} onChange={(v) => onUpdateProps({ badge: v })} />
+        </>
       )}
+      {node.type === 'Card' && (
+        <>
+          {(p.items || []).map((item, i) => (
+            <div key={i} className="space-y-1 border rounded-md p-2">
+              <Input className="h-7 text-xs" placeholder="Title" value={item.title} onChange={(e) => {
+                const updated = [...(p.items || [])]; updated[i] = { ...item, title: e.target.value }; onUpdateProps({ items: updated });
+              }} />
+              <Input className="h-7 text-xs" placeholder="Description" value={item.description} onChange={(e) => {
+                const updated = [...(p.items || [])]; updated[i] = { ...item, description: e.target.value }; onUpdateProps({ items: updated });
+              }} />
+            </div>
+          ))}
+        </>
+      )}
+      {node.type === 'Navbar' && <NavbarPropsEditor node={node} onUpdate={onUpdateProps} />}
+      {node.type === 'Footer' && <FooterPropsEditor node={node} onUpdate={onUpdateProps} />}
+      {node.type === 'AnnouncementBar' && <AnnouncementBarPropsEditor node={node} onUpdate={onUpdateProps} />}
+      {node.type === 'FeatureBar' && <FeatureBarPropsEditor node={node} onUpdate={onUpdateProps} />}
+      {node.type === 'TestimonialCard' && <TestimonialPropsEditor node={node} onUpdate={onUpdateProps} />}
+      {node.type === 'NewsletterSection' && <NewsletterPropsEditor node={node} onUpdate={onUpdateProps} />}
     </div>
   );
 }
+
+/* ── Style tab ── */
 
 const STYLE_FIELDS: { label: string; key: keyof NodeStyle }[] = [
   { label: 'Padding', key: 'padding' },
@@ -133,6 +263,8 @@ function StyleTab({ node, onUpdateStyle }: { node: SchemaNode; onUpdateStyle: (s
     </div>
   );
 }
+
+/* ── Main Inspector ── */
 
 export function Inspector({ node, onUpdateProps, onUpdateStyle, onDelete }: InspectorProps) {
   return (
