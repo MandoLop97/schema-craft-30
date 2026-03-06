@@ -37,7 +37,10 @@ export function AnnouncementBarNode({ node }: NodeComponentProps) {
 }
 
 export function FeatureBarNode({ node }: NodeComponentProps) {
-  const items = node.props.items || [];
+  const items = (node.props.items || []).map(item => ({
+    ...item,
+    description: item.description || '',
+  }));
   return (
     <div
       style={{
@@ -53,27 +56,35 @@ export function FeatureBarNode({ node }: NodeComponentProps) {
       }}
       data-node-id={node.id}
     >
-      {items.map((item, i) => (
-        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
-          <span style={{ fontSize: '1.25rem', flexShrink: 0 }}>
-            {item.icon === 'truck' && '🚚'}
-            {item.icon === 'shield' && '🛡️'}
-            {item.icon === 'refresh' && '🔄'}
-            {item.icon === 'star' && '⭐'}
-            {!['truck', 'shield', 'refresh', 'star'].includes(item.icon || '') && '✨'}
-          </span>
-          <div style={{ minWidth: 0 }}>
-            <p style={{ fontWeight: 600, fontSize: '0.8125rem', whiteSpace: 'nowrap' }}>{item.title}</p>
-            <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.7rem', whiteSpace: 'nowrap' }}>{item.description}</p>
+      {items.map((item, i) => {
+        const iconKey = (item.icon || '').toLowerCase();
+        return (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
+            <span style={{ fontSize: '1.25rem', flexShrink: 0 }}>
+              {iconKey === 'truck' && '🚚'}
+              {iconKey === 'shield' && '🛡️'}
+              {iconKey === 'refresh' && '🔄'}
+              {iconKey === 'rotateccw' && '🔄'}
+              {iconKey === 'star' && '⭐'}
+              {!['truck', 'shield', 'refresh', 'rotateccw', 'star'].includes(iconKey) && '✨'}
+            </span>
+            <div style={{ minWidth: 0 }}>
+              <p style={{ fontWeight: 600, fontSize: '0.8125rem', whiteSpace: 'nowrap' }}>{item.title}</p>
+              {item.description && (
+                <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.7rem', whiteSpace: 'nowrap' }}>{item.description}</p>
+              )}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
 
 export function TestimonialCardNode({ node }: NodeComponentProps) {
-  const stars = parseInt(node.props.variant || '5', 10);
+  const stars = node.props.stars ?? parseInt(node.props.variant || '5', 10);
+  const quote = node.props.quote || node.props.text || '"Great product!"';
+  const author = node.props.author || node.props.label || 'Customer';
   return (
     <div
       style={{
@@ -92,14 +103,14 @@ export function TestimonialCardNode({ node }: NodeComponentProps) {
         {'★'.repeat(Math.min(stars, 5))}{'☆'.repeat(Math.max(0, 5 - stars))}
       </div>
       <p style={{ fontSize: '0.95rem', lineHeight: '1.6', fontStyle: 'italic', marginBottom: '1rem', color: 'hsl(var(--foreground))' }}>
-        {node.props.text || '"Great product!"'}
+        {quote}
       </p>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
         <div style={{ width: '2rem', height: '2rem', borderRadius: '50%', backgroundColor: 'hsl(var(--muted))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 600, color: 'hsl(var(--muted-foreground))' }}>
-          {(node.props.label || 'C')[0].toUpperCase()}
+          {author[0].toUpperCase()}
         </div>
         <p style={{ fontWeight: 600, fontSize: '0.875rem' }}>
-          {node.props.label || 'Customer'}
+          {author}
         </p>
       </div>
     </div>
@@ -107,6 +118,8 @@ export function TestimonialCardNode({ node }: NodeComponentProps) {
 }
 
 export function NewsletterSectionNode({ node }: NodeComponentProps) {
+  const heading = node.props.heading || node.props.text || 'Subscribe';
+  const subtitle = node.props.subtitle || node.props.label || 'Get updates delivered to your inbox.';
   return (
     <div
       style={{
@@ -121,10 +134,10 @@ export function NewsletterSectionNode({ node }: NodeComponentProps) {
       data-node-id={node.id}
     >
       <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>
-        {node.props.text || 'Subscribe'}
+        {heading}
       </h3>
       <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.9rem', marginBottom: '1.5rem', maxWidth: '28rem', marginLeft: 'auto', marginRight: 'auto', lineHeight: '1.6' }}>
-        {node.props.label || 'Get updates delivered to your inbox.'}
+        {subtitle}
       </p>
       <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', maxWidth: '24rem', margin: '0 auto' }}>
         <input
@@ -164,6 +177,9 @@ export function NewsletterSectionNode({ node }: NodeComponentProps) {
 
 export function HeroSectionNode({ node }: NodeComponentProps) {
   const opacity = parseFloat(node.props.overlayOpacity || '0.55');
+  const heading = node.props.heading || node.props.text || 'Hero Title';
+  const bgSrc = node.props.src || node.props.image;
+  const ctaLink = node.props.ctaLink || node.props.ctaHref || '#';
   return (
     <div
       style={{
@@ -182,9 +198,9 @@ export function HeroSectionNode({ node }: NodeComponentProps) {
       }}
       data-node-id={node.id}
     >
-      {node.props.src && (
+      {bgSrc && (
         <img
-          src={node.props.src}
+          src={bgSrc}
           alt=""
           style={{
             position: 'absolute',
@@ -205,6 +221,22 @@ export function HeroSectionNode({ node }: NodeComponentProps) {
         }}
       />
       <div style={{ position: 'relative', zIndex: 2, maxWidth: '48rem', width: '100%' }}>
+        {node.props.overlayText && (
+          <span style={{
+            display: 'inline-block',
+            padding: '0.375rem 1rem',
+            borderRadius: '9999px',
+            fontSize: '0.75rem',
+            fontWeight: 600,
+            backgroundColor: 'rgba(255,255,255,0.15)',
+            color: '#fff',
+            marginBottom: '1.25rem',
+            backdropFilter: 'blur(4px)',
+            border: '1px solid rgba(255,255,255,0.2)',
+          }}>
+            {node.props.overlayText}
+          </span>
+        )}
         <h1
           style={{
             fontSize: 'clamp(2rem, 5vw, 3.5rem)',
@@ -215,7 +247,7 @@ export function HeroSectionNode({ node }: NodeComponentProps) {
             letterSpacing: '-0.025em',
           }}
         >
-          {node.props.text || 'Hero Title'}
+          {heading}
         </h1>
         <p
           style={{
@@ -230,25 +262,46 @@ export function HeroSectionNode({ node }: NodeComponentProps) {
         >
           {node.props.subtitle || 'Subtitle goes here'}
         </p>
-        {node.props.ctaText && (
-          <a
-            href={node.props.ctaHref || '#'}
-            style={{
-              display: 'inline-block',
-              padding: '0.875rem 2.5rem',
-              backgroundColor: 'hsl(var(--primary))',
-              color: 'hsl(var(--primary-foreground))',
-              borderRadius: '0.5rem',
-              fontWeight: 600,
-              fontSize: '1rem',
-              textDecoration: 'none',
-              transition: 'transform 150ms ease, box-shadow 150ms ease',
-              boxShadow: '0 4px 14px rgba(0,0,0,0.25)',
-            }}
-          >
-            {node.props.ctaText}
-          </a>
-        )}
+        <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+          {node.props.ctaText && (
+            <a
+              href={ctaLink}
+              style={{
+                display: 'inline-block',
+                padding: '0.875rem 2.5rem',
+                backgroundColor: 'hsl(var(--primary))',
+                color: 'hsl(var(--primary-foreground))',
+                borderRadius: '0.5rem',
+                fontWeight: 600,
+                fontSize: '1rem',
+                textDecoration: 'none',
+                transition: 'transform 150ms ease, box-shadow 150ms ease',
+                boxShadow: '0 4px 14px rgba(0,0,0,0.25)',
+              }}
+            >
+              {node.props.ctaText}
+            </a>
+          )}
+          {node.props.secondaryCtaText && (
+            <a
+              href={node.props.secondaryCtaLink || '#'}
+              style={{
+                display: 'inline-block',
+                padding: '0.875rem 2.5rem',
+                backgroundColor: 'transparent',
+                color: '#fff',
+                borderRadius: '0.5rem',
+                fontWeight: 600,
+                fontSize: '1rem',
+                textDecoration: 'none',
+                border: '1px solid rgba(255,255,255,0.4)',
+                transition: 'background-color 150ms ease',
+              }}
+            >
+              {node.props.secondaryCtaText}
+            </a>
+          )}
+        </div>
       </div>
     </div>
   );

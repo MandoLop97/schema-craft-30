@@ -68,6 +68,29 @@ export interface NodeProps {
   ctaText?: string;
   ctaHref?: string;
   overlayOpacity?: string;
+  // ── Aliases for template compatibility ──
+  /** Alias for `text` in HeroSection/Newsletter */
+  heading?: string;
+  /** Alias for `ctaHref` in HeroSection */
+  ctaLink?: string;
+  /** Secondary CTA button text */
+  secondaryCtaText?: string;
+  /** Secondary CTA button link */
+  secondaryCtaLink?: string;
+  /** Overlay label text in HeroSection */
+  overlayText?: string;
+  /** Alias for `text` in ProductCard */
+  name?: string;
+  /** Alias for `src` in ProductCard */
+  image?: string;
+  /** Alias for `text` in TestimonialCard */
+  quote?: string;
+  /** Alias for `label` in TestimonialCard */
+  author?: string;
+  /** Alias for `variant` (stars) in TestimonialCard */
+  stars?: number;
+  /** Alias for `href` in Button */
+  link?: string;
 }
 
 export interface SchemaNode {

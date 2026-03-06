@@ -10,6 +10,8 @@ interface NodeComponentProps {
 const s = (style: NodeStyle): React.CSSProperties => style as unknown as React.CSSProperties;
 
 export function ProductCardNode({ node }: NodeComponentProps) {
+  const productName = node.props.name || node.props.text || 'Product Name';
+  const productImage = node.props.image || node.props.src || '/placeholder.svg';
   return (
     <div
       style={{
@@ -25,8 +27,8 @@ export function ProductCardNode({ node }: NodeComponentProps) {
     >
       <div style={{ position: 'relative', overflow: 'hidden', aspectRatio: '1/1' }}>
         <img
-          src={node.props.src || '/placeholder.svg'}
-          alt={node.props.text || 'Product'}
+          src={productImage}
+          alt={productName}
           style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s' }}
           className="group-hover:scale-105"
         />
@@ -50,7 +52,7 @@ export function ProductCardNode({ node }: NodeComponentProps) {
       </div>
       <div style={{ padding: '1rem' }}>
         <h3 style={{ fontWeight: '500', fontSize: '0.95rem', marginBottom: '0.5rem' }}>
-          {node.props.text || 'Product Name'}
+          {productName}
         </h3>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <span style={{ fontWeight: '600', fontSize: '1rem' }}>{node.props.price || '$0'}</span>
