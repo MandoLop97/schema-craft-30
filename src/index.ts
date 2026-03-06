@@ -3,6 +3,10 @@ import './index.css';
 // Runtime version
 export { EDITOR_VERSION } from './lib/version';
 
+// i18n — locale system
+export { setLocale, setLocaleByCode, t, es, en, translateCategory } from './lib/i18n';
+export type { BuilderLocale } from './lib/i18n';
+
 // Main editor component
 export { NexoraBuilderApp } from './NexoraBuilderApp';
 export type { NexoraBuilderAppProps } from './NexoraBuilderApp';

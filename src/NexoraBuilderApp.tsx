@@ -106,7 +106,17 @@ export function NexoraBuilderApp({
   onPageChange,
   onSaveWithSlug,
   onPublishSubmit,
+  locale: localeProp,
 }: NexoraBuilderAppProps) {
+  // Apply locale
+  useEffect(() => {
+    if (!localeProp) return;
+    if (typeof localeProp === 'string') {
+      setLocaleByCode(localeProp);
+    } else {
+      setLocale(localeProp);
+    }
+  }, [localeProp]);
   // When pages are provided but no activePage, auto-select the first page
   useEffect(() => {
     if (pages && pages.length > 0 && !activePage && onPageChange) {
