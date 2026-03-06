@@ -6,6 +6,7 @@ export { EDITOR_VERSION } from './lib/version';
 // Main editor component
 export { NexoraBuilderApp } from './NexoraBuilderApp';
 export type { NexoraBuilderAppProps } from './NexoraBuilderApp';
+export type { PublishPayload } from './components/builder/PublishDialog';
 
 // Schema types
 export type { Schema, SchemaNode, NodeType, NodeProps, NodeStyle, ThemeTokens, Page, PageDefinition, RenderMode } from './types/schema';

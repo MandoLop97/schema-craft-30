@@ -30,6 +30,20 @@ export default function Builder() {
     );
   }
 
+  const handlePublishSubmit = async (payload: PublishPayload) => {
+    const { error } = await supabase
+      .from('published_pages')
+      .upsert(
+        {
+          domain: payload.domain,
+          content_json: payload.schema as any,
+          status: payload.mode,
+        },
+        { onConflict: 'domain' }
+      );
+    if (error) throw error;
+  };
+
   return (
     <NexoraBuilderApp
       key={initialSchema.id}
@@ -38,6 +52,7 @@ export default function Builder() {
       onSave={(schema) => SchemaStore.saveSchema(schema)}
       onPreview={() => navigate(`/preview?page=${pageSlug}`)}
       onExport={() => navigate(`/admin/export?page=${pageSlug}`)}
+      onPublishSubmit={handlePublishSubmit}
     />
   );
 }
