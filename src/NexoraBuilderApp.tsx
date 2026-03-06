@@ -3,6 +3,7 @@ import { Schema, PageDefinition } from '@/types/schema';
 import { createDefaultHomeSchema } from '@/lib/default-schema';
 import { validateSchema } from '@/lib/schema-validator';
 import { BuilderEditorShell } from '@/components/builder/BuilderEditorShell';
+import { PublishPayload } from '@/components/builder/PublishDialog';
 import { PageManager } from '@/components/builder/PageManager';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from '@/components/ui/sonner';
