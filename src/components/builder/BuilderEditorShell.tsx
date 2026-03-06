@@ -4,6 +4,7 @@ import { arrayMove } from '@dnd-kit/sortable';
 import { useSchemaHistory } from '@/hooks/use-schema-history';
 import { Schema, NodeType, SchemaNode, PageDefinition } from '@/types/schema';
 import { createNode, isContainerType } from '@/lib/node-factory';
+import { canDropInto } from '@/lib/block-registry';
 import { TopBar } from '@/components/builder/TopBar';
 import { BlocksPalette } from '@/components/builder/BlocksPalette';
 import { LayersPanel } from '@/components/builder/LayersPanel';
