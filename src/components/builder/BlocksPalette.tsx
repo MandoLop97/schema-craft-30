@@ -16,9 +16,13 @@ function DraggableBlock({ block }: { block: BlockDefinition }) {
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      className={`flex items-center gap-2 rounded-md border bg-background px-3 py-2 text-xs cursor-grab hover:bg-muted transition-colors ${isDragging ? 'opacity-50' : ''}`}
+      className={`group flex items-center gap-2 rounded-md border bg-background px-3 py-2 text-xs cursor-grab transition-all duration-200 ${
+        isDragging
+          ? 'opacity-40 scale-95'
+          : 'hover:shadow-sm hover:border-primary/20 hover:scale-[1.02] active:scale-95'
+      }`}
     >
-      <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+      <Icon className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors duration-200" />
       <span>{block.label}</span>
     </div>
   );

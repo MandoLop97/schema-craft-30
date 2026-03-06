@@ -1,4 +1,4 @@
-import { ChevronRight, ChevronDown, Eye, EyeOff, Lock } from 'lucide-react';
+import { ChevronRight, ChevronDown, EyeOff, Lock } from 'lucide-react';
 import { useState } from 'react';
 import { Schema, SchemaNode } from '@/types/schema';
 
@@ -20,26 +20,60 @@ function LayerItem({ node, schema, depth, selectedNodeId, onSelectNode }: {
   const isSelected = selectedNodeId === node.id;
 
   return (
-    <div>
+    <div className="relative">
+      {/* Vertical indent line */}
+      {depth > 0 && (
+        <div
+          style={{
+            position: 'absolute',
+            left: `${depth * 12 + 2}px`,
+            top: 0,
+            bottom: 0,
+            width: '1px',
+            backgroundColor: 'hsl(var(--border))',
+            opacity: 0.5,
+          }}
+        />
+      )}
       <div
-        className={`flex items-center gap-1 py-1 px-2 text-xs cursor-pointer hover:bg-muted/50 transition-colors rounded-sm ${isSelected ? 'bg-primary/10 text-primary font-medium' : ''}`}
+        className={`group flex items-center gap-1 py-1.5 px-2 text-xs cursor-pointer rounded-sm transition-all duration-150 relative ${
+          isSelected
+            ? 'bg-primary/10 text-primary font-medium'
+            : 'hover:bg-muted/60'
+        }`}
         style={{ paddingLeft: `${depth * 12 + 8}px` }}
         onClick={() => onSelectNode(node.id)}
       >
+        {/* Active indicator bar */}
+        {isSelected && (
+          <div
+            style={{
+              position: 'absolute',
+              left: 0,
+              top: '4px',
+              bottom: '4px',
+              width: '2px',
+              backgroundColor: 'hsl(var(--primary))',
+              borderRadius: '2px',
+            }}
+          />
+        )}
         {hasChildren ? (
           <button
-            className="p-0.5 hover:bg-muted rounded"
+            className="p-0.5 hover:bg-muted rounded transition-colors"
             onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
           >
-            {expanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+            <div style={{ transition: 'transform 150ms ease', transform: expanded ? 'rotate(0deg)' : 'rotate(-90deg)' }}>
+              <ChevronDown className="h-3 w-3" />
+            </div>
           </button>
         ) : (
           <span className="w-4" />
         )}
         <span className="truncate flex-1">{node.type}</span>
-        {node.props.text && <span className="text-muted-foreground truncate max-w-[80px]">"{node.props.text}"</span>}
-        {node.hidden && <EyeOff className="h-3 w-3 text-muted-foreground" />}
-        {node.locked && <Lock className="h-3 w-3 text-muted-foreground" />}
+        {node.props.text && <span className="text-muted-foreground truncate max-w-[80px] text-[10px]">"{node.props.text}"</span>}
+        {node.hidden && <EyeOff className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />}
+        {node.locked && <Lock className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />}
       </div>
       {expanded && hasChildren && node.children.map((childId) => {
         const child = schema.nodes[childId];
