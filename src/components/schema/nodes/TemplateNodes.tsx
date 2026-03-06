@@ -82,7 +82,9 @@ export function FeatureBarNode({ node }: NodeComponentProps) {
 }
 
 export function TestimonialCardNode({ node }: NodeComponentProps) {
-  const stars = parseInt(node.props.variant || '5', 10);
+  const stars = node.props.stars ?? parseInt(node.props.variant || '5', 10);
+  const quote = node.props.quote || node.props.text || '"Great product!"';
+  const author = node.props.author || node.props.label || 'Customer';
   return (
     <div
       style={{
@@ -101,14 +103,14 @@ export function TestimonialCardNode({ node }: NodeComponentProps) {
         {'★'.repeat(Math.min(stars, 5))}{'☆'.repeat(Math.max(0, 5 - stars))}
       </div>
       <p style={{ fontSize: '0.95rem', lineHeight: '1.6', fontStyle: 'italic', marginBottom: '1rem', color: 'hsl(var(--foreground))' }}>
-        {node.props.text || '"Great product!"'}
+        {quote}
       </p>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
         <div style={{ width: '2rem', height: '2rem', borderRadius: '50%', backgroundColor: 'hsl(var(--muted))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 600, color: 'hsl(var(--muted-foreground))' }}>
-          {(node.props.label || 'C')[0].toUpperCase()}
+          {author[0].toUpperCase()}
         </div>
         <p style={{ fontWeight: 600, fontSize: '0.875rem' }}>
-          {node.props.label || 'Customer'}
+          {author}
         </p>
       </div>
     </div>
