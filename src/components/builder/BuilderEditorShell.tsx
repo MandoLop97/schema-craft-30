@@ -18,6 +18,8 @@ export interface BuilderEditorShellProps {
   initialSchema: Schema;
   /** Called when the user clicks Save. Receives the current schema. */
   onSave: (schema: Schema) => void;
+  /** Called when the user clicks Publish. If provided, bypasses the internal PublishDialog. */
+  onPublish?: (schema: Schema) => void;
   /** Called when the user clicks Preview. */
   onPreview?: (schema: Schema) => void;
   /** Called when the user clicks Export. */
@@ -29,6 +31,7 @@ export interface BuilderEditorShellProps {
 export function BuilderEditorShell({
   initialSchema,
   onSave: onSaveExternal,
+  onPublish,
   onPreview,
   onExport,
   className,
@@ -175,7 +178,7 @@ export function BuilderEditorShell({
           device={device}
           onDeviceChange={setDevice}
           dirty={dirty}
-          onPublish={() => { setPublishMode('published'); setPublishOpen(true); }}
+          onPublish={() => { onPublish ? onPublish(schema) : (setPublishMode('published'), setPublishOpen(true)); }}
           onSaveDraft={() => { setPublishMode('draft'); setPublishOpen(true); }}
         />
 

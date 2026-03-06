@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo } from 'react';
 import { Schema } from '@/types/schema';
 import { createDefaultHomeSchema } from '@/lib/default-schema';
 import { BuilderEditorShell } from '@/components/builder/BuilderEditorShell';
@@ -8,8 +8,14 @@ import { Toaster } from '@/components/ui/sonner';
 export interface NexoraBuilderAppProps {
   /** Initial schema to edit. If omitted, a default home page schema is created. */
   initialSchema?: Schema;
+  /** Domain context passed from the template. */
+  domain?: string;
+  /** Page slug context passed from the template. */
+  pageSlug?: string;
   /** Called when the user clicks Save. Receives the current schema. */
   onSave?: (schema: Schema) => void;
+  /** Called when the user clicks Publish. Receives the current schema. */
+  onPublish?: (schema: Schema) => void;
   /** Called when the user clicks Preview. */
   onPreview?: (schema: Schema) => void;
   /** Called when the user clicks Export. */
@@ -19,24 +25,30 @@ export interface NexoraBuilderAppProps {
 }
 
 export function NexoraBuilderApp({
-  initialSchema: externalSchema,
+  initialSchema,
+  domain,
+  pageSlug,
   onSave,
+  onPublish,
   onPreview,
   onExport,
   className,
 }: NexoraBuilderAppProps) {
-  const [schema0] = useState<Schema>(() => {
-    if (externalSchema) return externalSchema;
+  // Use external schema if provided; only fall back to default when none given.
+  // Re-derive when the external reference changes (key forces remount).
+  const resolvedSchema = useMemo<Schema>(() => {
+    if (initialSchema) return initialSchema;
     return createDefaultHomeSchema().schema;
-  });
+  }, [initialSchema]);
 
   return (
     <TooltipProvider>
       <Toaster />
       <BuilderEditorShell
-        key={schema0.id}
-        initialSchema={schema0}
+        key={resolvedSchema.id}
+        initialSchema={resolvedSchema}
         onSave={onSave || (() => {})}
+        onPublish={onPublish}
         onPreview={onPreview}
         onExport={onExport}
         className={className}
