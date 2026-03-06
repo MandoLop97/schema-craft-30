@@ -75,16 +75,15 @@ export function BuilderEditorShell({
       const newNode = createNode(nodeType);
 
       updateSchema((s) => {
-        let parentId = selectedNodeId || s.rootNodeId;
+        // Use the droppable id (container node id) as the parent
+        let parentId = String(over.id);
         const parentNode = s.nodes[parentId];
 
-        if (parentNode && !isContainerType(parentNode.type)) {
+        // If the drop target isn't a valid container, walk up to find one
+        if (!parentNode || !isContainerType(parentNode.type)) {
+          // Try to find the parent of this node
           const actualParent = Object.values(s.nodes).find((n) => n.children.includes(parentId));
-          if (actualParent) {
-            parentId = actualParent.id;
-          } else {
-            parentId = s.rootNodeId;
-          }
+          parentId = actualParent ? actualParent.id : s.rootNodeId;
         }
 
         s.nodes[newNode.id] = newNode;

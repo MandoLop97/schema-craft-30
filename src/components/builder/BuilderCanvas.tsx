@@ -16,7 +16,8 @@ const DEVICE_WIDTHS = {
 };
 
 export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode }: BuilderCanvasProps) {
-  const { setNodeRef, isOver } = useDroppable({ id: 'canvas-drop' });
+  // Fallback droppable for the root — only catches drops that miss a container
+  const { setNodeRef, isOver } = useDroppable({ id: schema.rootNodeId });
 
   return (
     <div className="flex-1 bg-muted/30 overflow-auto flex justify-center p-6" onClick={() => onSelectNode('')}>
