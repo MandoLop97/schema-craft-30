@@ -181,6 +181,7 @@ export const en: BuilderLocale = {
   categoryCommerce: 'Commerce',
   categorySite: 'Site',
   categoryTemplate: 'Template',
+  categoryInteractive: 'Interactive',
 
   spacing: 'Spacing',
   size: 'Size',
