@@ -31,6 +31,7 @@ export interface BuilderEditorShellProps {
 export function BuilderEditorShell({
   initialSchema,
   onSave: onSaveExternal,
+  onPublish,
   onPreview,
   onExport,
   className,
