@@ -1,6 +1,7 @@
 import { useDraggable } from '@dnd-kit/core';
 import { NodeType } from '@/types/schema';
 import { blockRegistry, getCategories, getBlocksByCategory, BlockDefinition } from '@/lib/block-registry';
+import { EDITOR_VERSION } from '@/lib/version';
 
 function DraggableBlock({ block }: { block: BlockDefinition }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
