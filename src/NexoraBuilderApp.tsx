@@ -3,6 +3,7 @@ import { Schema, PageDefinition } from '@/types/schema';
 import { createDefaultHomeSchema } from '@/lib/default-schema';
 import { validateSchema } from '@/lib/schema-validator';
 import { BuilderEditorShell } from '@/components/builder/BuilderEditorShell';
+import { PublishPayload } from '@/components/builder/PublishDialog';
 import { PageManager } from '@/components/builder/PageManager';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from '@/components/ui/sonner';
@@ -76,6 +77,12 @@ export interface NexoraBuilderAppProps {
    * Called on save alongside `onSave`, providing the active page slug for routing-aware persistence.
    */
   onSaveWithSlug?: (slug: string, schema: Schema) => void;
+
+  /**
+   * Handler for the built-in publish dialog. Receives domain, schema and mode.
+   * Required if `onPublish` is not provided and the internal dialog is used.
+   */
+  onPublishSubmit?: (payload: PublishPayload) => Promise<void>;
 }
 
 export function NexoraBuilderApp({
@@ -91,6 +98,7 @@ export function NexoraBuilderApp({
   activePage,
   onPageChange,
   onSaveWithSlug,
+  onPublishSubmit,
 }: NexoraBuilderAppProps) {
   // When pages are provided but no activePage, auto-select the first page
   useEffect(() => {
@@ -187,6 +195,7 @@ export function NexoraBuilderApp({
         activePage={activePage}
         onPageChange={onPageChange}
         pageTitle={activePageTitle}
+        onPublishSubmit={onPublishSubmit}
       />
     </TooltipProvider>
   );

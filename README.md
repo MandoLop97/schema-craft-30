@@ -77,7 +77,8 @@ function BuilderPage() {
 | `onPageChange` | `(slug: string) => void` | Callback al cambiar de página. |
 | `onSave` | `(schema: Schema) => void` | Callback al guardar. |
 | `onSaveWithSlug` | `(slug: string, schema: Schema) => void` | Callback al guardar con el slug de la página activa. |
-| `onPublish` | `(schema: Schema) => void` | Callback al publicar. Si se omite, se muestra un diálogo interno. |
+| `onPublish` | `(schema: Schema) => void` | Callback al publicar. Si se omite, se muestra un diálogo interno que requiere `onPublishSubmit`. |
+| `onPublishSubmit` | `(payload: PublishPayload) => Promise<void>` | Handler para el diálogo interno de publicación. Recibe `{ domain, schema, mode }`. |
 | `onPreview` | `(schema: Schema) => void` | Callback al previsualizar. |
 | `onExport` | `(schema: Schema) => void` | Callback al exportar. |
 | `domain` | `string` | Contexto de dominio para multi-tenant. |

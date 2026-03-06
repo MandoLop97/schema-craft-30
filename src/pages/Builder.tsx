@@ -3,6 +3,8 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { SchemaStore } from '@/lib/schema-store';
 import { Schema } from '@/types/schema';
 import { NexoraBuilderApp } from '@/NexoraBuilderApp';
+import { supabase } from '@/integrations/supabase/client';
+import { PublishPayload } from '@/components/builder/PublishDialog';
 
 export default function Builder() {
   const [searchParams] = useSearchParams();
@@ -28,6 +30,20 @@ export default function Builder() {
     );
   }
 
+  const handlePublishSubmit = async (payload: PublishPayload) => {
+    const { error } = await supabase
+      .from('published_pages')
+      .upsert(
+        {
+          domain: payload.domain,
+          content_json: payload.schema as any,
+          status: payload.mode,
+        },
+        { onConflict: 'domain' }
+      );
+    if (error) throw error;
+  };
+
   return (
     <NexoraBuilderApp
       key={initialSchema.id}
@@ -36,6 +52,7 @@ export default function Builder() {
       onSave={(schema) => SchemaStore.saveSchema(schema)}
       onPreview={() => navigate(`/preview?page=${pageSlug}`)}
       onExport={() => navigate(`/admin/export?page=${pageSlug}`)}
+      onPublishSubmit={handlePublishSubmit}
     />
   );
 }

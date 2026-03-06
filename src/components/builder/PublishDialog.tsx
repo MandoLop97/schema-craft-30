@@ -3,19 +3,26 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { supabase } from '@/integrations/supabase/client';
 import { Schema } from '@/types/schema';
 import { toast } from 'sonner';
 import { Globe, Loader2 } from 'lucide-react';
+
+export interface PublishPayload {
+  domain: string;
+  schema: Schema;
+  mode: 'draft' | 'published';
+}
 
 interface PublishDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   schema: Schema;
   mode: 'draft' | 'published';
+  /** Host-provided publish handler. If omitted, the dialog only shows a warning. */
+  onPublishSubmit?: (payload: PublishPayload) => Promise<void>;
 }
 
-export function PublishDialog({ open, onOpenChange, schema, mode }: PublishDialogProps) {
+export function PublishDialog({ open, onOpenChange, schema, mode, onPublishSubmit }: PublishDialogProps) {
   const [domain, setDomain] = useState('');
   const [publishing, setPublishing] = useState(false);
 
@@ -26,21 +33,14 @@ export function PublishDialog({ open, onOpenChange, schema, mode }: PublishDialo
       return;
     }
 
+    if (!onPublishSubmit) {
+      toast.error('No se configuró un handler de publicación. Usa la prop onPublish o onPublishSubmit.');
+      return;
+    }
+
     setPublishing(true);
     try {
-      const { error } = await supabase
-        .from('published_pages')
-        .upsert(
-          {
-            domain: trimmed,
-            content_json: schema as any,
-            status: mode,
-          },
-          { onConflict: 'domain' }
-        );
-
-      if (error) throw error;
-
+      await onPublishSubmit({ domain: trimmed, schema, mode });
       toast.success(mode === 'published' ? `Página publicada para ${trimmed}` : `Borrador guardado para ${trimmed}`);
       onOpenChange(false);
     } catch (err: any) {
@@ -75,7 +75,7 @@ export function PublishDialog({ open, onOpenChange, schema, mode }: PublishDialo
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-          <Button onClick={handlePublish} disabled={publishing}>
+          <Button onClick={handlePublish} disabled={publishing || !onPublishSubmit}>
             {publishing && <Loader2 className="h-4 w-4 animate-spin" />}
             {mode === 'published' ? 'Publicar' : 'Guardar borrador'}
           </Button>

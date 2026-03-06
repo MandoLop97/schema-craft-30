@@ -8,7 +8,7 @@ import { TopBar } from '@/components/builder/TopBar';
 import { BlocksPalette } from '@/components/builder/BlocksPalette';
 import { LayersPanel } from '@/components/builder/LayersPanel';
 import { Inspector } from '@/components/builder/Inspector';
-import { PublishDialog } from '@/components/builder/PublishDialog';
+import { PublishDialog, PublishPayload } from '@/components/builder/PublishDialog';
 import { BuilderCanvas } from '@/components/builder/BuilderCanvas';
 import { PageManager } from '@/components/builder/PageManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -22,6 +22,8 @@ export interface BuilderEditorShellProps {
   onPreview?: (schema: Schema) => void;
   onExport?: (schema: Schema) => void;
   className?: string;
+  /** Host-provided handler for the built-in publish dialog */
+  onPublishSubmit?: (payload: PublishPayload) => Promise<void>;
   // Multi-page
   pages?: PageDefinition[];
   activePage?: string;
@@ -36,6 +38,7 @@ export function BuilderEditorShell({
   onPreview,
   onExport,
   className,
+  onPublishSubmit,
   pages,
   activePage,
   onPageChange,
@@ -264,7 +267,7 @@ export function BuilderEditorShell({
         )}
       </DragOverlay>
 
-      <PublishDialog open={publishOpen} onOpenChange={setPublishOpen} schema={schema} mode={publishMode} />
+      <PublishDialog open={publishOpen} onOpenChange={setPublishOpen} schema={schema} mode={publishMode} onPublishSubmit={onPublishSubmit} />
     </DndContext>
   );
 }
