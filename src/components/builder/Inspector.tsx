@@ -1,8 +1,10 @@
+import { useState, useRef, useEffect } from 'react';
 import { SchemaNode, NodeProps, NodeStyle } from '@/types/schema';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -21,6 +23,81 @@ function PropField({ label, value, onChange }: { label: string; value: string; o
     <div className="grid gap-1">
       <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</Label>
       <Input className="h-8 text-xs transition-shadow duration-200 focus:ring-2 focus:ring-primary/20" value={value} onChange={(e) => onChange(e.target.value)} />
+    </div>
+  );
+}
+
+const PRESET_COLORS = [
+  '#000000', '#ffffff', '#ef4444', '#f97316', '#eab308', '#22c55e',
+  '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899', '#6b7280', '#1e293b',
+  '#fef2f2', '#fefce8', '#f0fdf4', '#eff6ff', '#faf5ff', '#fdf2f8',
+];
+
+function ColorField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  const [localValue, setLocalValue] = useState(value);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { setLocalValue(value); }, [value]);
+
+  const handleCommit = (v: string) => {
+    setLocalValue(v);
+    onChange(v);
+  };
+
+  // Resolve display color — handle hsl(var(...)) gracefully
+  const displayColor = localValue && !localValue.includes('var(') ? localValue : '#ffffff';
+
+  return (
+    <div className="grid gap-1">
+      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</Label>
+      <div className="flex gap-1.5 items-center">
+        <Popover>
+          <PopoverTrigger asChild>
+            <button
+              className="h-8 w-8 rounded-md border border-border shrink-0 cursor-pointer transition-shadow hover:ring-2 hover:ring-primary/20"
+              style={{ backgroundColor: displayColor }}
+              title="Pick color"
+            />
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-3" side="left" align="start">
+            <div className="space-y-3">
+              {/* Native color picker */}
+              <div className="flex items-center gap-2">
+                <input
+                  ref={inputRef}
+                  type="color"
+                  value={displayColor}
+                  onChange={(e) => handleCommit(e.target.value)}
+                  className="h-8 w-8 rounded cursor-pointer border-0 p-0 bg-transparent"
+                />
+                <span className="text-xs text-muted-foreground">Custom</span>
+              </div>
+              {/* Preset swatches */}
+              <div className="grid grid-cols-6 gap-1.5">
+                {PRESET_COLORS.map((c) => (
+                  <button
+                    key={c}
+                    className={`h-6 w-6 rounded-md border cursor-pointer transition-all hover:scale-110 ${
+                      localValue === c ? 'ring-2 ring-primary ring-offset-1' : 'border-border'
+                    }`}
+                    style={{ backgroundColor: c }}
+                    onClick={() => handleCommit(c)}
+                    title={c}
+                  />
+                ))}
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
+        <Input
+          className="h-8 text-xs flex-1 font-mono transition-shadow duration-200 focus:ring-2 focus:ring-primary/20"
+          value={localValue}
+          onChange={(e) => setLocalValue(e.target.value)}
+          onBlur={() => onChange(localValue)}
+          onKeyDown={(e) => { if (e.key === 'Enter') onChange(localValue); }}
+          placeholder="#hex, rgb(), hsl()"
+        />
+      </div>
     </div>
   );
 }
@@ -277,6 +354,8 @@ function PropsTab({ node, onUpdateProps }: { node: SchemaNode; onUpdateProps: (p
 
 /* ── Style tab ── */
 
+const COLOR_KEYS: (keyof NodeStyle)[] = ['color', 'backgroundColor', 'borderColor'];
+
 function StyleTab({ node, onUpdateStyle }: { node: SchemaNode; onUpdateStyle: (s: Partial<NodeStyle>) => void }) {
   const locale = t();
 
@@ -329,14 +408,23 @@ function StyleTab({ node, onUpdateStyle }: { node: SchemaNode; onUpdateStyle: (s
           {gi > 0 && <Separator className="my-3" />}
           <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">{group.title}</p>
           <div className="space-y-2">
-            {group.fields.map((f) => (
-              <PropField
-                key={f.key}
-                label={f.label}
-                value={(node.style as any)[f.key] || ''}
-                onChange={(v) => onUpdateStyle({ [f.key]: v || undefined })}
-              />
-            ))}
+            {group.fields.map((f) =>
+              COLOR_KEYS.includes(f.key) ? (
+                <ColorField
+                  key={f.key}
+                  label={f.label}
+                  value={(node.style as any)[f.key] || ''}
+                  onChange={(v) => onUpdateStyle({ [f.key]: v || undefined })}
+                />
+              ) : (
+                <PropField
+                  key={f.key}
+                  label={f.label}
+                  value={(node.style as any)[f.key] || ''}
+                  onChange={(v) => onUpdateStyle({ [f.key]: v || undefined })}
+                />
+              )
+            )}
           </div>
         </div>
       ))}
