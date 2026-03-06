@@ -28,7 +28,8 @@ export function TopBar({ onSave, onUndo, onRedo, canUndo, canRedo, onPreview, on
           <ArrowLeft className="h-4 w-4" />
         </Button>
       )}
-      <span className="text-sm font-bold tracking-tight mr-1 text-foreground">NEXORA</span>
+      <span className="text-sm font-bold tracking-tight mr-0.5 text-foreground">NEXORA</span>
+      <span className="text-[9px] font-mono text-muted-foreground/60 bg-muted/60 px-1.5 py-0.5 rounded mr-1">v{EDITOR_VERSION}</span>
       {pageTitle && (
         <>
           <span className="text-muted-foreground/50 text-sm mx-0.5">/</span>
