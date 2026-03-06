@@ -87,6 +87,7 @@ export function BuilderEditorShell({
       const nodeType = activeData.nodeType as NodeType;
       const newNode = createNode(nodeType);
 
+      let dropped = false;
       updateSchema((s) => {
         let parentId = String(over.id);
         const parentNode = s.nodes[parentId];
@@ -96,12 +97,24 @@ export function BuilderEditorShell({
           parentId = actualParent ? actualParent.id : s.rootNodeId;
         }
 
+        const isRoot = parentId === s.rootNodeId;
+        const parentType = s.nodes[parentId].type;
+
+        if (!canDropInto(nodeType, parentType, isRoot)) {
+          return s; // hierarchy violation — don't insert
+        }
+
         s.nodes[newNode.id] = newNode;
         s.nodes[parentId].children.push(newNode.id);
+        dropped = true;
         return s;
       });
 
-      setSelectedNodeId(newNode.id);
+      if (dropped) {
+        setSelectedNodeId(newNode.id);
+      } else {
+        toast.error(`"${nodeType}" cannot be placed here`);
+      }
       return;
     }
 
