@@ -38,6 +38,7 @@ export function BuilderEditorShell({
   onPreview,
   onExport,
   className,
+  onPublishSubmit,
   pages,
   activePage,
   onPageChange,
