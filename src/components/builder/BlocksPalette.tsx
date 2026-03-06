@@ -39,7 +39,7 @@ export function BlocksPalette() {
         </div>
       ))}
       <div className="pt-3 border-t border-border">
-        <span className="text-[10px] text-muted-foreground font-mono">v1.1.0</span>
+        <span className="text-[10px] text-muted-foreground font-mono">v1.2.0</span>
       </div>
     </div>
   );

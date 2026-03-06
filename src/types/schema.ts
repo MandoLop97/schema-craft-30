@@ -125,4 +125,11 @@ export interface Page {
   schemaId: string;
 }
 
+export interface PageDefinition {
+  slug: string;
+  title: string;
+  schema: Schema;
+  status?: 'published' | 'draft';
+}
+
 export type RenderMode = 'public' | 'preview' | 'edit';

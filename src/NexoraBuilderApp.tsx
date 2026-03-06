@@ -1,13 +1,14 @@
 import { useMemo } from 'react';
-import { Schema } from '@/types/schema';
+import { Schema, PageDefinition } from '@/types/schema';
 import { createDefaultHomeSchema } from '@/lib/default-schema';
 import { validateSchema } from '@/lib/schema-validator';
 import { BuilderEditorShell } from '@/components/builder/BuilderEditorShell';
+import { PageManager } from '@/components/builder/PageManager';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from '@/components/ui/sonner';
 
 export interface NexoraBuilderAppProps {
-  /** Initial schema to edit. If omitted, a default home page schema is created. */
+  /** Initial schema to edit. If omitted, resolved from pages or default. */
   initialSchema?: Schema;
   /** Domain context passed from the template. */
   domain?: string;
@@ -23,6 +24,16 @@ export interface NexoraBuilderAppProps {
   onExport?: (schema: Schema) => void;
   /** CSS class name applied to the root container. */
   className?: string;
+
+  // ── Multi-page props ──
+  /** List of pages available for editing. */
+  pages?: PageDefinition[];
+  /** Currently active page slug. */
+  activePage?: string;
+  /** Called when the user navigates to a different page. */
+  onPageChange?: (slug: string) => void;
+  /** Called on save with slug context. */
+  onSaveWithSlug?: (slug: string, schema: Schema) => void;
 }
 
 export function NexoraBuilderApp({
@@ -34,12 +45,27 @@ export function NexoraBuilderApp({
   onPreview,
   onExport,
   className,
+  pages,
+  activePage,
+  onPageChange,
+  onSaveWithSlug,
 }: NexoraBuilderAppProps) {
-  // Prioritize external schema; fallback to demo only when none provided.
-  const { resolvedSchema, validationErrors } = useMemo(() => {
-    const raw = initialSchema ?? createDefaultHomeSchema().schema;
-    const result = validateSchema(raw);
+  // When pages are provided but no activePage, show PageManager
+  const showPageManager = pages && pages.length > 0 && !activePage;
 
+  // Resolve schema: initialSchema > active page schema > default
+  const { resolvedSchema, validationErrors } = useMemo(() => {
+    let raw: Schema;
+    if (initialSchema) {
+      raw = initialSchema;
+    } else if (pages && activePage) {
+      const pageDef = pages.find((p) => p.slug === activePage);
+      raw = pageDef?.schema ?? createDefaultHomeSchema().schema;
+    } else {
+      raw = createDefaultHomeSchema().schema;
+    }
+
+    const result = validateSchema(raw);
     if (result.errors.length > 0) {
       console.warn('[NexoraBuilder] Schema validation warnings:', result.errors);
     }
@@ -48,10 +74,23 @@ export function NexoraBuilderApp({
       resolvedSchema: result.schema ?? createDefaultHomeSchema().schema,
       validationErrors: result.schema ? [] : result.errors,
     };
-  }, [initialSchema]);
+  }, [initialSchema, pages, activePage]);
 
-  // Fatal validation error — show error instead of crashing
-  if (validationErrors.length > 0) {
+  // Active page title for TopBar
+  const activePageTitle = pages?.find((p) => p.slug === activePage)?.title;
+
+  // Wrap onSave to also call onSaveWithSlug
+  const handleSave = useMemo(() => {
+    return (schema: Schema) => {
+      onSave?.(schema);
+      if (activePage && onSaveWithSlug) {
+        onSaveWithSlug(activePage, schema);
+      }
+    };
+  }, [onSave, activePage, onSaveWithSlug]);
+
+  // Fatal validation error
+  if (!showPageManager && validationErrors.length > 0) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background p-8">
         <div className="max-w-md space-y-3 text-center">
@@ -69,17 +108,37 @@ export function NexoraBuilderApp({
     );
   }
 
+  // Page selection screen
+  if (showPageManager) {
+    return (
+      <TooltipProvider>
+        <Toaster />
+        <div className={`min-h-screen flex items-center justify-center bg-background ${className || ''}`}>
+          <PageManager
+            pages={pages!}
+            activePage={activePage}
+            onSelectPage={(slug) => onPageChange?.(slug)}
+          />
+        </div>
+      </TooltipProvider>
+    );
+  }
+
   return (
     <TooltipProvider>
       <Toaster />
       <BuilderEditorShell
         key={resolvedSchema.id}
         initialSchema={resolvedSchema}
-        onSave={onSave || (() => {})}
+        onSave={handleSave}
         onPublish={onPublish}
         onPreview={onPreview}
         onExport={onExport}
         className={className}
+        pages={pages}
+        activePage={activePage}
+        onPageChange={onPageChange}
+        pageTitle={activePageTitle}
       />
     </TooltipProvider>
   );
