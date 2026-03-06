@@ -18,6 +18,8 @@ export interface BuilderEditorShellProps {
   initialSchema: Schema;
   /** Called when the user clicks Save. Receives the current schema. */
   onSave: (schema: Schema) => void;
+  /** Called when the user clicks Publish. If provided, bypasses the internal PublishDialog. */
+  onPublish?: (schema: Schema) => void;
   /** Called when the user clicks Preview. */
   onPreview?: (schema: Schema) => void;
   /** Called when the user clicks Export. */
