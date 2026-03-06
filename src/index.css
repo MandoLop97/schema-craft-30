@@ -2,6 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Editor-scoped fallback tokens ──
+   These ensure the editor renders correctly even when the host
+   does not define shadcn/tailwind CSS variables.
+   The .nxr-editor wrapper is applied by NexoraBuilderApp. */
+.nxr-editor {
+  --background: var(--background, 0 0% 100%);
+  --foreground: var(--foreground, 222.2 84% 4.9%);
+  --card: var(--card, 0 0% 100%);
+  --card-foreground: var(--card-foreground, 222.2 84% 4.9%);
+  --popover: var(--popover, 0 0% 100%);
+  --popover-foreground: var(--popover-foreground, 222.2 84% 4.9%);
+  --primary: var(--primary, 222.2 47.4% 11.2%);
+  --primary-foreground: var(--primary-foreground, 210 40% 98%);
+  --secondary: var(--secondary, 210 40% 96.1%);
+  --secondary-foreground: var(--secondary-foreground, 222.2 47.4% 11.2%);
+  --muted: var(--muted, 210 40% 96.1%);
+  --muted-foreground: var(--muted-foreground, 215.4 16.3% 46.9%);
+  --accent: var(--accent, 210 40% 96.1%);
+  --accent-foreground: var(--accent-foreground, 222.2 47.4% 11.2%);
+  --destructive: var(--destructive, 0 84.2% 60.2%);
+  --destructive-foreground: var(--destructive-foreground, 210 40% 98%);
+  --border: var(--border, 214.3 31.8% 91.4%);
+  --input: var(--input, 214.3 31.8% 91.4%);
+  --ring: var(--ring, 222.2 84% 4.9%);
+  --radius: var(--radius, 0.5rem);
+}
+
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */
