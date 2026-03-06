@@ -73,45 +73,47 @@ function ImagePropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: 
   );
 }
 
+function LinksEditor({ links, onChange }: { links: { text: string; href: string }[]; onChange: (links: { text: string; href: string }[]) => void }) {
+  return (
+    <>
+      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Links</Label>
+      {links.map((link, i) => (
+        <div key={i} className="flex gap-1 items-start">
+          <div className="grid grid-cols-2 gap-1 flex-1">
+            <Input className="h-7 text-xs" placeholder="Text" value={link.text} onChange={(e) => {
+              const updated = [...links]; updated[i] = { ...link, text: e.target.value }; onChange(updated);
+            }} />
+            <Input className="h-7 text-xs" placeholder="Href" value={link.href} onChange={(e) => {
+              const updated = [...links]; updated[i] = { ...link, href: e.target.value }; onChange(updated);
+            }} />
+          </div>
+          <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive" onClick={() => {
+            onChange(links.filter((_, idx) => idx !== i));
+          }}>
+            <Trash2 className="h-3 w-3" />
+          </Button>
+        </div>
+      ))}
+      <Button variant="outline" size="sm" className="text-xs w-full" onClick={() => onChange([...links, { text: 'Link', href: '#' }])}>+ Add Link</Button>
+    </>
+  );
+}
+
 function NavbarPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: Partial<NodeProps>) => void }) {
-  const links = node.props.links || [];
   return (
     <>
       <PropField label="Logo Text" value={node.props.logoText || ''} onChange={(v) => onUpdate({ logoText: v })} />
-      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Links</Label>
-      {links.map((link, i) => (
-        <div key={i} className="grid grid-cols-2 gap-1">
-          <Input className="h-7 text-xs" placeholder="Text" value={link.text} onChange={(e) => {
-            const updated = [...links]; updated[i] = { ...link, text: e.target.value }; onUpdate({ links: updated });
-          }} />
-          <Input className="h-7 text-xs" placeholder="Href" value={link.href} onChange={(e) => {
-            const updated = [...links]; updated[i] = { ...link, href: e.target.value }; onUpdate({ links: updated });
-          }} />
-        </div>
-      ))}
-      <Button variant="outline" size="sm" className="text-xs w-full" onClick={() => onUpdate({ links: [...links, { text: 'Link', href: '#' }] })}>+ Add Link</Button>
+      <LinksEditor links={node.props.links || []} onChange={(links) => onUpdate({ links })} />
     </>
   );
 }
 
 function FooterPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: Partial<NodeProps>) => void }) {
-  const links = node.props.links || [];
   return (
     <>
       <PropField label="Logo Text" value={node.props.logoText || ''} onChange={(v) => onUpdate({ logoText: v })} />
       <PropField label="Copyright" value={node.props.copyright || ''} onChange={(v) => onUpdate({ copyright: v })} />
-      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Links</Label>
-      {links.map((link, i) => (
-        <div key={i} className="grid grid-cols-2 gap-1">
-          <Input className="h-7 text-xs" placeholder="Text" value={link.text} onChange={(e) => {
-            const updated = [...links]; updated[i] = { ...link, text: e.target.value }; onUpdate({ links: updated });
-          }} />
-          <Input className="h-7 text-xs" placeholder="Href" value={link.href} onChange={(e) => {
-            const updated = [...links]; updated[i] = { ...link, href: e.target.value }; onUpdate({ links: updated });
-          }} />
-        </div>
-      ))}
-      <Button variant="outline" size="sm" className="text-xs w-full" onClick={() => onUpdate({ links: [...links, { text: 'Link', href: '#' }] })}>+ Add Link</Button>
+      <LinksEditor links={node.props.links || []} onChange={(links) => onUpdate({ links })} />
     </>
   );
 }
@@ -131,7 +133,12 @@ function FeatureBarPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate:
     <>
       <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Features</Label>
       {items.map((item, i) => (
-        <div key={i} className="space-y-1 border rounded-md p-2">
+        <div key={i} className="space-y-1 border rounded-md p-2 relative">
+          <Button variant="ghost" size="icon" className="absolute top-1 right-1 h-5 w-5 text-muted-foreground hover:text-destructive" onClick={() => {
+            onUpdate({ items: items.filter((_, idx) => idx !== i) });
+          }}>
+            <Trash2 className="h-3 w-3" />
+          </Button>
           <Input className="h-7 text-xs" placeholder="Icon" value={item.icon || ''} onChange={(e) => {
             const updated = [...items]; updated[i] = { ...item, icon: e.target.value }; onUpdate({ items: updated });
           }} />
@@ -144,6 +151,19 @@ function FeatureBarPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate:
         </div>
       ))}
       <Button variant="outline" size="sm" className="text-xs w-full" onClick={() => onUpdate({ items: [...items, { icon: 'star', title: 'Feature', description: 'Description' }] })}>+ Add Feature</Button>
+    </>
+  );
+}
+
+function HeroSectionPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: Partial<NodeProps>) => void }) {
+  return (
+    <>
+      <PropField label="Heading" value={node.props.text || ''} onChange={(v) => onUpdate({ text: v })} />
+      <PropField label="Subtitle" value={node.props.subtitle || ''} onChange={(v) => onUpdate({ subtitle: v })} />
+      <PropField label="CTA Text" value={node.props.ctaText || ''} onChange={(v) => onUpdate({ ctaText: v })} />
+      <PropField label="CTA Link" value={node.props.ctaHref || ''} onChange={(v) => onUpdate({ ctaHref: v })} />
+      <PropField label="Background Image" value={node.props.src || ''} onChange={(v) => onUpdate({ src: v })} />
+      <PropField label="Overlay Opacity (0-1)" value={node.props.overlayOpacity || '0.55'} onChange={(v) => onUpdate({ overlayOpacity: v })} />
     </>
   );
 }
@@ -250,6 +270,7 @@ function PropsTab({ node, onUpdateProps }: { node: SchemaNode; onUpdateProps: (p
       {node.type === 'FeatureBar' && <FeatureBarPropsEditor node={node} onUpdate={onUpdateProps} />}
       {node.type === 'TestimonialCard' && <TestimonialPropsEditor node={node} onUpdate={onUpdateProps} />}
       {node.type === 'NewsletterSection' && <NewsletterPropsEditor node={node} onUpdate={onUpdateProps} />}
+      {node.type === 'HeroSection' && <HeroSectionPropsEditor node={node} onUpdate={onUpdateProps} />}
     </div>
   );
 }
