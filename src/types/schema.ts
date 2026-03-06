@@ -5,7 +5,8 @@ export type NodeType =
   | 'Text' | 'Image' | 'Divider' | 'Badge'
   | 'Button' | 'Card' | 'Input'
   | 'ProductCard'
-  | 'Navbar' | 'Footer';
+  | 'Navbar' | 'Footer'
+  | 'AnnouncementBar' | 'FeatureBar' | 'TestimonialCard' | 'NewsletterSection';
 
 export interface NodeStyle {
   padding?: string;
