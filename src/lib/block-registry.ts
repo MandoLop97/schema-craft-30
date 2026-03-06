@@ -37,7 +37,7 @@ const LAYOUT_TYPES: NodeType[] = ['Section', 'Container', 'Grid', 'Stack'];
 /** Site-level blocks: should only be at root or inside Section */
 const SITE_TYPES: NodeType[] = ['Navbar', 'Footer', 'AnnouncementBar'];
 /** Content that goes inside any container */
-const CONTENT_TYPES: NodeType[] = ['Text', 'Image', 'Divider', 'Badge', 'Button', 'Card', 'Input', 'ProductCard', 'TestimonialCard', 'NewsletterSection', 'FeatureBar', 'HeroSection'];
+const CONTENT_TYPES: NodeType[] = ['Text', 'Image', 'Divider', 'Badge', 'Button', 'Card', 'Input', 'ProductCard', 'TestimonialCard', 'NewsletterSection', 'FeatureBar', 'HeroSection', 'Accordion', 'TabsBlock', 'VideoEmbed'];
 
 export const blockRegistry: BlockDefinition[] = [
   // ── Layout ── (can nest inside other layout, but Section is top-level preferred)
