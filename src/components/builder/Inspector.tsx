@@ -122,6 +122,7 @@ function TextPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: P
 }
 
 function ButtonPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: Partial<NodeProps>) => void }) {
+  const linkValue = node.props.link || node.props.href || '';
   return (
     <>
       <PropField label="Text" value={node.props.text || ''} onChange={(v) => onUpdate({ text: v })} />
@@ -136,8 +137,9 @@ function ButtonPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p:
           </SelectContent>
         </Select>
       </div>
-      <PropField label="Link (href)" value={node.props.href || ''} onChange={(v) => onUpdate({ href: v })} />
+      <PropField label="Link (href)" value={linkValue} onChange={(v) => onUpdate({ href: v, link: v })} />
     </>
+  );
   );
 }
 
