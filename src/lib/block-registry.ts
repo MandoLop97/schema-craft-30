@@ -105,7 +105,7 @@ export function canDropInto(childType: NodeType, parentType: NodeType, isRoot: b
   // If root (the Page-level container), allow layout and site blocks
   if (isRoot) {
     // Only layout and site-level blocks at root
-    const rootAllowed: NodeType[] = [...LAYOUT_TYPES, ...SITE_TYPES, 'HeroSection', 'NewsletterSection', 'FeatureBar'];
+    const rootAllowed: NodeType[] = [...LAYOUT_TYPES, ...SITE_TYPES, 'HeroSection', 'NewsletterSection', 'FeatureBar', 'Accordion', 'TabsBlock', 'VideoEmbed'];
     return rootAllowed.includes(childType);
   }
 

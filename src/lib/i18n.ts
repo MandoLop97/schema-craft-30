@@ -231,6 +231,7 @@ const CATEGORY_MAP_EN: Record<string, string> = {
   Commerce: en.categoryCommerce,
   Site: en.categorySite,
   Template: en.categoryTemplate,
+  Interactive: en.categoryInteractive,
 };
 
 export function translateCategory(category: string): string {
