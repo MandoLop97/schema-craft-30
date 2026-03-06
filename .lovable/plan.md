@@ -1,54 +1,72 @@
 
 
-## Plan: Layout blocks al 100% + Responsividad completa
+## Phase 1: Schema-First Foundation + eCommerce Home
 
-### Problemas detectados
+### Overview
+Build the core schema system, page renderer, storage layer, and a clean eCommerce Home page — all driven by JSON schema. This foundation makes Phase 2 (Builder UI) straightforward to add.
 
-1. **Grid no es responsivo**: Usa `gridTemplateColumns: repeat(N, 1fr)` fijo. En mobile, 4 columnas se comprimen sin adaptarse.
-2. **Layout nodes no tienen estilos responsivos**: No hay sistema de breakpoints en el schema ni en los renderers.
-3. **Section/Container carecen de props editables en el inspector**: No se puede configurar alignment, dirección, etc. desde el panel derecho.
-4. **El canvas no simula responsividad real**: Cambia el ancho del wrapper pero los nodos internos no reaccionan con media queries porque están en inline styles.
+---
 
-### Solución
+### 1. Schema Types & Data Model
+Define TypeScript types for the entire schema system:
+- **Page** (id, slug, name, schemaId)
+- **Schema** (id, version, updatedAt, themeTokens, rootNodeId, nodes map)
+- **Node** (id, type, props, style, children, locked, hidden)
+- **ThemeTokens** (colors, typography, radius, spacing)
+- Support all node types: Section, Container, Grid, Stack, Text, Image, Button, Card, Badge, Divider, Input, ProductCard, Navbar, Footer
 
-**1. Hacer Grid responsivo automáticamente** (`LayoutNodes.tsx`)
+### 2. Schema Store (LocalStorage)
+Create an abstraction layer (`SchemaStore`) with clean API:
+- `getPages()`, `getPageBySlug()`, `getSchema()`, `saveSchema()`
+- `createPage()`, `duplicatePage()`, `deletePage()`, `renamePage()`
+- All backed by LocalStorage, designed so swapping to a database later only changes the store internals
 
-El `GridNode` usará CSS clamp/auto-fill en vez de columnas fijas cuando el viewport sea pequeño:
-- En desktop: `repeat(N, 1fr)` como ahora
-- Agregar `@container` o `auto-fill` con `minmax(min(100%, 280px), 1fr)` para que las columnas se adapten automáticamente al ancho disponible
-- Esto se logra sin media queries, solo con CSS grid inteligente
+### 3. Node Registry & Components
+Build a component for each node type, all receiving props/style from schema:
+- **Layout**: Section, Container, Grid, Stack
+- **Content**: Text, Image, Divider, Badge
+- **UI**: Button, Card, Input
+- **Commerce**: ProductCard (mock with image, title, price, CTA)
+- **Site**: Navbar, Footer
 
-**2. Agregar props de layout al inspector** (`Inspector.tsx`)
+### 4. PageRenderer
+Core rendering engine:
+- Takes a schema + mode (`public` | `preview` | `edit`)
+- Recursively renders nodes from the tree using the Node Registry
+- In `public`/`preview` mode: clean output, no editing UI
+- In `edit` mode: adds selection outlines and drop zones (prepared for Phase 2)
+- Applies ThemeTokens as CSS variables
 
-Para Section, Container, Grid, Stack — agregar campos editables:
-- Section: `alignItems`, `justifyContent`, `backgroundColor`, `minHeight`
-- Container: `maxWidth`  
-- Grid: `columns`, `gap`
-- Stack: `direction`, `gap`, `alignItems`
+### 5. eCommerce Home Page (Schema-based)
+Create a default `home` schema that produces a modern eCommerce landing page:
+- **Navbar** with logo and navigation links
+- **Hero section** with headline, subtext, and CTA button
+- **Featured products grid** with 3-4 ProductCard mocks
+- **Value propositions** section (icons + text)
+- **Footer** with links and copyright
+- Clean, minimal design inspired by modern eCommerce (think Stripe/Linear aesthetics)
 
-**3. Hacer que los layout nodes usen estilos responsivos** (`LayoutNodes.tsx`)
+### 6. Route Setup
+- `/` → Renders Home from schema via PageRenderer (public mode)
+- `/preview?page=home` → Same but in preview mode
+- `/admin/export?page=home` → Shows raw JSON schema with copy button
+- `/license-blocked` → Placeholder lock screen
 
-- Agregar `width: 100%`, `box-sizing: border-box` como base en todos los layout nodes
-- Stack horizontal: hacer wrap automático con `flexWrap: wrap` para que en mobile los items se apilen
-- Container: usar `width: 100%` + `maxWidth` + padding lateral para que respete bordes en mobile
+### 7. License Gate (Mock)
+- `license_status` stored in LocalStorage (active/inactive/exceeded)
+- Admin routes check license; public site always works
+- `/license-blocked` shows status, reason, and placeholder "Enter License" button
 
-**4. Mejorar el canvas para simular responsividad** (`BuilderCanvas.tsx`)
+---
 
-- Envolver el canvas en un `<iframe>` o usar CSS `container-type: inline-size` para que los nodos internos reaccionen al ancho del canvas, no al del viewport
-- Alternativa más simple: pasar `device` al PageRenderer y ajustar estilos condicionalmente
+### What's NOT in Phase 1 (saved for Phase 2)
+- Full Builder UI (drag & drop canvas, left/right sidebars, inspector)
+- Undo/Redo history
+- AI Edit feature
+- Templates management (`/admin/templates`)
+- Theme editor (`/admin/theme`)
+- Device toggle & responsive overrides
 
-### Archivos afectados
-
-| Archivo | Cambio |
-|---|---|
-| `src/components/schema/nodes/LayoutNodes.tsx` | Grid responsivo con auto-fill, Stack con flexWrap, Container con width:100% |
-| `src/components/builder/Inspector.tsx` | Props editables para Section/Container/Grid/Stack |
-| `src/components/builder/BuilderCanvas.tsx` | Pasar device context al renderer |
-| `src/components/schema/PageRenderer.tsx` | Recibir device prop y pasarlo a nodos |
-
-### Resultado esperado
-
-- Arrastrar un Grid de 4 columnas dentro de una Section → se renderiza con 4 columnas en desktop y se adapta a 1-2 en mobile
-- Cambiar a vista tablet/mobile en el top bar → el canvas refleja cómo se verá en esos dispositivos
-- Section, Container, Grid, Stack son completamente editables desde el inspector
+### Design Style
+Minimal, professional SaaS aesthetic — light background, clean typography, subtle borders, polished hover states.
 

@@ -16,19 +16,19 @@ const DEVICE_WIDTHS = {
 };
 
 export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode }: BuilderCanvasProps) {
-  // Fallback droppable for the root — only catches drops that miss a container
   const { setNodeRef, isOver } = useDroppable({ id: schema.rootNodeId });
 
   return (
     <div className="flex-1 bg-muted/30 overflow-auto flex justify-center p-6" onClick={() => onSelectNode('')}>
       <div
         ref={setNodeRef}
-        className={`bg-background shadow-sm border transition-all ${isOver ? 'ring-2 ring-primary/30' : ''}`}
         style={{
           width: DEVICE_WIDTHS[device],
           maxWidth: '100%',
           minHeight: '100%',
+          containerType: 'inline-size' as any,
         }}
+        className={`bg-background shadow-sm border transition-all ${isOver ? 'ring-2 ring-primary/30' : ''}`}
         onClick={(e) => e.stopPropagation()}
       >
         <PageRenderer
