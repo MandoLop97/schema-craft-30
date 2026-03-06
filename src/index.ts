@@ -1,5 +1,8 @@
 import './index.css';
 
+// Runtime version
+export { EDITOR_VERSION } from './lib/version';
+
 // Main editor component
 export { NexoraBuilderApp } from './NexoraBuilderApp';
 export type { NexoraBuilderAppProps } from './NexoraBuilderApp';

@@ -6,33 +6,75 @@ import { BuilderEditorShell } from '@/components/builder/BuilderEditorShell';
 import { PageManager } from '@/components/builder/PageManager';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from '@/components/ui/sonner';
+import { EDITOR_VERSION } from '@/lib/version';
 
 export interface NexoraBuilderAppProps {
-  /** Initial schema to edit. If omitted, resolved from pages or default. */
+  /**
+   * Initial schema to load in the editor.
+   * Takes priority over any schema resolved from `pages`.
+   * If omitted, the editor falls back to the active page's schema or a built-in default.
+   */
   initialSchema?: Schema;
-  /** Domain context passed from the template. */
+
+  /**
+   * Optional domain context string passed through to callbacks.
+   * Useful for multi-tenant hosts that manage schemas per domain.
+   */
   domain?: string;
-  /** Page slug context passed from the template. */
+
+  /**
+   * Optional page slug context. Informational — does not affect editor behavior directly.
+   */
   pageSlug?: string;
-  /** Called when the user clicks Save. Receives the current schema. */
+
+  /**
+   * Called when the user clicks **Save**. Receives the current schema.
+   */
   onSave?: (schema: Schema) => void;
-  /** Called when the user clicks Publish. Receives the current schema. */
+
+  /**
+   * Called when the user clicks **Publish**. Receives the current schema.
+   * If omitted, the built-in publish dialog is shown instead.
+   */
   onPublish?: (schema: Schema) => void;
-  /** Called when the user clicks Preview. */
+
+  /**
+   * Called when the user clicks **Preview**. Receives the current schema.
+   */
   onPreview?: (schema: Schema) => void;
-  /** Called when the user clicks Export. */
+
+  /**
+   * Called when the user clicks **Export**. Receives the current schema.
+   */
   onExport?: (schema: Schema) => void;
+
   /** CSS class name applied to the root container. */
   className?: string;
 
   // ── Multi-page props ──
-  /** List of pages available for editing. */
+
+  /**
+   * List of pages available for editing.
+   * When provided, a **Pages** tab appears in the left sidebar.
+   * If `activePage` is not set, the editor shows the PageManager as a full-screen page selector.
+   */
   pages?: PageDefinition[];
-  /** Currently active page slug. */
+
+  /**
+   * Slug of the currently active page (must match a slug in `pages[]`).
+   * When set together with `pages`, the editor loads that page's schema.
+   */
   activePage?: string;
-  /** Called when the user navigates to a different page. */
+
+  /**
+   * Called when the user selects a different page from the Pages tab or clicks the back button.
+   * The host is responsible for updating `activePage` accordingly.
+   */
   onPageChange?: (slug: string) => void;
-  /** Called on save with slug context. */
+
+  /**
+   * Called on save alongside `onSave`, providing the active page slug for routing-aware persistence.
+   */
   onSaveWithSlug?: (slug: string, schema: Schema) => void;
 }
 
@@ -113,7 +155,7 @@ export function NexoraBuilderApp({
     return (
       <TooltipProvider>
         <Toaster />
-        <div className={`min-h-screen flex items-center justify-center bg-background ${className || ''}`}>
+        <div className={`nxr-editor min-h-screen flex items-center justify-center bg-background ${className || ''}`}>
           <PageManager
             pages={pages!}
             activePage={activePage}
@@ -128,7 +170,7 @@ export function NexoraBuilderApp({
     <TooltipProvider>
       <Toaster />
       <div className="fixed bottom-2 left-2 z-[9999] px-2 py-1 rounded bg-foreground/80 text-background text-[10px] font-mono pointer-events-none select-none opacity-70">
-        schema-craft runtime: 1.2.0
+        schema-craft runtime: {EDITOR_VERSION}
       </div>
       <BuilderEditorShell
         key={resolvedSchema.id}
@@ -137,7 +179,7 @@ export function NexoraBuilderApp({
         onPublish={onPublish}
         onPreview={onPreview}
         onExport={onExport}
-        className={className}
+        className={`nxr-editor ${className || ''}`}
         pages={pages}
         activePage={activePage}
         onPageChange={onPageChange}
