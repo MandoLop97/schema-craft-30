@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { Schema, PageDefinition } from '@/types/schema';
 import { createDefaultHomeSchema } from '@/lib/default-schema';
 import { validateSchema } from '@/lib/schema-validator';
