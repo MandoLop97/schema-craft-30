@@ -15,6 +15,7 @@ export function SectionNode({ node, mode, renderChildren }: NodeComponentProps) 
       style={{
         width: '100%',
         boxSizing: 'border-box' as const,
+        overflow: 'hidden',
         ...s(node.style),
       }}
       data-node-id={node.id}
@@ -34,6 +35,7 @@ export function ContainerNode({ node, mode, renderChildren }: NodeComponentProps
         boxSizing: 'border-box' as const,
         paddingLeft: node.style.padding || '1rem',
         paddingRight: node.style.padding || '1rem',
+        overflow: 'hidden',
         ...s(node.style),
       }}
       data-node-id={node.id}
@@ -45,8 +47,6 @@ export function ContainerNode({ node, mode, renderChildren }: NodeComponentProps
 
 export function GridNode({ node, mode, renderChildren }: NodeComponentProps) {
   const cols = node.props.columns || 3;
-  // Use auto-fill with minmax for automatic responsive behavior
-  // Items will be at least 250px wide, automatically wrapping to fewer columns on smaller screens
   const minColWidth = Math.max(180, Math.floor(800 / cols));
   return (
     <div
@@ -56,6 +56,7 @@ export function GridNode({ node, mode, renderChildren }: NodeComponentProps) {
         width: '100%',
         boxSizing: 'border-box' as const,
         gap: node.style.gap || '1rem',
+        overflow: 'hidden',
         ...s(node.style),
       }}
       data-node-id={node.id}
@@ -76,6 +77,7 @@ export function StackNode({ node, mode, renderChildren }: NodeComponentProps) {
         width: '100%',
         boxSizing: 'border-box' as const,
         gap: node.style.gap || '0.5rem',
+        overflow: 'hidden',
         ...s(node.style),
       }}
       data-node-id={node.id}
