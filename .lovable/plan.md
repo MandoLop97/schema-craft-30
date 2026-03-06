@@ -1,81 +1,64 @@
 
-## Instrucción permanente: Versionado automático
 
-**IMPORTANTE**: Cada vez que se haga un cambio en el proyecto, incrementar la versión en:
-1. `package.json` → campo `"version"`
-2. `src/components/builder/BuilderEditorShell.tsx` → texto de versión en el status bar
+## Plan: Mejoras visuales y de UX para el constructor v1.0.6
 
-Formato: semver (major.minor.patch). Incrementar el **patch** (+1) en cada cambio. Versión actual: **1.0.7**
+### Archivos a modificar
 
----
+**1. `SortableNodeWrapper.tsx` -- Seleccion y arrastre elegante**
+- Reemplazar outline crudo por un borde suave con `box-shadow` tipo glow azul sutil
+- En drag: escalar ligeramente (1.02), agregar sombra elevada, reducir opacity a 0.6
+- Label del tipo de nodo: agregar backdrop-blur, bordes redondeados, sombra sutil, transicion de aparicion con opacity
+- Hover state: mostrar un borde punteado sutil antes de seleccionar
+- Transiciones suaves en todos los estados (150-200ms)
 
-## Phase 1: Schema-First Foundation + eCommerce Home
+**2. `EditableDropZone.tsx` -- Drop zone animada**
+- Reemplazar outline dashed por un borde con gradiente animado o pulso suave
+- Agregar animacion de "breathing" en el placeholder vacio (scale pulse sutil)
+- El icono `+` rota levemente al hacer hover
+- Transicion de fondo mas suave con gradiente radial desde el centro
+- Texto cambia a "Release to drop" cuando `isOver`
 
-### Overview
-Build the core schema system, page renderer, storage layer, and a clean eCommerce Home page — all driven by JSON schema. This foundation makes Phase 2 (Builder UI) straightforward to add.
+**3. `BuilderCanvas.tsx` -- Canvas con mejor feedback**
+- Agregar patron de puntos sutil (dot grid) al fondo del canvas area
+- Transicion suave del ancho del canvas al cambiar device con `transition: width 300ms`
+- Shadow mas pronunciada y elegante en el contenedor del canvas
 
----
+**4. `BuilderEditorShell.tsx` -- DragOverlay mejorado**
+- El overlay del drag muestra icono del bloque + nombre
+- Agregar sombra elevada, backdrop-blur, borde con color primary sutil
+- Escala ligeramente mayor (1.05) para indicar que esta "flotando"
 
-### 1. Schema Types & Data Model
-Define TypeScript types for the entire schema system:
-- **Page** (id, slug, name, schemaId)
-- **Schema** (id, version, updatedAt, themeTokens, rootNodeId, nodes map)
-- **Node** (id, type, props, style, children, locked, hidden)
-- **ThemeTokens** (colors, typography, radius, spacing)
-- Support all node types: Section, Container, Grid, Stack, Text, Image, Button, Card, Badge, Divider, Input, ProductCard, Navbar, Footer
+**5. `BlocksPalette.tsx` -- Bloques con hover mas rico**
+- Hover: elevar con shadow + scale sutil (1.02)
+- Agregar borde izquierdo de color al hacer hover
+- Transicion de drag: el bloque original hace fade out suave
+- Icono cambia de color en hover (muted -> primary)
 
-### 2. Schema Store (LocalStorage)
-Create an abstraction layer (`SchemaStore`) with clean API:
-- `getPages()`, `getPageBySlug()`, `getSchema()`, `saveSchema()`
-- `createPage()`, `duplicatePage()`, `deletePage()`, `renamePage()`
-- All backed by LocalStorage, designed so swapping to a database later only changes the store internals
+**6. `LayersPanel.tsx` -- Layers con mejor interaccion**
+- Hover: fondo con transicion mas suave, borde izquierdo sutil
+- Selected: barra lateral de color primary (como PageManager)
+- Indent lines: lineas verticales sutiles de conexion entre niveles
+- Chevron animado al expandir/colapsar (rotacion suave)
 
-### 3. Node Registry & Components
-Build a component for each node type, all receiving props/style from schema:
-- **Layout**: Section, Container, Grid, Stack
-- **Content**: Text, Image, Divider, Badge
-- **UI**: Button, Card, Input
-- **Commerce**: ProductCard (mock with image, title, price, CTA)
-- **Site**: Navbar, Footer
+**7. `Inspector.tsx` -- Inspector mas pulido**
+- Header con gradiente sutil de fondo
+- Inputs con focus ring animado
+- Boton delete con confirmacion visual (hover rojo gradual)
+- Separadores entre secciones de style
 
-### 4. PageRenderer
-Core rendering engine:
-- Takes a schema + mode (`public` | `preview` | `edit`)
-- Recursively renders nodes from the tree using the Node Registry
-- In `public`/`preview` mode: clean output, no editing UI
-- In `edit` mode: adds selection outlines and drop zones (prepared for Phase 2)
-- Applies ThemeTokens as CSS variables
+**8. `TopBar.tsx` -- Tooltips y micro-interacciones**
+- Botones con transiciones de scale al hacer click (active:scale-95)
+- Indicador "dirty" animado (punto pulsante al lado de Save)
 
-### 5. eCommerce Home Page (Schema-based)
-Create a default `home` schema that produces a modern eCommerce landing page:
-- **Navbar** with logo and navigation links
-- **Hero section** with headline, subtext, and CTA button
-- **Featured products grid** with 3-4 ProductCard mocks
-- **Value propositions** section (icons + text)
-- **Footer** with links and copyright
-- Clean, minimal design inspired by modern eCommerce (think Stripe/Linear aesthetics)
+**9. `index.css` -- Animaciones CSS globales**
+- Agregar keyframes: `pulse-glow`, `breathe`, `slide-in-label`
+- Clases utilitarias para el builder
 
-### 6. Route Setup
-- `/` → Renders Home from schema via PageRenderer (public mode)
-- `/preview?page=home` → Same but in preview mode
-- `/admin/export?page=home` → Shows raw JSON schema with copy button
-- `/license-blocked` → Placeholder lock screen
+**10. `package.json` -- Bump a 1.0.6** (ya esta en 1.0.6)
 
-### 7. License Gate (Mock)
-- `license_status` stored in LocalStorage (active/inactive/exceeded)
-- Admin routes check license; public site always works
-- `/license-blocked` shows status, reason, and placeholder "Enter License" button
-
----
-
-### What's NOT in Phase 1 (saved for Phase 2)
-- Full Builder UI (drag & drop canvas, left/right sidebars, inspector)
-- Undo/Redo history
-- AI Edit feature
-- Templates management (`/admin/templates`)
-- Theme editor (`/admin/theme`)
-- Device toggle & responsive overrides
-
-### Design Style
-Minimal, professional SaaS aesthetic — light background, clean typography, subtle borders, polished hover states.
+### Filosofia de los efectos
+- Todos los efectos son sutiles (opacity, scale, shadow) -- nunca distractivos
+- Duraciones entre 150-300ms con ease-out
+- Colores: usar `--primary` con opacity baja para glows y highlights
+- El feedback visual debe comunicar estado: hoverable, seleccionado, arrastrando, zona de drop activa
 
