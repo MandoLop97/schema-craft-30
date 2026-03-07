@@ -15,6 +15,11 @@ interface BuilderCanvasProps {
   mockData?: Record<string, any>;
   customStylesheets?: string[];
   customCSS?: string;
+  onCopyNode?: (nodeId: string) => void;
+  onPasteNode?: (nodeId: string) => void;
+  onDuplicateNode?: (nodeId: string) => void;
+  onDeleteNode?: (nodeId: string) => void;
+  canPaste?: boolean;
 }
 
 const DEVICE_WIDTHS = {
