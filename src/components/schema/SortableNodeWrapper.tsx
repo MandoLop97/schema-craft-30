@@ -259,6 +259,13 @@ export function SortableNodeWrapper({ nodeId, children, isSelected, nodeType, on
           <Save className="h-3.5 w-3.5" /> Guardar como Template
         </ContextMenuItem>
         <ContextMenuSeparator />
+        <ContextMenuItem onClick={() => onCopyStyle?.(nodeId)} className="gap-2 text-xs">
+          <Paintbrush className="h-3.5 w-3.5" /> Copiar Estilo
+        </ContextMenuItem>
+        <ContextMenuItem onClick={() => onPasteStyle?.(nodeId)} disabled={!canPasteStyle} className="gap-2 text-xs">
+          <ClipboardCheck className="h-3.5 w-3.5" /> Pegar Estilo
+        </ContextMenuItem>
+        <ContextMenuSeparator />
         <ContextMenuItem onClick={() => onDelete?.(nodeId)} className="gap-2 text-xs text-destructive focus:text-destructive">
           <Trash2 className="h-3.5 w-3.5" /> Eliminar
         </ContextMenuItem>
