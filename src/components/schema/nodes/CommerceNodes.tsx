@@ -270,6 +270,30 @@ export function ProductGridNode({ node, mode }: NodeComponentProps) {
     });
   }, [templateData, products]);
 
+  // Convert template's themeTokens into scoped CSS custom properties
+  const templateThemeStyle = useMemo<React.CSSProperties>(() => {
+    if (!templateData?.themeTokens) return {};
+    return themeTokensToCSS(templateData.themeTokens);
+  }, [templateData?.themeTokens]);
+
+  // Generate dynamic CSS (pseudo-states, custom CSS) for all hydrated nodes
+  const templateDynamicCSS = useMemo(() => {
+    if (hydratedCards.length === 0) return '';
+    const rules: string[] = [];
+    for (const { nodes } of hydratedCards) {
+      for (const n of Object.values(nodes)) {
+        const pseudo = generatePseudoStateCSS(n.id, n.style);
+        if (pseudo) rules.push(pseudo);
+        const responsive = generateResponsiveCSS(n.id, n.style);
+        if (responsive) rules.push(responsive);
+        if (n.customCSS) {
+          rules.push(n.customCSS.replace(/selector/g, `[data-node-id="${n.id}"]`));
+        }
+      }
+    }
+    return rules.join('\n');
+  }, [hydratedCards]);
+
   const handleAddToCart = (productId: string) => {
     window.dispatchEvent(new CustomEvent('nexora:addToCart', { detail: { productId } }));
   };
