@@ -287,6 +287,7 @@ function SortableChildrenList({
   onDuplicateNode,
   onDeleteNode,
   onMoveNode,
+  onRenameNode,
 }: {
   parentNode: SchemaNode;
   schema: Schema;
@@ -297,6 +298,7 @@ function SortableChildrenList({
   onDuplicateNode?: (nodeId: string) => void;
   onDeleteNode?: (nodeId: string) => void;
   onMoveNode?: (nodeId: string, newParentId: string, index: number) => void;
+  onRenameNode?: (nodeId: string, newName: string) => void;
 }) {
   return (
     <SortableContext
@@ -318,6 +320,7 @@ function SortableChildrenList({
             onDuplicateNode={onDuplicateNode}
             onDeleteNode={onDeleteNode}
             onMoveNode={onMoveNode}
+            onRenameNode={onRenameNode}
           />
         );
       })}
