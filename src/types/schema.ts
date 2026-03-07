@@ -202,6 +202,8 @@ export interface SchemaNode {
   customName?: string;
   /** Raw CSS applied to this specific widget */
   customCSS?: string;
+  /** IDs of global styles applied to this node */
+  appliedGlobalStyles?: string[];
 }
 
 export interface ThemeTokens {
