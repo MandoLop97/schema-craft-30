@@ -37,7 +37,7 @@ const TEMPLATE_CANVAS: Record<TemplateType, { width?: string; height?: string; s
   single: { scroll: true, checkerboard: false },
 };
 
-export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode, customComponents, templateType = 'page', canvasSize, mockData, customStylesheets, customCSS }: BuilderCanvasProps) {
+export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode, customComponents, templateType = 'page', canvasSize, mockData, customStylesheets, customCSS, onCopyNode, onPasteNode, onDuplicateNode, onDeleteNode, canPaste }: BuilderCanvasProps) {
   const { setNodeRef, isOver } = useDroppable({ id: schema.rootNodeId });
 
   const preset = TEMPLATE_CANVAS[templateType];
