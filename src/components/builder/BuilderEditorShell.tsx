@@ -37,6 +37,7 @@ export interface BuilderEditorShellProps {
   onBack?: () => void;
   customStylesheets?: string[];
   customCSS?: string;
+  customScripts?: string[];
   onImageUpload?: (file: File) => Promise<string>;
   resolveAssetUrl?: (path: string) => string;
 }
@@ -57,6 +58,7 @@ export function BuilderEditorShell({
   onBack,
   customStylesheets,
   customCSS,
+  customScripts,
   onImageUpload,
   resolveAssetUrl,
 }: BuilderEditorShellProps) {
@@ -521,6 +523,7 @@ export function BuilderEditorShell({
             mockData={activePageDef?.mockData}
             customStylesheets={customStylesheets}
             customCSS={customCSS}
+            customScripts={customScripts}
             onCopyNode={handleCopyById}
             onPasteNode={handlePasteById}
             onDuplicateNode={handleDuplicateById}

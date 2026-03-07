@@ -15,6 +15,7 @@ interface BuilderCanvasProps {
   mockData?: Record<string, any>;
   customStylesheets?: string[];
   customCSS?: string;
+  customScripts?: string[];
   onCopyNode?: (nodeId: string) => void;
   onPasteNode?: (nodeId: string) => void;
   onDuplicateNode?: (nodeId: string) => void;
@@ -39,7 +40,7 @@ const TEMPLATE_CANVAS: Record<TemplateType, { width?: string; height?: string; s
   single: { scroll: true, checkerboard: false },
 };
 
-export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode, customComponents, templateType = 'page', canvasSize, mockData, customStylesheets, customCSS, onCopyNode, onPasteNode, onDuplicateNode, onDeleteNode, canPaste, onEditSection, onSaveAsTemplate }: BuilderCanvasProps) {
+export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode, customComponents, templateType = 'page', canvasSize, mockData, customStylesheets, customCSS, customScripts, onCopyNode, onPasteNode, onDuplicateNode, onDeleteNode, canPaste, onEditSection, onSaveAsTemplate }: BuilderCanvasProps) {
   const { setNodeRef, isOver } = useDroppable({ id: schema.rootNodeId });
 
   const preset = TEMPLATE_CANVAS[templateType];
@@ -70,7 +71,7 @@ export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode, cu
         className={`bg-background border nxr-responsive-canvas ${isOver ? 'ring-2 ring-primary/20' : ''}`}
         onClick={(e) => e.stopPropagation()}
       >
-        <CustomStylesInjector stylesheets={customStylesheets} css={customCSS} />
+        <CustomStylesInjector stylesheets={customStylesheets} css={customCSS} scripts={customScripts} />
         <PageRenderer
           schema={schema}
           mode="edit"
