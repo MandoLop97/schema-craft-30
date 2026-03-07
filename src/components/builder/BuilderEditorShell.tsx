@@ -73,6 +73,7 @@ export function BuilderEditorShell({
   const [previewOpen, setPreviewOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const clipboardRef = useRef<string | null>(null);
+  const clipboardStyleRef = useRef<NodeStyle | null>(null);
 
   // Scroll to selected node on canvas when selection changes (e.g. from Layers panel)
   // and trigger a brief flash highlight to help locate it visually
