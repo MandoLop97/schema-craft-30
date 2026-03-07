@@ -199,6 +199,8 @@ export interface SchemaNode {
   locked?: boolean;
   hidden?: boolean;
   customName?: string;
+  /** Raw CSS applied to this specific widget */
+  customCSS?: string;
 }
 
 export interface ThemeTokens {
