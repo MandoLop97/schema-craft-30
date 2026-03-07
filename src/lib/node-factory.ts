@@ -1,5 +1,5 @@
 import { SchemaNode, NodeType, NodeProps, NodeStyle, Schema } from '@/types/schema';
-import { getBlockDef } from './block-registry';
+import { getBlockDef, CompositeNodeTree } from './block-registry';
 
 const uid = () => `node-${Math.random().toString(36).slice(2, 9)}`;
 
@@ -17,6 +17,19 @@ export function createNode(type: NodeType): SchemaNode {
     style: { ...(def?.defaultStyle || {}) },
     children: [],
   };
+}
+
+/**
+ * Creates a node tree. If the block has a compositeFactory, returns the full
+ * composite tree. Otherwise returns a single-node tree.
+ */
+export function createNodeTree(type: NodeType): CompositeNodeTree {
+  const def = getBlockDef(type);
+  if (def?.compositeFactory) {
+    return def.compositeFactory();
+  }
+  const node = createNode(type);
+  return { rootId: node.id, nodes: { [node.id]: node } };
 }
 
 /**
