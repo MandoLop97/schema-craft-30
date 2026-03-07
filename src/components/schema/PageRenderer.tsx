@@ -80,6 +80,7 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
                 onDuplicate={onDuplicateNode}
                 onDelete={onDeleteNode}
                 canPaste={canPaste}
+                onEditSection={onEditSection}
               >
                 {wrappedChild}
               </SortableNodeWrapper>
