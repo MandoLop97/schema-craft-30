@@ -29,6 +29,10 @@ export interface NexoraBuilderAppProps {
   locale?: 'es' | 'en' | BuilderLocale;
   customComponents?: CustomComponentMap;
   extraBlocks?: BlockDefinition[];
+  /** URLs of external CSS stylesheets to inject into the canvas */
+  customStylesheets?: string[];
+  /** Raw CSS string to inject into the canvas */
+  customCSS?: string;
 }
 
 export function NexoraBuilderApp({
