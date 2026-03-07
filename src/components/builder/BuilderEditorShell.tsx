@@ -482,6 +482,11 @@ export function BuilderEditorShell({
             mockData={activePageDef?.mockData}
             customStylesheets={customStylesheets}
             customCSS={customCSS}
+            onCopyNode={handleCopyById}
+            onPasteNode={handlePasteById}
+            onDuplicateNode={handleDuplicateById}
+            onDeleteNode={handleDeleteById}
+            canPaste={!!clipboardRef.current}
           />
 
           {/* Right Sidebar */}
