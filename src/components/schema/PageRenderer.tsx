@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { Schema, RenderMode, ThemeTokens } from '@/types/schema';
+import { ThemeProvider } from './ThemeContext';
 import { getNodeComponent, CustomComponentMap } from './NodeRegistry';
 import { EditableDropZone } from './EditableDropZone';
 import { SortableNodeWrapper } from './SortableNodeWrapper';
@@ -270,9 +271,11 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
   }, [schema.nodes]);
 
   return (
-    <div style={{ ...themeStyle, containerType: 'inline-size' as any }}>
-      {dynamicCSS && <style dangerouslySetInnerHTML={{ __html: dynamicCSS }} />}
-      {renderNode(schema.rootNodeId)}
-    </div>
+    <ThemeProvider value={schema.themeTokens}>
+      <div style={{ ...themeStyle, containerType: 'inline-size' as any }}>
+        {dynamicCSS && <style dangerouslySetInnerHTML={{ __html: dynamicCSS }} />}
+        {renderNode(schema.rootNodeId)}
+      </div>
+    </ThemeProvider>
   );
 }

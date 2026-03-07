@@ -232,6 +232,8 @@ export interface ThemeTokens {
     xl: string;
   };
   gradient?: string;
+  /** Default ProductCard layout used across the site */
+  defaultCardLayout?: 'vertical' | 'horizontal' | 'minimal' | 'overlay';
 }
 
 export interface Schema {
