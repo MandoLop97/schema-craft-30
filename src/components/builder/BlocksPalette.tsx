@@ -17,10 +17,10 @@ function DraggableBlock({ block }: { block: BlockDefinition }) {
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      className={`group flex items-center gap-2 rounded-md border bg-background px-3 py-2 text-xs cursor-grab transition-all duration-200 ${
+      className={`group flex items-center gap-2 rounded-lg px-3 py-2 text-xs cursor-grab transition-all duration-200 nxr-block-chip ${
         isDragging
           ? 'opacity-40 scale-95'
-          : 'hover:shadow-sm hover:border-primary/20 hover:scale-[1.02] active:scale-95'
+          : 'hover:scale-[1.02] active:scale-95'
       }`}
     >
       <Icon className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors duration-200" />
@@ -52,7 +52,7 @@ export function BlocksPalette({ templateType }: BlocksPaletteProps) {
           </div>
         );
       })}
-      <div className="pt-3 border-t border-border">
+      <div className="pt-3 border-t" style={{ borderColor: 'hsl(var(--border) / 0.4)' }}>
         <span className="text-[10px] text-muted-foreground font-mono">v{EDITOR_VERSION}</span>
       </div>
     </div>

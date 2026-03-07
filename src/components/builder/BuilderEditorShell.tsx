@@ -291,7 +291,13 @@ export function BuilderEditorShell({
 
         <div className="flex flex-1 overflow-hidden">
           {/* Left Sidebar */}
-          <div className="w-60 border-r bg-background flex flex-col shrink-0">
+          <div
+            className="w-60 border-r flex flex-col shrink-0 backdrop-blur-sm"
+            style={{
+              backgroundColor: 'hsl(var(--background) / 0.85)',
+              borderColor: 'hsl(var(--border) / 0.5)',
+            }}
+          >
             <Tabs defaultValue="blocks" className="flex-1 flex flex-col overflow-hidden">
               <TabsList className="mx-2 mt-2 w-auto">
                 <TabsTrigger value="blocks" className="text-xs">{locale.blocks}</TabsTrigger>
@@ -354,7 +360,13 @@ export function BuilderEditorShell({
           />
 
           {/* Right Sidebar */}
-          <div className="w-64 border-l bg-background shrink-0 overflow-hidden">
+          <div
+            className="w-64 border-l shrink-0 overflow-hidden backdrop-blur-sm"
+            style={{
+              backgroundColor: 'hsl(var(--background) / 0.85)',
+              borderColor: 'hsl(var(--border) / 0.5)',
+            }}
+          >
             {selectedNode ? (
               <ScrollArea className="h-full">
                 <Inspector
