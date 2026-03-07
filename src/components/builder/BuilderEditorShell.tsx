@@ -238,7 +238,33 @@ export function BuilderEditorShell({
   const handleUpdateProps = useCallback((props: Partial<SchemaNode['props']>) => {
     if (!selectedNodeId) return;
     updateSchema((s) => {
-      s.nodes[selectedNodeId].props = { ...s.nodes[selectedNodeId].props, ...props };
+      const node = s.nodes[selectedNodeId];
+      node.props = { ...node.props, ...props };
+
+      // ProductCard visibility toggles — propagate hidden to descendant nodes
+      if (node.type === 'ProductCard') {
+        const allDescendantIds = (id: string): string[] => {
+          const n = s.nodes[id];
+          if (!n) return [];
+          return n.children.flatMap((c) => [c, ...allDescendantIds(c)]);
+        };
+        const descendants = allDescendantIds(selectedNodeId);
+        if ('showBadge' in props) {
+          descendants.forEach((did) => {
+            if (did.endsWith('-badge') || s.nodes[did]?.type === 'Badge') {
+              s.nodes[did].hidden = props.showBadge === false;
+            }
+          });
+        }
+        if ('showOriginalPrice' in props) {
+          descendants.forEach((did) => {
+            if (did.endsWith('-old-price')) {
+              s.nodes[did].hidden = props.showOriginalPrice === false;
+            }
+          });
+        }
+      }
+
       return s;
     });
   }, [selectedNodeId, updateSchema]);

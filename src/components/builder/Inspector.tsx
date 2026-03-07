@@ -747,6 +747,14 @@ function ProductCardPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate
         <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Mostrar Botón</Label>
         <Switch checked={p.hideButton !== true} onCheckedChange={(v) => onUpdate({ hideButton: !v })} />
       </div>
+      <div className="flex items-center justify-between">
+        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Mostrar Badge</Label>
+        <Switch checked={p.showBadge !== false} onCheckedChange={(v) => onUpdate({ showBadge: v })} />
+      </div>
+      <div className="flex items-center justify-between">
+        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Mostrar Precio Original</Label>
+        <Switch checked={p.showOriginalPrice !== false} onCheckedChange={(v) => onUpdate({ showOriginalPrice: v })} />
+      </div>
     </>
   );
 }
