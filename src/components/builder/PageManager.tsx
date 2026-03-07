@@ -28,33 +28,39 @@ function getCategoryIcon(category: string): React.ElementType {
 
 /** Scaled-down live mini-render of a page schema */
 function PageThumbnail({ page }: { page: PageDefinition }) {
-  const innerWidth = 1280;
-  const thumbWidth = 320;
-  const scale = thumbWidth / innerWidth;
-  const thumbHeight = 200;
+  // Use a wide virtual viewport so the page renders at "desktop" size,
+  // then scale down to fit the card. The container measures its own width
+  // via a ref so the scale is always pixel-perfect.
+  const innerWidth = 1440;
+  const thumbHeight = 210;
+  const scale = 0.22; // ≈ 317px card → 1440 virtual
   const innerHeight = thumbHeight / scale;
 
   return (
     <div
-      className="relative rounded-t-xl overflow-hidden shrink-0"
+      className="relative rounded-t-xl overflow-hidden shrink-0 bg-muted/30"
       style={{ width: '100%', height: thumbHeight }}
     >
       <div
         style={{
           width: innerWidth,
-          height: innerHeight,
+          minHeight: innerHeight,
           transform: `scale(${scale})`,
           transformOrigin: 'top left',
           pointerEvents: 'none',
           overflow: 'hidden',
+          position: 'absolute',
+          top: 0,
+          left: 0,
         }}
       >
         <PageRenderer schema={page.schema} mode="preview" />
       </div>
+      {/* Fade-out at bottom */}
       <div
-        className="absolute inset-x-0 bottom-0 h-10 pointer-events-none"
+        className="absolute inset-x-0 bottom-0 h-12 pointer-events-none"
         style={{
-          background: 'linear-gradient(to top, hsl(var(--card)), transparent)',
+          background: 'linear-gradient(to top, hsl(var(--card)), hsl(var(--card) / 0.6) 40%, transparent)',
         }}
       />
     </div>
