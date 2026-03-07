@@ -597,6 +597,9 @@ export function BuilderEditorShell({
             onDuplicateNode={handleDuplicateById}
             onDeleteNode={handleDeleteById}
             canPaste={!!clipboardRef.current}
+            onCopyStyle={handleCopyStyleById}
+            onPasteStyle={handlePasteStyleById}
+            canPasteStyle={!!clipboardStyleRef.current}
             onRepositionNode={(nodeId, posStyle) => {
               updateSchema((s) => {
                 if (s.nodes[nodeId]) {
