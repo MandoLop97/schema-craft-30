@@ -106,7 +106,7 @@ function createProductCardComposite(): CompositeNodeTree {
     [btnId]: {
       id: btnId, type: 'Button',
       props: { text: 'Add to Cart', variant: 'outline' },
-      style: { width: '100%', marginTop: '0.25rem' },
+      style: { width: '100%', margin: '0.25rem 0 0 0' },
       children: [],
     },
   };
