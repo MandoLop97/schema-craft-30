@@ -447,7 +447,7 @@ export function LayersPanel({
               <div className="h-5 w-5 rounded flex items-center justify-center bg-primary/10">
                 <RootIcon className="h-3 w-3 text-primary" />
               </div>
-              <span className="truncate flex-1 font-semibold">{root.type}</span>
+              <span className="truncate flex-1 font-semibold">{root.customName || root.type}</span>
               <span className="text-[9px] text-muted-foreground/50 font-mono">{root.children.length}</span>
             </div>
 
