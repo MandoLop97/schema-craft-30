@@ -39,6 +39,7 @@ export function SortableNodeWrapper({ nodeId, children, isSelected, nodeType, on
     <div
       ref={setNodeRef}
       style={style}
+      data-node-id={nodeId}
       {...attributes}
       {...listeners}
       onMouseEnter={() => setHovered(true)}
