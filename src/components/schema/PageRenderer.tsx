@@ -27,6 +27,7 @@ interface PageRendererProps {
   onDeleteNode?: (nodeId: string) => void;
   canPaste?: boolean;
   onEditSection?: (nodeType: string) => void;
+  onSaveAsTemplate?: (nodeId: string) => void;
 }
 
 export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, customComponents, mockData, onCopyNode, onPasteNode, onDuplicateNode, onDeleteNode, canPaste, onEditSection }: PageRendererProps) {
