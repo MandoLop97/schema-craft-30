@@ -328,7 +328,8 @@ export function ProductGridNode({ node, mode }: NodeComponentProps) {
         style={{
           ...s(node.style),
           display: 'grid',
-          gridTemplateColumns: `repeat(${columns}, 1fr)`,
+          gridTemplateColumns: `repeat(auto-fill, minmax(250px, 1fr))`,
+          gap: (node.props.gap as string) || '1.5rem',
         }}
       >
         {Array.from({ length: Math.min(columns, 4) }).map((_, i) => (
