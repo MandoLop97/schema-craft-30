@@ -71,6 +71,7 @@ function SortableLayerItem({
   onDuplicateNode,
   onDeleteNode,
   onMoveNode,
+  onRenameNode,
   isOverTarget,
 }: {
   node: SchemaNode;
@@ -82,13 +83,17 @@ function SortableLayerItem({
   onDuplicateNode?: (nodeId: string) => void;
   onDeleteNode?: (nodeId: string) => void;
   onMoveNode?: (nodeId: string, newParentId: string, index: number) => void;
+  onRenameNode?: (nodeId: string, newName: string) => void;
   isOverTarget?: boolean;
 }) {
   const [expanded, setExpanded] = useState(depth < 2);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState('');
   const hasChildren = node.children.length > 0;
   const isSelected = selectedNodeId === node.id;
   const nodeIsContainer = isContainer(node.type);
   const Icon = getNodeIcon(node.type);
+  const displayName = node.customName || node.type;
 
   const {
     attributes,
