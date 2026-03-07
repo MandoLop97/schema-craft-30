@@ -1,5 +1,5 @@
 import {
-  ChevronDown, EyeOff, Lock, GripVertical, Copy, Trash2,
+  ChevronDown, Eye, EyeOff, Lock, GripVertical, Copy, Trash2,
   Square, Type, ImageIcon, Navigation, PanelBottom, Layers,
 } from 'lucide-react';
 import { useState, useCallback } from 'react';
@@ -34,6 +34,7 @@ interface LayersPanelProps {
   onDeleteNode?: (nodeId: string) => void;
   onMoveNode?: (nodeId: string, newParentId: string, index: number) => void;
   onRenameNode?: (nodeId: string, newName: string) => void;
+  onToggleVisibility?: (nodeId: string) => void;
 }
 
 /** Depth-based accent colors for tree lines */
@@ -72,6 +73,7 @@ function SortableLayerItem({
   onDeleteNode,
   onMoveNode,
   onRenameNode,
+  onToggleVisibility,
   isOverTarget,
 }: {
   node: SchemaNode;
@@ -84,6 +86,7 @@ function SortableLayerItem({
   onDeleteNode?: (nodeId: string) => void;
   onMoveNode?: (nodeId: string, newParentId: string, index: number) => void;
   onRenameNode?: (nodeId: string, newName: string) => void;
+  onToggleVisibility?: (nodeId: string) => void;
   isOverTarget?: boolean;
 }) {
   const [expanded, setExpanded] = useState(depth < 2);
@@ -233,6 +236,15 @@ function SortableLayerItem({
 
         {/* Action buttons */}
         <div className="flex items-center gap-0 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+          {onToggleVisibility && (
+            <button
+              className={`p-0.5 transition-colors ${node.hidden ? 'text-muted-foreground/40 hover:text-foreground' : 'text-muted-foreground hover:text-primary'}`}
+              onClick={(e) => { e.stopPropagation(); onToggleVisibility(node.id); }}
+              title={node.hidden ? 'Show' : 'Hide'}
+            >
+              {node.hidden ? <EyeOff className="h-2.5 w-2.5" /> : <Eye className="h-2.5 w-2.5" />}
+            </button>
+          )}
           {onDuplicateNode && (
             <button
               className="p-0.5 text-muted-foreground hover:text-primary transition-colors"
@@ -253,8 +265,10 @@ function SortableLayerItem({
           )}
         </div>
 
-        {/* Status icons */}
-        {node.hidden && <EyeOff className="h-2.5 w-2.5 text-muted-foreground/40 shrink-0" />}
+        {/* Persistent hidden indicator (visible even when not hovered) */}
+        {node.hidden && (
+          <EyeOff className="h-2.5 w-2.5 text-muted-foreground/40 shrink-0 group-hover:hidden" />
+        )}
         {node.locked && <Lock className="h-2.5 w-2.5 text-muted-foreground/40 shrink-0" />}
       </div>
 
@@ -271,6 +285,7 @@ function SortableLayerItem({
           onDeleteNode={onDeleteNode}
           onMoveNode={onMoveNode}
           onRenameNode={onRenameNode}
+          onToggleVisibility={onToggleVisibility}
         />
       )}
     </div>
@@ -288,6 +303,7 @@ function SortableChildrenList({
   onDeleteNode,
   onMoveNode,
   onRenameNode,
+  onToggleVisibility,
 }: {
   parentNode: SchemaNode;
   schema: Schema;
@@ -299,6 +315,7 @@ function SortableChildrenList({
   onDeleteNode?: (nodeId: string) => void;
   onMoveNode?: (nodeId: string, newParentId: string, index: number) => void;
   onRenameNode?: (nodeId: string, newName: string) => void;
+  onToggleVisibility?: (nodeId: string) => void;
 }) {
   return (
     <SortableContext
@@ -321,6 +338,7 @@ function SortableChildrenList({
             onDeleteNode={onDeleteNode}
             onMoveNode={onMoveNode}
             onRenameNode={onRenameNode}
+            onToggleVisibility={onToggleVisibility}
           />
         );
       })}
@@ -337,6 +355,7 @@ export function LayersPanel({
   onDeleteNode,
   onMoveNode,
   onRenameNode,
+  onToggleVisibility,
 }: LayersPanelProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -467,6 +486,7 @@ export function LayersPanel({
                   onDeleteNode={onDeleteNode}
                   onMoveNode={onMoveNode}
                   onRenameNode={onRenameNode}
+                  onToggleVisibility={onToggleVisibility}
                 />
               );
             })}
