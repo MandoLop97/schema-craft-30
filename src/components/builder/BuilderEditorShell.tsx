@@ -202,9 +202,28 @@ export function BuilderEditorShell({
     setSelectedNodeId(null);
   }, [selectedNodeId, schema.rootNodeId, updateSchema]);
 
+  // Duplicate selected node (recursive)
+  const handleDuplicate = useCallback(() => {
+    if (!selectedNodeId || selectedNodeId === schema.rootNodeId) return;
+    const parentNode = Object.values(schema.nodes).find((n) => n.children.includes(selectedNodeId));
+    if (!parentNode) return;
+
+    updateSchema((s) => {
+      const { newNodes, newRootId } = duplicateNodeTree(selectedNodeId, s.nodes);
+      Object.assign(s.nodes, newNodes);
+      const idx = s.nodes[parentNode.id].children.indexOf(selectedNodeId);
+      s.nodes[parentNode.id].children.splice(idx + 1, 0, newRootId);
+      return s;
+    });
+
+    toast.success('Node duplicated');
+  }, [selectedNodeId, schema.rootNodeId, schema.nodes, updateSchema]);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      const isInput = document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA';
+
       if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
         e.preventDefault();
         if (e.shiftKey) redo(); else undo();
@@ -213,14 +232,40 @@ export function BuilderEditorShell({
         e.preventDefault();
         handleSave();
       }
+      if ((e.metaKey || e.ctrlKey) && e.key === 'c' && !isInput) {
+        if (selectedNodeId && selectedNodeId !== schema.rootNodeId) {
+          clipboardRef.current = selectedNodeId;
+          toast.success('Node copied');
+        }
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === 'v' && !isInput) {
+        if (clipboardRef.current && schema.nodes[clipboardRef.current]) {
+          const sourceId = clipboardRef.current;
+          const parentNode = Object.values(schema.nodes).find((n) => n.children.includes(sourceId));
+          if (!parentNode) return;
+
+          updateSchema((s) => {
+            const { newNodes, newRootId } = duplicateNodeTree(sourceId, s.nodes);
+            Object.assign(s.nodes, newNodes);
+            const idx = s.nodes[parentNode.id].children.indexOf(sourceId);
+            s.nodes[parentNode.id].children.splice(idx + 1, 0, newRootId);
+            return s;
+          });
+          toast.success('Node pasted');
+        }
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === 'd' && !isInput) {
+        e.preventDefault();
+        handleDuplicate();
+      }
       if (e.key === 'Delete' || e.key === 'Backspace') {
-        if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') return;
+        if (isInput) return;
         if (selectedNodeId && selectedNodeId !== schema.rootNodeId) handleDelete();
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [undo, redo, handleSave, handleDelete, selectedNodeId, schema.rootNodeId]);
+  }, [undo, redo, handleSave, handleDelete, handleDuplicate, selectedNodeId, schema.rootNodeId, schema.nodes, updateSchema]);
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
