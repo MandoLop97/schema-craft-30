@@ -26,7 +26,7 @@ export { PageManager } from './components/builder/PageManager';
 export type { PageManagerProps } from './components/builder/PageManager';
 
 // Block registry — for hosts that want to inspect or extend available blocks
-export { blockRegistry, getBlockDef, getCategories, getBlocksByCategory, registerBlock, registerBlocks } from './lib/block-registry';
+export { blockRegistry, getBlockDef, getCategories, getBlocksByCategory, getCategoriesForTemplate, registerBlock, registerBlocks } from './lib/block-registry';
 export type { BlockDefinition, InspectorFieldDef } from './lib/block-registry';
 
 // Node utilities — for hosts that want to create or inspect nodes programmatically
