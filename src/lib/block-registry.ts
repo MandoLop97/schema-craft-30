@@ -36,6 +36,11 @@ export interface InspectorFieldDef {
   defaultValue?: any;
 }
 
+export interface CompositeNodeTree {
+  rootId: string;
+  nodes: Record<string, import('@/types/schema').SchemaNode>;
+}
+
 export interface BlockDefinition {
   type: NodeType;
   label: string;
@@ -48,6 +53,65 @@ export interface BlockDefinition {
   allowedChildren?: NodeType[];
   inspectorFields?: InspectorFieldDef[];
   allowedTemplateTypes?: TemplateType[];
+  /** Factory that generates a composite tree of child nodes when this block is created */
+  compositeFactory?: () => CompositeNodeTree;
+}
+
+const uid = () => `node-${Math.random().toString(36).slice(2, 9)}`;
+
+/** Composite factory for ProductCard — generates editable sub-nodes */
+function createProductCardComposite(): CompositeNodeTree {
+  const rootId = uid();
+  const imgId = uid();
+  const bodyId = uid();
+  const titleId = uid();
+  const priceRowId = uid();
+  const priceId = uid();
+  const btnId = uid();
+
+  const nodes: Record<string, import('@/types/schema').SchemaNode> = {
+    [rootId]: {
+      id: rootId, type: 'ProductCard', props: { customName: 'Product Card' },
+      style: { borderRadius: '0.75rem', overflow: 'hidden', borderWidth: '1px', borderColor: 'hsl(var(--border))', backgroundColor: 'hsl(var(--card))', transition: 'box-shadow 0.2s, transform 0.2s' },
+      children: [imgId, bodyId],
+    },
+    [imgId]: {
+      id: imgId, type: 'Image',
+      props: { src: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop', alt: 'Product' },
+      style: { width: '100%' },
+      children: [],
+    },
+    [bodyId]: {
+      id: bodyId, type: 'Stack', props: { direction: 'vertical' },
+      style: { padding: '1rem', gap: '0.5rem' },
+      children: [titleId, priceRowId, btnId],
+    },
+    [titleId]: {
+      id: titleId, type: 'Text',
+      props: { text: 'Product Name', level: 'h3' },
+      style: { fontWeight: '500', fontSize: '0.95rem' },
+      children: [],
+    },
+    [priceRowId]: {
+      id: priceRowId, type: 'Stack', props: { direction: 'horizontal' },
+      style: { gap: '0.5rem', alignItems: 'center' },
+      children: [priceId],
+    },
+    [priceId]: {
+      id: priceId, type: 'Text',
+      props: { text: '$99' },
+      style: { fontWeight: '600', fontSize: '1rem' },
+      children: [],
+    },
+    [btnId]: {
+      id: btnId, type: 'Button',
+      props: { text: 'Add to Cart', variant: 'outline' },
+      style: { width: '100%', margin: '0.25rem 0 0 0' },
+      children: [],
+    },
+  };
+
+  return { rootId, nodes };
 }
 
 // ── Category definitions for hierarchy ──
@@ -82,7 +146,7 @@ export const blockRegistry: BlockDefinition[] = [
   { type: 'FormBlock', label: 'Form', category: 'Interactive', icon: FileText, canHaveChildren: false, defaultProps: { formTitle: 'Contáctanos', formFields: [{ type: 'text', label: 'Nombre', placeholder: 'Tu nombre', required: true }, { type: 'email', label: 'Email', placeholder: 'tu@email.com', required: true }, { type: 'tel', label: 'Teléfono', placeholder: '+1 234 567 890', required: false }, { type: 'textarea', label: 'Mensaje', placeholder: 'Escribe tu mensaje...', required: false }], formBtnText: 'Enviar', formBtnVariant: 'filled' }, defaultStyle: { padding: '1.5rem' } },
 
   // ── Commerce ──
-  { type: 'ProductCard', label: 'Product Card', category: 'Commerce', icon: ShoppingBag, canHaveChildren: false, defaultProps: { text: 'Product Name', price: '$99', src: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop' }, defaultStyle: {} },
+  { type: 'ProductCard', label: 'Product Card', category: 'Commerce', icon: ShoppingBag, canHaveChildren: true, defaultProps: { text: 'Product Name', price: '$99', src: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop' }, defaultStyle: {}, compositeFactory: createProductCardComposite },
 
   // ── Site ──
   { type: 'Navbar', label: 'Navbar', category: 'Site', icon: Navigation, canHaveChildren: false, defaultProps: { logoText: 'Brand', links: [{ text: 'Home', href: '#' }] }, defaultStyle: {}, allowedParents: ['Section'], allowedTemplateTypes: ['header'] },

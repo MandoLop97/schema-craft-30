@@ -31,10 +31,10 @@ export type { PageManagerProps } from './components/builder/PageManager';
 
 // Block registry — for hosts that want to inspect or extend available blocks
 export { blockRegistry, getBlockDef, getCategories, getBlocksByCategory, getCategoriesForTemplate, registerBlock, registerBlocks } from './lib/block-registry';
-export type { BlockDefinition, InspectorFieldDef } from './lib/block-registry';
+export type { BlockDefinition, InspectorFieldDef, CompositeNodeTree } from './lib/block-registry';
 
 // Node utilities — for hosts that want to create or inspect nodes programmatically
-export { createNode, isContainerType, duplicateNodeTree } from './lib/node-factory';
+export { createNode, createNodeTree, isContainerType, duplicateNodeTree } from './lib/node-factory';
 
 // Schema utilities — for hosts that want to scaffold or validate schemas
 export { createDefaultHomeSchema } from './lib/default-schema';

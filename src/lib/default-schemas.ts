@@ -1,6 +1,95 @@
 import { Schema, SchemaNode } from '@/types/schema';
+import { CompositeNodeTree } from './block-registry';
 
 type Nodes = Record<string, SchemaNode>;
+
+/**
+ * Creates a composite ProductCard node tree with individually editable sub-elements.
+ * Returns the rootId and all generated nodes for merging into a schema.
+ */
+function productCardNodes(
+  id: string,
+  opts: { name: string; price: string; image: string; badge?: string; originalPrice?: string }
+): { rootId: string; nodes: Nodes } {
+  const imgId = `${id}-img`;
+  const bodyId = `${id}-body`;
+  const titleId = `${id}-title`;
+  const priceRowId = `${id}-prices`;
+  const priceId = `${id}-price`;
+  const oldPriceId = `${id}-old-price`;
+  const badgeId = `${id}-badge`;
+  const btnId = `${id}-btn`;
+
+  const children = [imgId, bodyId];
+  const bodyChildren = [titleId, priceRowId, btnId];
+  const priceChildren: string[] = [priceId];
+  if (opts.originalPrice) priceChildren.push(oldPriceId);
+
+  const nodes: Nodes = {
+    [id]: {
+      id, type: 'ProductCard', props: {},
+      style: { borderRadius: '0.75rem', overflow: 'hidden', borderWidth: '1px', borderColor: 'hsl(var(--border))', backgroundColor: 'hsl(var(--card))', transition: 'box-shadow 0.2s, transform 0.2s' },
+      children,
+    },
+    [imgId]: {
+      id: imgId, type: 'Image',
+      props: { src: opts.image, alt: opts.name },
+      style: { width: '100%' },
+      children: [],
+    },
+    [bodyId]: {
+      id: bodyId, type: 'Stack', props: { direction: 'vertical' },
+      style: { padding: '1rem', gap: '0.5rem' },
+      children: bodyChildren,
+    },
+    [titleId]: {
+      id: titleId, type: 'Text',
+      props: { text: opts.name, level: 'h3' },
+      style: { fontWeight: '500', fontSize: '0.95rem' },
+      children: [],
+    },
+    [priceRowId]: {
+      id: priceRowId, type: 'Stack', props: { direction: 'horizontal' },
+      style: { gap: '0.5rem', alignItems: 'center' },
+      children: priceChildren,
+    },
+    [priceId]: {
+      id: priceId, type: 'Text',
+      props: { text: opts.price },
+      style: { fontWeight: '600', fontSize: '1rem' },
+      children: [],
+    },
+    [btnId]: {
+      id: btnId, type: 'Button',
+      props: { text: 'Add to Cart', variant: 'outline' },
+      style: { width: '100%', margin: '0.25rem 0 0 0' },
+      children: [],
+    },
+  };
+
+  if (opts.badge) {
+    children.splice(1, 0, badgeId); // insert badge between image and body
+    nodes[badgeId] = {
+      id: badgeId, type: 'Badge',
+      props: { text: opts.badge },
+      style: { position: 'absolute', top: '0.75rem', left: '0.75rem' },
+      children: [],
+    };
+    // Make ProductCard root relative for absolute badge
+    nodes[id].style.position = 'relative';
+  }
+
+  if (opts.originalPrice) {
+    nodes[oldPriceId] = {
+      id: oldPriceId, type: 'Text',
+      props: { text: opts.originalPrice },
+      style: { textDecoration: 'line-through', color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem' },
+      children: [],
+    };
+  }
+
+  return { rootId: id, nodes };
+}
 
 const defaultThemeTokens = (): Schema['themeTokens'] => ({
   colors: { primary: '222.2 47.4% 11.2%', secondary: '210 40% 96.1%', background: '0 0% 100%', text: '222.2 84% 4.9%', muted: '215.4 16.3% 46.9%', border: '214.3 31.8% 91.4%', accent: '210 40% 96.1%' },
@@ -48,10 +137,10 @@ export function createHomeSchema(): Schema {
       'products-title': { id: 'products-title', type: 'Text', props: { text: 'All Products', level: 'h2' }, style: { fontSize: '1.25rem', fontWeight: '600' }, children: [] },
       'products-link': { id: 'products-link', type: 'Button', props: { text: 'View all →', href: '/products' }, style: { backgroundColor: 'transparent', color: '#111', fontSize: '0.875rem', padding: '0.5rem 1rem' }, children: [] },
       'products-grid': { id: 'products-grid', type: 'Grid', props: { columns: 4 }, style: { gap: '1.5rem' }, children: ['product-1', 'product-2', 'product-3', 'product-4'] },
-      'product-1': { id: 'product-1', type: 'ProductCard', props: { text: 'Minimal Watch', price: '$249', src: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop', badge: 'New' }, style: {}, children: [] },
-      'product-2': { id: 'product-2', type: 'ProductCard', props: { text: 'Leather Bag', price: '$189', originalPrice: '$249', src: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400&h=400&fit=crop' }, style: {}, children: [] },
-      'product-3': { id: 'product-3', type: 'ProductCard', props: { text: 'Wireless Earbuds', price: '$129', src: 'https://images.unsplash.com/photo-1590658268037-6bf12f032f55?w=400&h=400&fit=crop' }, style: {}, children: [] },
-      'product-4': { id: 'product-4', type: 'ProductCard', props: { text: 'Sunglasses', price: '$159', src: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&h=400&fit=crop', badge: 'Sale' }, style: {}, children: [] },
+      ...productCardNodes('product-1', { name: 'Minimal Watch', price: '$249', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop', badge: 'New' }).nodes,
+      ...productCardNodes('product-2', { name: 'Leather Bag', price: '$189', originalPrice: '$249', image: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400&h=400&fit=crop' }).nodes,
+      ...productCardNodes('product-3', { name: 'Wireless Earbuds', price: '$129', image: 'https://images.unsplash.com/photo-1590658268037-6bf12f032f55?w=400&h=400&fit=crop' }).nodes,
+      ...productCardNodes('product-4', { name: 'Sunglasses', price: '$159', image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&h=400&fit=crop', badge: 'Sale' }).nodes,
       'testimonials-section': { id: 'testimonials-section', type: 'Section', props: {}, style: { backgroundColor: 'hsl(210 40% 98%)', padding: '4rem 2rem' }, children: ['testimonials-title', 'testimonials-grid'] },
       'testimonials-title': { id: 'testimonials-title', type: 'Text', props: { text: 'What Our Customers Say', level: 'h2' }, style: { fontSize: '1.25rem', fontWeight: '600', textAlign: 'center', margin: '0 0 2.5rem 0' }, children: [] },
       'testimonials-grid': { id: 'testimonials-grid', type: 'Grid', props: { columns: 3 }, style: { gap: '2rem', maxWidth: '72rem', margin: '0 auto' }, children: ['testimonial-1', 'testimonial-2', 'testimonial-3'] },
@@ -83,12 +172,12 @@ export function createProductsSchema(): Schema {
       'filter-title': { id: 'filter-title', type: 'Text', props: { text: 'Filters', level: 'h3' }, style: { fontSize: '0.875rem', fontWeight: '600', margin: '0 0 1rem 0' }, children: [] },
       'filter-categories': { id: 'filter-categories', type: 'Card', props: { items: [{ title: 'Categories', description: 'Electronics • Clothing • Accessories • Home & Garden' }] }, style: { padding: '1rem', borderRadius: '0.5rem' }, children: [] },
       'products-grid': { id: 'products-grid', type: 'Grid', props: { columns: 3 }, style: { gap: '1.5rem' }, children: ['product-1', 'product-2', 'product-3', 'product-4', 'product-5', 'product-6'] },
-      'product-1': { id: 'product-1', type: 'ProductCard', props: { text: 'Minimal Watch', price: '$249', src: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop', badge: 'New' }, style: {}, children: [] },
-      'product-2': { id: 'product-2', type: 'ProductCard', props: { text: 'Leather Bag', price: '$189', originalPrice: '$249', src: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400&h=400&fit=crop' }, style: {}, children: [] },
-      'product-3': { id: 'product-3', type: 'ProductCard', props: { text: 'Wireless Earbuds', price: '$129', src: 'https://images.unsplash.com/photo-1590658268037-6bf12f032f55?w=400&h=400&fit=crop' }, style: {}, children: [] },
-      'product-4': { id: 'product-4', type: 'ProductCard', props: { text: 'Sunglasses', price: '$159', src: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&h=400&fit=crop', badge: 'Sale' }, style: {}, children: [] },
-      'product-5': { id: 'product-5', type: 'ProductCard', props: { text: 'Headphones', price: '$299', src: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop' }, style: {}, children: [] },
-      'product-6': { id: 'product-6', type: 'ProductCard', props: { text: 'Smart Speaker', price: '$99', src: 'https://images.unsplash.com/photo-1543512214-318228f4a704?w=400&h=400&fit=crop' }, style: {}, children: [] },
+      ...productCardNodes('product-1', { name: 'Minimal Watch', price: '$249', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop', badge: 'New' }).nodes,
+      ...productCardNodes('product-2', { name: 'Leather Bag', price: '$189', originalPrice: '$249', image: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400&h=400&fit=crop' }).nodes,
+      ...productCardNodes('product-3', { name: 'Wireless Earbuds', price: '$129', image: 'https://images.unsplash.com/photo-1590658268037-6bf12f032f55?w=400&h=400&fit=crop' }).nodes,
+      ...productCardNodes('product-4', { name: 'Sunglasses', price: '$159', image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&h=400&fit=crop', badge: 'Sale' }).nodes,
+      ...productCardNodes('product-5', { name: 'Headphones', price: '$299', image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop' }).nodes,
+      ...productCardNodes('product-6', { name: 'Smart Speaker', price: '$99', image: 'https://images.unsplash.com/photo-1543512214-318228f4a704?w=400&h=400&fit=crop' }).nodes,
       ...sharedFooter(),
     },
   };

@@ -3,7 +3,7 @@ import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, u
 import { arrayMove } from '@dnd-kit/sortable';
 import { useSchemaHistory } from '@/hooks/use-schema-history';
 import { Schema, NodeType, SchemaNode, PageDefinition, ThemeTokens, TemplateType } from '@/types/schema';
-import { createNode, duplicateNodeTree } from '@/lib/node-factory';
+import { createNode, createNodeTree, duplicateNodeTree } from '@/lib/node-factory';
 import { canDropInto } from '@/lib/block-registry';
 import { t } from '@/lib/i18n';
 import { TopBar } from '@/components/builder/TopBar';
@@ -140,7 +140,7 @@ export function BuilderEditorShell({
 
     if (activeData?.type === 'palette') {
       const nodeType = activeData.nodeType as NodeType;
-      const newNode = createNode(nodeType);
+      const tree = createNodeTree(nodeType);
 
       let dropped = false;
       updateSchema((s) => {
@@ -177,9 +177,16 @@ export function BuilderEditorShell({
           return canDropInto(nodeType, candidate.type, candidateId === s.rootNodeId);
         });
 
+        // Insert all nodes from the composite tree
+        const insertAllNodes = () => {
+          Object.values(tree.nodes).forEach((n) => {
+            s.nodes[n.id] = n;
+          });
+        };
+
         if (validParentId) {
-          s.nodes[newNode.id] = newNode;
-          s.nodes[validParentId].children.push(newNode.id);
+          insertAllNodes();
+          s.nodes[validParentId].children.push(tree.rootId);
           dropped = true;
           return s;
         }
@@ -188,8 +195,8 @@ export function BuilderEditorShell({
         if (canDropInto(nodeType, 'Section', false)) {
           const wrapperSection = createNode('Section');
           s.nodes[wrapperSection.id] = wrapperSection;
-          s.nodes[newNode.id] = newNode;
-          wrapperSection.children.push(newNode.id);
+          insertAllNodes();
+          wrapperSection.children.push(tree.rootId);
           s.nodes[s.rootNodeId].children.push(wrapperSection.id);
           dropped = true;
         }
@@ -198,7 +205,7 @@ export function BuilderEditorShell({
       });
 
       if (dropped) {
-        setSelectedNodeId(newNode.id);
+        setSelectedNodeId(tree.rootId);
       } else {
         toast.error(locale.cannotPlaceHere(nodeType));
       }
