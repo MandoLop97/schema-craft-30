@@ -23,7 +23,7 @@ function createHeaderSchema() {
 function createFooterSchema() {
   return {
     id: 'schema-footer', version: 1, updatedAt: new Date().toISOString(),
-    themeTokens: createDefaultHomeSchema().themeTokens, rootNodeId: 'root',
+    themeTokens: createDefaultHomeSchema().schema.themeTokens, rootNodeId: 'root',
     nodes: {
       root: { id: 'root', type: 'Section' as const, props: {}, style: { display: 'flex', flexDirection: 'column' }, children: ['footer'] },
       footer: { id: 'footer', type: 'Footer' as const, props: { logoText: 'STORE', copyright: '© 2026', links: [{ text: 'Privacy', href: '#' }] }, style: {}, children: [] },
