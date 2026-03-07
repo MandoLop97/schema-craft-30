@@ -22,7 +22,8 @@ export function SortableNodeWrapper({ nodeId, children, isSelected, nodeType, on
     data: { type: 'sortable', nodeId },
   });
 
-  const showEditButton = hovered && !isDragging && !isSelected && EDITABLE_SECTION_TYPES.has(nodeType);
+  const isEditableSection = EDITABLE_SECTION_TYPES.has(nodeType);
+  const showEditButton = isEditableSection && !isDragging && (hovered || isSelected);
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
