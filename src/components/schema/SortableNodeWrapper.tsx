@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Pencil } from 'lucide-react';
+import { Pencil, Copy, Trash2, CopyPlus, ClipboardPaste } from 'lucide-react';
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from '@/components/ui/context-menu';
 
 const EDITABLE_SECTION_TYPES = new Set([
   'Navbar', 'Footer', 'ProductCard',
@@ -13,9 +20,14 @@ interface SortableNodeWrapperProps {
   isSelected: boolean;
   nodeType: string;
   onSelect: (id: string) => void;
+  onCopy?: (id: string) => void;
+  onPaste?: (id: string) => void;
+  onDuplicate?: (id: string) => void;
+  onDelete?: (id: string) => void;
+  canPaste?: boolean;
 }
 
-export function SortableNodeWrapper({ nodeId, children, isSelected, nodeType, onSelect }: SortableNodeWrapperProps) {
+export function SortableNodeWrapper({ nodeId, children, isSelected, nodeType, onSelect, onCopy, onPaste, onDuplicate, onDelete, canPaste }: SortableNodeWrapperProps) {
   const [hovered, setHovered] = useState(false);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: nodeId,
@@ -48,7 +60,7 @@ export function SortableNodeWrapper({ nodeId, children, isSelected, nodeType, on
     }),
   };
 
-  return (
+  const innerContent = (
     <div
       ref={setNodeRef}
       style={style}
@@ -62,28 +74,13 @@ export function SortableNodeWrapper({ nodeId, children, isSelected, nodeType, on
         onSelect(nodeId);
       }}
     >
-      {/* Selected label badge */}
-      {isSelected && (
-        <div className="nxr-selection-label">
-          {nodeType}
-        </div>
-      )}
-      {/* Top accent line */}
-      {isSelected && (
-        <div className="nxr-selection-accent-top" />
-      )}
-      {/* Left accent bar */}
-      {isSelected && (
-        <div className="nxr-selection-accent-left" />
-      )}
-      {/* Hover edit button for key sections */}
+      {isSelected && <div className="nxr-selection-label">{nodeType}</div>}
+      {isSelected && <div className="nxr-selection-accent-top" />}
+      {isSelected && <div className="nxr-selection-accent-left" />}
       {showEditButton && (
         <button
           className="nxr-edit-section-btn"
-          onClick={(e) => {
-            e.stopPropagation();
-            onSelect(nodeId);
-          }}
+          onClick={(e) => { e.stopPropagation(); onSelect(nodeId); }}
           title={`Editar ${nodeType}`}
         >
           <Pencil size={13} />
@@ -92,5 +89,31 @@ export function SortableNodeWrapper({ nodeId, children, isSelected, nodeType, on
       )}
       {children}
     </div>
+  );
+
+  // Only wrap with context menu if handlers are provided
+  if (!onCopy && !onDelete) return innerContent;
+
+  return (
+    <ContextMenu>
+      <ContextMenuTrigger asChild>
+        {innerContent}
+      </ContextMenuTrigger>
+      <ContextMenuContent className="w-48">
+        <ContextMenuItem onClick={() => onCopy?.(nodeId)} className="gap-2 text-xs">
+          <Copy className="h-3.5 w-3.5" /> Copiar
+        </ContextMenuItem>
+        <ContextMenuItem onClick={() => onPaste?.(nodeId)} disabled={!canPaste} className="gap-2 text-xs">
+          <ClipboardPaste className="h-3.5 w-3.5" /> Pegar
+        </ContextMenuItem>
+        <ContextMenuItem onClick={() => onDuplicate?.(nodeId)} className="gap-2 text-xs">
+          <CopyPlus className="h-3.5 w-3.5" /> Duplicar
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem onClick={() => onDelete?.(nodeId)} className="gap-2 text-xs text-destructive focus:text-destructive">
+          <Trash2 className="h-3.5 w-3.5" /> Eliminar
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }
