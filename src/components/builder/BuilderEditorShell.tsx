@@ -138,7 +138,7 @@ export function BuilderEditorShell({
 
     const activeData = active.data.current;
 
-    if (activeData?.type === 'palette') {
+      if (activeData?.type === 'palette') {
       const nodeType = activeData.nodeType as NodeType;
       const newNode = createNode(nodeType);
 
@@ -156,6 +156,16 @@ export function BuilderEditorShell({
         const parentType = s.nodes[parentId].type;
 
         if (!canDropInto(nodeType, parentType, isRoot)) {
+          // Auto-wrap in a Section when dropping at root level
+          if (isRoot) {
+            const wrapperSection = createNode('Section');
+            s.nodes[wrapperSection.id] = wrapperSection;
+            s.nodes[newNode.id] = newNode;
+            wrapperSection.children.push(newNode.id);
+            s.nodes[parentId].children.push(wrapperSection.id);
+            dropped = true;
+            return s;
+          }
           return s;
         }
 
