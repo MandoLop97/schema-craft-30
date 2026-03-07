@@ -35,6 +35,7 @@ export interface BuilderEditorShellProps {
   onPageChange?: (slug: string) => void;
   pageTitle?: string;
   customComponents?: CustomComponentMap;
+  onBack?: () => void;
 }
 
 export function BuilderEditorShell({
