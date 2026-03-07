@@ -543,7 +543,15 @@ export function BuilderEditorShell({
         </div>
       </div>
 
-      <DragOverlay>
+      <DragOverlay
+        dropAnimation={{
+          sideEffects: defaultDropAnimationSideEffects({
+            styles: { active: { opacity: '0.4' } },
+          }),
+          duration: 300,
+          easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
+        }}
+      >
         {activeDragType && (
           <div
             className="px-3 py-2 rounded-lg text-xs font-semibold border"
