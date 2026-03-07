@@ -611,7 +611,7 @@ function ScrollAnimationControls({ node, onUpdate }: { node: SchemaNode; onUpdat
       <Separator className="my-2" />
       <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Animación al Scroll</Label>
       <div className="grid gap-1">
-        <Select value={node.props.scrollAnimation || 'none'} onValueChange={(v) => onUpdate({ scrollAnimation: v })}>
+        <Select value={node.props.scrollAnimation || 'none'} onValueChange={(v) => onUpdate({ scrollAnimation: v as any })}>
           <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="none">Ninguna</SelectItem>
