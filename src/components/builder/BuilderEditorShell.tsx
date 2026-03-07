@@ -64,6 +64,18 @@ export function BuilderEditorShell({
   const [exportOpen, setExportOpen] = useState(false);
   const clipboardRef = useRef<string | null>(null);
 
+  // Scroll to selected node on canvas when selection changes (e.g. from Layers panel)
+  useEffect(() => {
+    if (!selectedNodeId) return;
+    const timer = setTimeout(() => {
+      const el = document.querySelector(`[data-node-id="${selectedNodeId}"]`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+      }
+    }, 50);
+    return () => clearTimeout(timer);
+  }, [selectedNodeId]);
+
   const hasPages = pages && pages.length > 0;
   const activePageDef = hasPages ? pages!.find((p) => p.slug === activePage) : undefined;
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
