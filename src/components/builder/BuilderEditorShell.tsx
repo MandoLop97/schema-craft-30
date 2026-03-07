@@ -354,6 +354,7 @@ export function BuilderEditorShell({
                   onUpdateProps={handleUpdateProps}
                   onUpdateStyle={handleUpdateStyle}
                   onDelete={handleDelete}
+                  onDuplicate={handleDuplicate}
                 />
               </ScrollArea>
             ) : (

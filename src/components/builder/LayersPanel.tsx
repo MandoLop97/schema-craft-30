@@ -34,6 +34,7 @@ function SortableLayerItem({
   selectedNodeId,
   onSelectNode,
   onReorderChildren,
+  onDuplicateNode,
 }: {
   node: SchemaNode;
   schema: Schema;
@@ -41,6 +42,7 @@ function SortableLayerItem({
   selectedNodeId: string | null;
   onSelectNode: (id: string) => void;
   onReorderChildren?: (parentId: string, newChildren: string[]) => void;
+  onDuplicateNode?: (nodeId: string) => void;
 }) {
   const [expanded, setExpanded] = useState(depth < 2);
   const hasChildren = node.children.length > 0;
