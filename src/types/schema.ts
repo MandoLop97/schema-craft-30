@@ -11,7 +11,8 @@ export type BuiltInNodeType =
   | 'HeroSection'
   | 'Accordion' | 'TabsBlock' | 'VideoEmbed'
   | 'Spacer' | 'Icon' | 'SocialIcons'
-  | 'FormBlock';
+  | 'FormBlock'
+  | 'ProductGrid';
 
 /** Extensible node type — accepts all built-in types plus any custom string. */
 export type NodeType = BuiltInNodeType | (string & {});
