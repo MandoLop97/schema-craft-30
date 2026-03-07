@@ -452,6 +452,7 @@ export function BuilderEditorShell({
                   onUpdateStyle={handleUpdateStyle}
                   onDelete={handleDelete}
                   onDuplicate={handleDuplicate}
+                  onImageUpload={onImageUpload}
                 />
               </ScrollArea>
             ) : (
