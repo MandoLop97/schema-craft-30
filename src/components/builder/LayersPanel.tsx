@@ -485,6 +485,7 @@ export function LayersPanel({
                   onDeleteNode={onDeleteNode}
                   onMoveNode={onMoveNode}
                   onRenameNode={onRenameNode}
+                  onToggleVisibility={onToggleVisibility}
                 />
               );
             })}
