@@ -355,6 +355,7 @@ export function LayersPanel({
   onDeleteNode,
   onMoveNode,
   onRenameNode,
+  onToggleVisibility,
 }: LayersPanelProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
