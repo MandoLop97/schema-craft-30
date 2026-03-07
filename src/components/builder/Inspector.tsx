@@ -326,7 +326,7 @@ function PropsTab({ node, onUpdateProps, onUpdateStyle }: { node: SchemaNode; on
         <>
           <div className="grid gap-1">
             <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Display</Label>
-            <Select value={node.style.display || 'block'} onValueChange={(v) => onUpdateProps({} as any) || onUpdateStyle?.({ display: v as any })}>
+            <Select value={node.style.display || 'block'} onValueChange={(v) => onUpdateStyle({ display: v as any })}>
               <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {['block', 'flex', 'grid'].map((v) => (
