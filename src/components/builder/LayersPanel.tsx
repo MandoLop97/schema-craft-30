@@ -466,6 +466,7 @@ export function LayersPanel({
                   onDuplicateNode={onDuplicateNode}
                   onDeleteNode={onDeleteNode}
                   onMoveNode={onMoveNode}
+                  onRenameNode={onRenameNode}
                 />
               );
             })}
