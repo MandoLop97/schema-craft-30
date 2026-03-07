@@ -313,7 +313,7 @@ function VideoEmbedPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate:
   );
 }
 
-function PropsTab({ node, onUpdateProps }: { node: SchemaNode; onUpdateProps: (p: Partial<NodeProps>) => void }) {
+function PropsTab({ node, onUpdateProps, onUpdateStyle }: { node: SchemaNode; onUpdateProps: (p: Partial<NodeProps>) => void; onUpdateStyle: (s: Partial<NodeStyle>) => void }) {
   const p = node.props;
   return (
     <div className="space-y-3 p-3">
