@@ -15,7 +15,7 @@ import { PublishDialog, PublishPayload } from '@/components/builder/PublishDialo
 import { PreviewDialog } from '@/components/builder/PreviewDialog';
 import { ExportDialog } from '@/components/builder/ExportDialog';
 import { BuilderCanvas } from '@/components/builder/BuilderCanvas';
-import { PageManager } from '@/components/builder/PageManager';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
