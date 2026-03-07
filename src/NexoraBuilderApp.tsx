@@ -33,6 +33,10 @@ export interface NexoraBuilderAppProps {
   customStylesheets?: string[];
   /** Raw CSS string to inject into the canvas */
   customCSS?: string;
+  /** Callback for image uploads from inspector fields */
+  onImageUpload?: (file: File) => Promise<string>;
+  /** Resolve asset paths to full URLs */
+  resolveAssetUrl?: (path: string) => string;
 }
 
 export function NexoraBuilderApp({
