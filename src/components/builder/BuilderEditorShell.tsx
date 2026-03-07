@@ -573,6 +573,10 @@ export function BuilderEditorShell({
                     onUpdate={(tokens) => {
                       updateSchema((s) => { s.themeTokens = tokens; return s; });
                     }}
+                    globalStyles={schema.globalStyles}
+                    onUpdateGlobalStyles={(styles) => {
+                      updateSchema((s) => { s.globalStyles = styles; return s; });
+                    }}
                   />
                 </TabsContent>
               </ScrollArea>
