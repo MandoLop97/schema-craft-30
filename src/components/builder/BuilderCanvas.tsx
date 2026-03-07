@@ -21,6 +21,7 @@ interface BuilderCanvasProps {
   onDeleteNode?: (nodeId: string) => void;
   canPaste?: boolean;
   onEditSection?: (nodeType: string) => void;
+  onSaveAsTemplate?: (nodeId: string) => void;
 }
 
 const DEVICE_WIDTHS = {
