@@ -4,8 +4,8 @@ import { CSS } from '@dnd-kit/utilities';
 import { Pencil } from 'lucide-react';
 
 const EDITABLE_SECTION_TYPES = new Set([
-  'navbar', 'footer', 'product-card', 'hero-section', 'feature-bar',
-  'announcement-bar', 'newsletter', 'testimonial',
+  'Navbar', 'Footer', 'ProductCard', 'HeroSection', 'FeatureBar',
+  'AnnouncementBar', 'Newsletter', 'Testimonial', 'Section', 'Grid',
 ]);
 
 interface SortableNodeWrapperProps {
