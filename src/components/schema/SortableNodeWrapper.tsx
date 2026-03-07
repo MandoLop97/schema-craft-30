@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { Pencil } from 'lucide-react';
+
+const EDITABLE_SECTION_TYPES = new Set([
+  'navbar', 'footer', 'product-card', 'hero-section', 'feature-bar',
+  'announcement-bar', 'newsletter', 'testimonial',
+]);
 
 interface SortableNodeWrapperProps {
   nodeId: string;
@@ -16,6 +22,8 @@ export function SortableNodeWrapper({ nodeId, children, isSelected, nodeType, on
     id: nodeId,
     data: { type: 'sortable', nodeId },
   });
+
+  const showEditButton = hovered && !isDragging && !isSelected && EDITABLE_SECTION_TYPES.has(nodeType);
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
@@ -67,6 +75,20 @@ export function SortableNodeWrapper({ nodeId, children, isSelected, nodeType, on
       {/* Left accent bar */}
       {isSelected && (
         <div className="nxr-selection-accent-left" />
+      )}
+      {/* Hover edit button for key sections */}
+      {showEditButton && (
+        <button
+          className="nxr-edit-section-btn"
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelect(nodeId);
+          }}
+          title={`Editar ${nodeType}`}
+        >
+          <Pencil size={13} />
+          <span>Editar</span>
+        </button>
       )}
       {children}
     </div>
