@@ -117,6 +117,9 @@ export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode, cu
           onEditSection={onEditSection}
           onSaveAsTemplate={onSaveAsTemplate}
           onRepositionNode={onRepositionNode}
+          onCopyStyle={onCopyStyle}
+          onPasteStyle={onPasteStyle}
+          canPasteStyle={canPasteStyle}
         />
       </div>
     </div>
