@@ -523,6 +523,7 @@ export function BuilderEditorShell({
             mockData={activePageDef?.mockData}
             customStylesheets={customStylesheets}
             customCSS={customCSS}
+            customScripts={customScripts}
             onCopyNode={handleCopyById}
             onPasteNode={handlePasteById}
             onDuplicateNode={handleDuplicateById}

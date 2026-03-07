@@ -175,6 +175,7 @@ export function NexoraBuilderApp({
         onBack={hasPages ? () => onPageChange?.('') : undefined}
         customStylesheets={customStylesheets}
         customCSS={customCSS}
+        customScripts={customScripts}
         onImageUpload={onImageUpload}
         resolveAssetUrl={resolveAssetUrl}
       />
