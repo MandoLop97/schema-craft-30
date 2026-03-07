@@ -304,3 +304,84 @@ All colors MUST be HSL.
   background-size: 16px 16px;
   background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
 }
+
+/* ═══════════════════════════════════════════════════════
+   Responsive Container Queries for rendered nodes
+   These react to the canvas width (via container-type: inline-size)
+   ensuring responsiveness inside the builder AND the final site.
+   ═══════════════════════════════════════════════════════ */
+
+/* Navbar — stack on small */
+@container (max-width: 600px) {
+  .nxr-navbar {
+    flex-wrap: wrap;
+    padding: 0.75rem 1rem !important;
+    gap: 0.5rem;
+  }
+  .nxr-navbar-links {
+    gap: 1rem !important;
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Hero — reduce padding on small */
+@container (max-width: 600px) {
+  .nxr-hero {
+    min-height: 24rem !important;
+    padding: 2.5rem 1rem !important;
+  }
+  .nxr-hero-btn,
+  .nxr-hero-btn-secondary {
+    padding: 0.75rem 1.5rem !important;
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Feature bar — column on small */
+@container (max-width: 600px) {
+  .nxr-feature-bar {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem !important;
+    padding: 1rem !important;
+  }
+}
+
+/* Newsletter — stack form on small */
+@container (max-width: 480px) {
+  .nxr-newsletter {
+    padding: 2rem 1rem !important;
+  }
+  .nxr-newsletter-form {
+    flex-direction: column;
+  }
+}
+
+/* Footer — center on small */
+@container (max-width: 600px) {
+  .nxr-footer {
+    padding: 2rem 1rem !important;
+  }
+  .nxr-footer-inner {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+}
+
+/* Announcement — smaller text on small */
+@container (max-width: 480px) {
+  .nxr-announcement {
+    font-size: 0.75rem !important;
+    padding: 0.5rem 0.75rem !important;
+  }
+}
+
+/* Feature description — hide on very small */
+@container (max-width: 400px) {
+  .nxr-feature-desc {
+    display: none;
+  }
+}
