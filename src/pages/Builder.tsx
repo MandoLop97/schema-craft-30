@@ -212,7 +212,7 @@ export default function Builder() {
       onPageChange={setActivePage}
       onSave={handleSave}
       onSaveWithSlug={handleSaveWithSlug}
-      onPreview={() => navigate(`/preview?page=${activePage}`)}
+      onPreview={() => navigate(`/preview/${activePage || 'home'}`)}
       onExport={() => navigate(`/admin/export?page=${activePage}`)}
       onPublishSubmit={handlePublishSubmit}
     />
