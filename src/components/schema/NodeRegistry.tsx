@@ -48,6 +48,7 @@ const registry: Record<NodeType, NodeComponent> = {
   Icon: IconNode,
   SocialIcons: SocialIconsNode,
   FormBlock: FormBlockNode,
+  ProductGrid: ProductGridNode,
 };
 
 export function getNodeComponent(type: NodeType, customComponents?: CustomComponentMap): NodeComponent | undefined {

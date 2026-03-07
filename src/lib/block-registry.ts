@@ -213,7 +213,7 @@ export function canDropInto(childType: NodeType, parentType: NodeType, isRoot: b
   if (!parentDef.canHaveChildren && !isRoot) return false;
 
   if (isRoot) {
-    const rootAllowed: NodeType[] = [...LAYOUT_TYPES, ...SITE_TYPES, 'HeroSection', 'NewsletterSection', 'FeatureBar', 'Accordion', 'TabsBlock', 'VideoEmbed'];
+    const rootAllowed: NodeType[] = [...LAYOUT_TYPES, ...SITE_TYPES, 'HeroSection', 'NewsletterSection', 'FeatureBar', 'Accordion', 'TabsBlock', 'VideoEmbed', 'ProductGrid'];
     return rootAllowed.includes(childType);
   }
 
