@@ -298,7 +298,6 @@ export function BuilderEditorShell({
                 <TabsTrigger value="blocks" className="text-xs">{locale.blocks}</TabsTrigger>
                 <TabsTrigger value="layers" className="text-xs">{locale.layers}</TabsTrigger>
                 <TabsTrigger value="theme" className="text-xs">{locale.theme}</TabsTrigger>
-                {hasPages && <TabsTrigger value="pages" className="text-xs">{locale.pages}</TabsTrigger>}
               </TabsList>
               <ScrollArea className="flex-1">
                 <TabsContent value="blocks" className="mt-0">
@@ -318,9 +317,6 @@ export function BuilderEditorShell({
                       });
                     }}
                     onDuplicateNode={(nodeId) => {
-                      const prev = selectedNodeId;
-                      setSelectedNodeId(nodeId);
-                      // Use a micro-task to ensure selectedNodeId is set
                       const parentNode = Object.values(schema.nodes).find((n) => n.children.includes(nodeId));
                       if (!parentNode) return;
                       updateSchema((s) => {
@@ -342,15 +338,6 @@ export function BuilderEditorShell({
                     }}
                   />
                 </TabsContent>
-                {hasPages && (
-                  <TabsContent value="pages" className="mt-0">
-                    <PageManager
-                      pages={pages!}
-                      activePage={activePage}
-                      onSelectPage={(slug) => onPageChange?.(slug)}
-                    />
-                  </TabsContent>
-                )}
               </ScrollArea>
             </Tabs>
           </div>
