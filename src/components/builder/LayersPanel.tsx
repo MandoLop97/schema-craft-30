@@ -301,6 +301,7 @@ export function LayersPanel({
                 selectedNodeId={selectedNodeId}
                 onSelectNode={onSelectNode}
                 onReorderChildren={onReorderChildren}
+                onDuplicateNode={onDuplicateNode}
               />
             );
           })}
