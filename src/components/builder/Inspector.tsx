@@ -1049,10 +1049,10 @@ function StyleTab({ node, onUpdateStyle, onUpdateCustomCSS }: { node: SchemaNode
   const renderSelect = (label: string, key: keyof NodeStyle, options: string[]) => (
     <div key={key} className="grid gap-1">
       <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</Label>
-      <Select value={(st as any)[key] || ''} onValueChange={(v) => onUpdateStyle({ [key]: v || undefined })}>
+      <Select value={(st as any)[key] || '__none__'} onValueChange={(v) => onUpdateStyle({ [key]: v === '__none__' ? undefined : v })}>
         <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="—" /></SelectTrigger>
         <SelectContent>
-          <SelectItem value="">—</SelectItem>
+          <SelectItem value="__none__">—</SelectItem>
           {options.map((o) => (<SelectItem key={o} value={o}>{o}</SelectItem>))}
         </SelectContent>
       </Select>
