@@ -28,7 +28,7 @@ interface PageRendererProps {
   canPaste?: boolean;
 }
 
-export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, customComponents, mockData }: PageRendererProps) {
+export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, customComponents, mockData, onCopyNode, onPasteNode, onDuplicateNode, onDeleteNode, canPaste }: PageRendererProps) {
   const renderNode = (nodeId: string): React.ReactNode => {
     const node = schema.nodes[nodeId];
     if (!node || node.hidden) return null;
