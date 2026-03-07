@@ -53,7 +53,7 @@ export interface BlockDefinition {
 // ── Category definitions for hierarchy ──
 const LAYOUT_TYPES: NodeType[] = ['Section', 'Container', 'Grid', 'Stack'];
 const SITE_TYPES: NodeType[] = ['Navbar', 'Footer', 'AnnouncementBar'];
-const CONTENT_TYPES: NodeType[] = ['Text', 'Image', 'Divider', 'Badge', 'Button', 'Card', 'Input', 'ProductCard', 'TestimonialCard', 'NewsletterSection', 'FeatureBar', 'HeroSection', 'Accordion', 'TabsBlock', 'VideoEmbed'];
+const CONTENT_TYPES: NodeType[] = ['Text', 'Image', 'Divider', 'Badge', 'Spacer', 'Icon', 'SocialIcons', 'Button', 'Card', 'Input', 'ProductCard', 'TestimonialCard', 'NewsletterSection', 'FeatureBar', 'HeroSection', 'Accordion', 'TabsBlock', 'VideoEmbed'];
 
 export const blockRegistry: BlockDefinition[] = [
   // ── Layout ──

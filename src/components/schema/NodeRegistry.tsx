@@ -44,6 +44,9 @@ const registry: Record<NodeType, NodeComponent> = {
   Accordion: AccordionNode,
   TabsBlock: TabsBlockNode,
   VideoEmbed: VideoEmbedNode,
+  Spacer: SpacerNode,
+  Icon: IconNode,
+  SocialIcons: SocialIconsNode,
 };
 
 export function getNodeComponent(type: NodeType, customComponents?: CustomComponentMap): NodeComponent | undefined {
