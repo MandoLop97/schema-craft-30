@@ -487,6 +487,15 @@ export function BuilderEditorShell({
             onDuplicateNode={handleDuplicateById}
             onDeleteNode={handleDeleteById}
             canPaste={!!clipboardRef.current}
+            onEditSection={(nodeType) => {
+              if (!onPageChange || !pages) return;
+              const typeToSlug: Record<string, string> = { Navbar: 'header', Footer: 'footer' };
+              const slug = typeToSlug[nodeType];
+              if (slug) {
+                const page = pages.find((p) => p.slug === slug || p.templateType === (nodeType === 'Navbar' ? 'header' : 'footer'));
+                if (page) onPageChange(page.slug);
+              }
+            }}
           />
 
           {/* Right Sidebar */}
