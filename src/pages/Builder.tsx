@@ -62,7 +62,7 @@ const DEMO_PAGES: PageDefinition[] = [
   {
     slug: '__template/product-card', title: 'Product Card', schema: createProductCardSchema(),
     templateType: 'component', category: 'Templates',
-    canvasSize: { width: 350, height: 450 },
+    canvasSize: { width: 400, height: 620 },
     mockData: { product: { name: 'Demo Product', price: 29.99, image: '/placeholder.svg', rating: 4.5 } },
   },
 ];
