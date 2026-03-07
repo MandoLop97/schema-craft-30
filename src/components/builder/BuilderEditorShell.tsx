@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors, closestCenter } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors, closestCenter, type DropAnimation, defaultDropAnimationSideEffects } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { useSchemaHistory } from '@/hooks/use-schema-history';
 import { Schema, NodeType, SchemaNode, PageDefinition, ThemeTokens, TemplateType } from '@/types/schema';
@@ -138,7 +138,7 @@ export function BuilderEditorShell({
 
     const activeData = active.data.current;
 
-    if (activeData?.type === 'palette') {
+      if (activeData?.type === 'palette') {
       const nodeType = activeData.nodeType as NodeType;
       const newNode = createNode(nodeType);
 
@@ -156,6 +156,16 @@ export function BuilderEditorShell({
         const parentType = s.nodes[parentId].type;
 
         if (!canDropInto(nodeType, parentType, isRoot)) {
+          // Auto-wrap in a Section when dropping at root level
+          if (isRoot) {
+            const wrapperSection = createNode('Section');
+            s.nodes[wrapperSection.id] = wrapperSection;
+            s.nodes[newNode.id] = newNode;
+            wrapperSection.children.push(newNode.id);
+            s.nodes[parentId].children.push(wrapperSection.id);
+            dropped = true;
+            return s;
+          }
           return s;
         }
 
@@ -533,7 +543,15 @@ export function BuilderEditorShell({
         </div>
       </div>
 
-      <DragOverlay>
+      <DragOverlay
+        dropAnimation={{
+          sideEffects: defaultDropAnimationSideEffects({
+            styles: { active: { opacity: '0.4' } },
+          }),
+          duration: 300,
+          easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
+        }}
+      >
         {activeDragType && (
           <div
             className="px-3 py-2 rounded-lg text-xs font-semibold border"
