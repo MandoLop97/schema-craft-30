@@ -234,19 +234,67 @@ export function BuilderEditorShell({
   // Duplicate selected node (recursive)
   const handleDuplicate = useCallback(() => {
     if (!selectedNodeId || selectedNodeId === schema.rootNodeId) return;
-    const parentNode = Object.values(schema.nodes).find((n) => n.children.includes(selectedNodeId));
+    handleDuplicateById(selectedNodeId);
+  }, [selectedNodeId, schema.rootNodeId]);
+
+  const handleDuplicateById = useCallback((nodeId: string) => {
+    if (!nodeId || nodeId === schema.rootNodeId) return;
+    const parentNode = Object.values(schema.nodes).find((n) => n.children.includes(nodeId));
     if (!parentNode) return;
 
     updateSchema((s) => {
-      const { newNodes, newRootId } = duplicateNodeTree(selectedNodeId, s.nodes);
+      const { newNodes, newRootId } = duplicateNodeTree(nodeId, s.nodes);
       Object.assign(s.nodes, newNodes);
-      const idx = s.nodes[parentNode.id].children.indexOf(selectedNodeId);
+      const idx = s.nodes[parentNode.id].children.indexOf(nodeId);
       s.nodes[parentNode.id].children.splice(idx + 1, 0, newRootId);
       return s;
     });
 
     toast.success('Node duplicated');
-  }, [selectedNodeId, schema.rootNodeId, schema.nodes, updateSchema]);
+  }, [schema.rootNodeId, schema.nodes, updateSchema]);
+
+  const handleDeleteById = useCallback((nodeId: string) => {
+    if (!nodeId || nodeId === schema.rootNodeId) return;
+    updateSchema((s) => {
+      for (const node of Object.values(s.nodes)) {
+        const idx = node.children.indexOf(nodeId);
+        if (idx !== -1) { node.children.splice(idx, 1); break; }
+      }
+      const removeRecursive = (id: string) => {
+        const n = s.nodes[id];
+        if (n) { n.children.forEach(removeRecursive); delete s.nodes[id]; }
+      };
+      removeRecursive(nodeId);
+      return s;
+    });
+    if (selectedNodeId === nodeId) setSelectedNodeId(null);
+    toast.success('Node deleted');
+  }, [schema.rootNodeId, updateSchema, selectedNodeId]);
+
+  const handleCopyById = useCallback((nodeId: string) => {
+    if (nodeId && nodeId !== schema.rootNodeId) {
+      clipboardRef.current = nodeId;
+      toast.success('Node copied');
+    }
+  }, [schema.rootNodeId]);
+
+  const handlePasteById = useCallback((nodeId: string) => {
+    if (clipboardRef.current && schema.nodes[clipboardRef.current]) {
+      const sourceId = clipboardRef.current;
+      // Paste as sibling of target node
+      const parentNode = Object.values(schema.nodes).find((n) => n.children.includes(nodeId));
+      if (!parentNode) return;
+
+      updateSchema((s) => {
+        const { newNodes, newRootId } = duplicateNodeTree(sourceId, s.nodes);
+        Object.assign(s.nodes, newNodes);
+        const idx = s.nodes[parentNode.id].children.indexOf(nodeId);
+        s.nodes[parentNode.id].children.splice(idx + 1, 0, newRootId);
+        return s;
+      });
+      toast.success('Node pasted');
+    }
+  }, [schema.nodes, updateSchema]);
 
   // Keyboard shortcuts
   useEffect(() => {
