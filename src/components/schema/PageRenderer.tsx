@@ -11,12 +11,9 @@ interface PageRendererProps {
   mode: RenderMode;
   selectedNodeId?: string | null;
   onSelectNode?: (nodeId: string) => void;
-  /**
-   * Optional map of custom React components provided by the host.
-   * Keys are NodeType strings; values are React components that receive NodeComponentProps.
-   * Custom components take priority over built-in renderers.
-   */
   customComponents?: CustomComponentMap;
+  /** Mock data passed to custom components in edit/preview mode */
+  mockData?: Record<string, any>;
 }
 
 export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, customComponents }: PageRendererProps) {
