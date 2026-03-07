@@ -28,9 +28,10 @@ interface PageRendererProps {
   canPaste?: boolean;
   onEditSection?: (nodeType: string) => void;
   onSaveAsTemplate?: (nodeId: string) => void;
+  onRepositionNode?: (nodeId: string, style: { top?: string; left?: string; right?: string; bottom?: string }) => void;
 }
 
-export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, customComponents, mockData, onCopyNode, onPasteNode, onDuplicateNode, onDeleteNode, canPaste, onEditSection, onSaveAsTemplate }: PageRendererProps) {
+export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, customComponents, mockData, onCopyNode, onPasteNode, onDuplicateNode, onDeleteNode, canPaste, onEditSection, onSaveAsTemplate, onRepositionNode }: PageRendererProps) {
   const renderNode = (nodeId: string): React.ReactNode => {
     const node = schema.nodes[nodeId];
     if (!node || node.hidden) return null;
@@ -83,6 +84,8 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
                 canPaste={canPaste}
                 onEditSection={onEditSection}
                 onSaveAsTemplate={onSaveAsTemplate}
+                nodeStyle={childNode.style}
+                onRepositionNode={onRepositionNode}
               >
                 {wrappedChild}
               </SortableNodeWrapper>
@@ -134,6 +137,8 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
                 canPaste={canPaste}
                 onEditSection={onEditSection}
                 onSaveAsTemplate={onSaveAsTemplate}
+                nodeStyle={childNode.style}
+                onRepositionNode={onRepositionNode}
               >
                 {wrappedChild}
               </SortableNodeWrapper>

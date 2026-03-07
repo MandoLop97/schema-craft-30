@@ -567,6 +567,18 @@ export function BuilderEditorShell({
             onDuplicateNode={handleDuplicateById}
             onDeleteNode={handleDeleteById}
             canPaste={!!clipboardRef.current}
+            onRepositionNode={(nodeId, posStyle) => {
+              updateSchema((s) => {
+                if (s.nodes[nodeId]) {
+                  const cleaned = { ...s.nodes[nodeId].style, ...posStyle };
+                  Object.keys(cleaned).forEach((k) => {
+                    if ((cleaned as any)[k] === undefined || (cleaned as any)[k] === '') delete (cleaned as any)[k];
+                  });
+                  s.nodes[nodeId].style = cleaned;
+                }
+                return s;
+              });
+            }}
             onEditSection={activePageDef?.templateType === 'page' ? (nodeType) => {
               if (!onPageChange || !pages) return;
               const typeToSlug: Record<string, string> = { Navbar: 'header', Footer: 'footer', ProductCard: 'component' };

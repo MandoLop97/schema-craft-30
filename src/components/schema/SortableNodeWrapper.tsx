@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Pencil, Copy, Trash2, CopyPlus, ClipboardPaste, Save } from 'lucide-react';
+import { Pencil, Copy, Trash2, CopyPlus, ClipboardPaste, Save, Move } from 'lucide-react';
 import {
   ContextMenu,
   ContextMenuContent,
@@ -27,9 +27,13 @@ interface SortableNodeWrapperProps {
   canPaste?: boolean;
   onEditSection?: (nodeType: string) => void;
   onSaveAsTemplate?: (nodeId: string) => void;
+  /** Pass the node's position-related styles so the wrapper can inherit absolute/fixed positioning */
+  nodeStyle?: { position?: string; top?: string; left?: string; right?: string; bottom?: string; zIndex?: string };
+  /** Callback to update node position when dragging absolute/fixed elements */
+  onRepositionNode?: (nodeId: string, style: { top?: string; left?: string; right?: string; bottom?: string }) => void;
 }
 
-export function SortableNodeWrapper({ nodeId, children, isSelected, nodeType, onSelect, onCopy, onPaste, onDuplicate, onDelete, canPaste, onEditSection, onSaveAsTemplate }: SortableNodeWrapperProps) {
+export function SortableNodeWrapper({ nodeId, children, isSelected, nodeType, onSelect, onCopy, onPaste, onDuplicate, onDelete, canPaste, onEditSection, onSaveAsTemplate, nodeStyle, onRepositionNode }: SortableNodeWrapperProps) {
   const [hovered, setHovered] = useState(false);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: nodeId,
@@ -39,12 +43,101 @@ export function SortableNodeWrapper({ nodeId, children, isSelected, nodeType, on
   const isEditableSection = EDITABLE_SECTION_TYPES.has(nodeType);
   const showEditButton = isEditableSection && !isDragging && (hovered || isSelected);
 
+  // If the node has absolute/fixed positioning, apply it to the wrapper so it positions correctly
+  const isAbsoluteOrFixed = nodeStyle?.position === 'absolute' || nodeStyle?.position === 'fixed';
+
+  // ── Visual drag repositioning for absolute/fixed elements ──
+  const [isDraggingPosition, setIsDraggingPosition] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const dragStartRef = useRef<{ x: number; y: number; startTop: number; startLeft: number; parentW: number; parentH: number } | null>(null);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+
+  const handleDragHandleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (!isAbsoluteOrFixed || !onRepositionNode) return;
+    e.stopPropagation();
+    e.preventDefault();
+
+    const el = wrapperRef.current;
+    if (!el) return;
+    const parent = el.offsetParent as HTMLElement;
+    if (!parent) return;
+
+    const parentRect = parent.getBoundingClientRect();
+    const elRect = el.getBoundingClientRect();
+
+    dragStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      startTop: elRect.top - parentRect.top,
+      startLeft: elRect.left - parentRect.left,
+      parentW: parentRect.width,
+      parentH: parentRect.height,
+    };
+
+    setIsDraggingPosition(true);
+    setDragOffset({ x: 0, y: 0 });
+  }, [isAbsoluteOrFixed, onRepositionNode]);
+
+  useEffect(() => {
+    if (!isDraggingPosition) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!dragStartRef.current) return;
+      const dx = e.clientX - dragStartRef.current.x;
+      const dy = e.clientY - dragStartRef.current.y;
+      setDragOffset({ x: dx, y: dy });
+    };
+
+    const handleMouseUp = (e: MouseEvent) => {
+      if (!dragStartRef.current || !onRepositionNode) return;
+      const { startTop, startLeft, parentW, parentH, x, y } = dragStartRef.current;
+      const dx = e.clientX - x;
+      const dy = e.clientY - y;
+
+      const newTopPx = startTop + dy;
+      const newLeftPx = startLeft + dx;
+
+      // Convert to percentage of parent
+      const topPct = Math.round((newTopPx / parentH) * 1000) / 10;
+      const leftPct = Math.round((newLeftPx / parentW) * 1000) / 10;
+
+      onRepositionNode(nodeId, {
+        top: `${topPct}%`,
+        left: `${leftPct}%`,
+        right: undefined,
+        bottom: undefined,
+      });
+
+      setIsDraggingPosition(false);
+      setDragOffset({ x: 0, y: 0 });
+      dragStartRef.current = null;
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDraggingPosition, nodeId, onRepositionNode]);
+
   const style: React.CSSProperties = {
-    transform: CSS.Transform.toString(transform),
-    transition: transition || 'box-shadow 250ms cubic-bezier(.4,0,.2,1), opacity 200ms ease, transform 200ms ease, outline 250ms cubic-bezier(.4,0,.2,1)',
+    transform: isDraggingPosition
+      ? `translate(${dragOffset.x}px, ${dragOffset.y}px)`
+      : CSS.Transform.toString(transform),
+    transition: isDraggingPosition
+      ? 'none'
+      : transition || 'box-shadow 250ms cubic-bezier(.4,0,.2,1), opacity 200ms ease, transform 200ms ease, outline 250ms cubic-bezier(.4,0,.2,1)',
     opacity: isDragging ? 0.45 : 1,
     cursor: isDragging ? 'grabbing' : 'grab',
-    position: 'relative',
+    position: isAbsoluteOrFixed ? nodeStyle!.position as any : 'relative',
+    ...(isAbsoluteOrFixed && {
+      top: nodeStyle?.top,
+      left: nodeStyle?.left,
+      right: nodeStyle?.right,
+      bottom: nodeStyle?.bottom,
+      zIndex: nodeStyle?.zIndex,
+    }),
     borderRadius: '4px',
     outline: isSelected
       ? '2px solid hsl(var(--primary) / 0.6)'
@@ -60,15 +153,28 @@ export function SortableNodeWrapper({ nodeId, children, isSelected, nodeType, on
       outline: '2px solid hsl(var(--primary) / 0.3)',
       boxShadow: '0 12px 32px hsl(var(--foreground) / 0.1), 0 0 0 1px hsl(var(--primary) / 0.15)',
     }),
+    ...(isDraggingPosition && {
+      outline: '2px solid hsl(var(--primary) / 0.8)',
+      boxShadow: '0 8px 24px hsl(var(--primary) / 0.15)',
+      cursor: 'move',
+    }),
   };
+
+  // For absolute/fixed nodes, don't use DnD sortable listeners (they conflict with position drag)
+  const effectiveListeners = isAbsoluteOrFixed ? {} : listeners;
+
+  const setRefs = useCallback((el: HTMLDivElement | null) => {
+    setNodeRef(el);
+    wrapperRef.current = el;
+  }, [setNodeRef]);
 
   const innerContent = (
     <div
-      ref={setNodeRef}
+      ref={setRefs}
       style={style}
       data-node-id={nodeId}
       {...attributes}
-      {...listeners}
+      {...effectiveListeners}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onClick={(e) => {
@@ -79,6 +185,33 @@ export function SortableNodeWrapper({ nodeId, children, isSelected, nodeType, on
       {isSelected && <div className="nxr-selection-label">{nodeType}</div>}
       {isSelected && <div className="nxr-selection-accent-top" />}
       {isSelected && <div className="nxr-selection-accent-left" />}
+      {/* Drag handle for absolute/fixed positioned elements */}
+      {isAbsoluteOrFixed && isSelected && onRepositionNode && (
+        <div
+          className="nxr-position-drag-handle"
+          onMouseDown={handleDragHandleMouseDown}
+          title="Arrastrar para reposicionar"
+          style={{
+            position: 'absolute',
+            top: -8,
+            right: -8,
+            width: 22,
+            height: 22,
+            borderRadius: '50%',
+            backgroundColor: 'hsl(var(--primary))',
+            color: 'hsl(var(--primary-foreground))',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'move',
+            zIndex: 50,
+            boxShadow: '0 2px 8px hsl(var(--foreground) / 0.15)',
+            border: '2px solid hsl(var(--background))',
+          }}
+        >
+          <Move size={11} />
+        </div>
+      )}
       {showEditButton && (
         <button
           className="nxr-edit-section-btn"
