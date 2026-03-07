@@ -271,7 +271,7 @@ export function BuilderEditorShell({
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <div className={`h-screen flex flex-col bg-background overflow-hidden ${className || ''}`}>
+      <div className={`h-screen flex flex-col bg-background overflow-hidden nxr-view-enter ${className || ''}`}>
         <TopBar
           onSave={handleSave}
           onUndo={undo}
