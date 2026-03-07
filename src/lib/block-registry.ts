@@ -57,6 +57,63 @@ export interface BlockDefinition {
   compositeFactory?: () => CompositeNodeTree;
 }
 
+const uid = () => `node-${Math.random().toString(36).slice(2, 9)}`;
+
+/** Composite factory for ProductCard — generates editable sub-nodes */
+function createProductCardComposite(): CompositeNodeTree {
+  const rootId = uid();
+  const imgId = uid();
+  const bodyId = uid();
+  const titleId = uid();
+  const priceRowId = uid();
+  const priceId = uid();
+  const btnId = uid();
+
+  const nodes: Record<string, import('@/types/schema').SchemaNode> = {
+    [rootId]: {
+      id: rootId, type: 'ProductCard', props: { customName: 'Product Card' },
+      style: { borderRadius: '0.75rem', overflow: 'hidden', borderWidth: '1px', borderColor: 'hsl(var(--border))', backgroundColor: 'hsl(var(--card))', transition: 'box-shadow 0.2s, transform 0.2s' },
+      children: [imgId, bodyId],
+    },
+    [imgId]: {
+      id: imgId, type: 'Image',
+      props: { src: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop', alt: 'Product' },
+      style: { width: '100%' },
+      children: [],
+    },
+    [bodyId]: {
+      id: bodyId, type: 'Stack', props: { direction: 'vertical' },
+      style: { padding: '1rem', gap: '0.5rem' },
+      children: [titleId, priceRowId, btnId],
+    },
+    [titleId]: {
+      id: titleId, type: 'Text',
+      props: { text: 'Product Name', level: 'h3' },
+      style: { fontWeight: '500', fontSize: '0.95rem' },
+      children: [],
+    },
+    [priceRowId]: {
+      id: priceRowId, type: 'Stack', props: { direction: 'horizontal' },
+      style: { gap: '0.5rem', alignItems: 'center' },
+      children: [priceId],
+    },
+    [priceId]: {
+      id: priceId, type: 'Text',
+      props: { text: '$99' },
+      style: { fontWeight: '600', fontSize: '1rem' },
+      children: [],
+    },
+    [btnId]: {
+      id: btnId, type: 'Button',
+      props: { text: 'Add to Cart', variant: 'outline' },
+      style: { width: '100%', marginTop: '0.25rem' },
+      children: [],
+    },
+  };
+
+  return { rootId, nodes };
+}
+
 // ── Category definitions for hierarchy ──
 const LAYOUT_TYPES: NodeType[] = ['Section', 'Container', 'Grid', 'Stack'];
 const SITE_TYPES: NodeType[] = ['Navbar', 'Footer', 'AnnouncementBar'];
