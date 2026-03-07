@@ -236,6 +236,15 @@ function SortableLayerItem({
 
         {/* Action buttons */}
         <div className="flex items-center gap-0 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+          {onToggleVisibility && (
+            <button
+              className={`p-0.5 transition-colors ${node.hidden ? 'text-muted-foreground/40 hover:text-foreground' : 'text-muted-foreground hover:text-primary'}`}
+              onClick={(e) => { e.stopPropagation(); onToggleVisibility(node.id); }}
+              title={node.hidden ? 'Show' : 'Hide'}
+            >
+              {node.hidden ? <EyeOff className="h-2.5 w-2.5" /> : <Eye className="h-2.5 w-2.5" />}
+            </button>
+          )}
           {onDuplicateNode && (
             <button
               className="p-0.5 text-muted-foreground hover:text-primary transition-colors"
@@ -256,8 +265,10 @@ function SortableLayerItem({
           )}
         </div>
 
-        {/* Status icons */}
-        {node.hidden && <EyeOff className="h-2.5 w-2.5 text-muted-foreground/40 shrink-0" />}
+        {/* Persistent hidden indicator (visible even when not hovered) */}
+        {node.hidden && (
+          <EyeOff className="h-2.5 w-2.5 text-muted-foreground/40 shrink-0 group-hover:hidden" />
+        )}
         {node.locked && <Lock className="h-2.5 w-2.5 text-muted-foreground/40 shrink-0" />}
       </div>
 
