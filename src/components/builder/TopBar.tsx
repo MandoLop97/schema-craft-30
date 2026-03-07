@@ -1,4 +1,4 @@
-import { Undo2, Redo2, Save, Eye, Download, Monitor, Tablet, Smartphone, Globe } from 'lucide-react';
+import { Undo2, Redo2, Save, Eye, Download, Monitor, Tablet, Smartphone, Globe, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { t } from '@/lib/i18n';
@@ -17,13 +17,19 @@ interface TopBarProps {
   onDeviceChange: (d: 'desktop' | 'tablet' | 'mobile') => void;
   dirty: boolean;
   pageTitle?: string;
+  onBack?: () => void;
 }
 
-export function TopBar({ onSave, onUndo, onRedo, canUndo, canRedo, onPreview, onExport, onPublish, onSaveDraft, device, onDeviceChange, dirty, pageTitle }: TopBarProps) {
+export function TopBar({ onSave, onUndo, onRedo, canUndo, canRedo, onPreview, onExport, onPublish, onSaveDraft, device, onDeviceChange, dirty, pageTitle, onBack }: TopBarProps) {
   const locale = t();
 
   return (
     <div className="h-12 border-b flex items-center px-3 gap-1 shrink-0" style={{ backgroundColor: 'hsla(210, 60%, 50%, 0.08)' }}>
+      {onBack && (
+        <Button variant="ghost" size="icon" onClick={onBack} title="Back" className="transition-transform active:scale-90 mr-0.5">
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+      )}
       <span className="text-sm font-bold tracking-tight mr-0.5 text-foreground">NEXORA</span>
       {pageTitle && (
         <>

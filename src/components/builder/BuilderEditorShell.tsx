@@ -51,6 +51,7 @@ export function BuilderEditorShell({
   onPageChange,
   pageTitle,
   customComponents,
+  onBack,
 }: BuilderEditorShellProps) {
   const locale = t();
   const { schema, setSchema, undo, redo, canUndo, canRedo } = useSchemaHistory(initialSchema);
