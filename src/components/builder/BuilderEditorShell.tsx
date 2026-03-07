@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors, closestCenter } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { useSchemaHistory } from '@/hooks/use-schema-history';
-import { Schema, NodeType, SchemaNode, PageDefinition, ThemeTokens } from '@/types/schema';
+import { Schema, NodeType, SchemaNode, PageDefinition, ThemeTokens, TemplateType } from '@/types/schema';
 import { createNode, isContainerType, duplicateNodeTree } from '@/lib/node-factory';
 import { canDropInto } from '@/lib/block-registry';
 import { t } from '@/lib/i18n';
@@ -64,6 +64,7 @@ export function BuilderEditorShell({
   const clipboardRef = useRef<string | null>(null);
 
   const hasPages = pages && pages.length > 0;
+  const activePageDef = hasPages ? pages!.find((p) => p.slug === activePage) : undefined;
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   const updateSchema = useCallback((updater: (s: Schema) => Schema) => {
@@ -298,7 +299,7 @@ export function BuilderEditorShell({
               </TabsList>
               <ScrollArea className="flex-1">
                 <TabsContent value="blocks" className="mt-0">
-                  <BlocksPalette />
+                  <BlocksPalette templateType={activePageDef?.templateType} />
                 </TabsContent>
                 <TabsContent value="layers" className="mt-0">
                   <LayersPanel
@@ -358,6 +359,9 @@ export function BuilderEditorShell({
             selectedNodeId={selectedNodeId}
             onSelectNode={(id) => setSelectedNodeId(id || null)}
             customComponents={customComponents}
+            templateType={activePageDef?.templateType}
+            canvasSize={activePageDef?.canvasSize}
+            mockData={activePageDef?.mockData}
           />
 
           {/* Right Sidebar */}

@@ -12,6 +12,8 @@ export interface NodeComponentProps {
   node: SchemaNode;
   mode: RenderMode;
   renderChildren: (childIds: string[]) => React.ReactNode;
+  /** Mock data from PageDefinition, available in edit/preview mode */
+  mockData?: Record<string, any>;
 }
 
 export type NodeComponent = React.FC<NodeComponentProps>;

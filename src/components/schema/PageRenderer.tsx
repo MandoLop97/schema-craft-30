@@ -11,15 +11,12 @@ interface PageRendererProps {
   mode: RenderMode;
   selectedNodeId?: string | null;
   onSelectNode?: (nodeId: string) => void;
-  /**
-   * Optional map of custom React components provided by the host.
-   * Keys are NodeType strings; values are React components that receive NodeComponentProps.
-   * Custom components take priority over built-in renderers.
-   */
   customComponents?: CustomComponentMap;
+  /** Mock data passed to custom components in edit/preview mode */
+  mockData?: Record<string, any>;
 }
 
-export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, customComponents }: PageRendererProps) {
+export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, customComponents, mockData }: PageRendererProps) {
   const renderNode = (nodeId: string): React.ReactNode => {
     const node = schema.nodes[nodeId];
     if (!node || node.hidden) return null;
@@ -118,7 +115,7 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
       );
     };
 
-    const element = <Component node={node} mode={mode} renderChildren={renderChildren} />;
+    const element = <Component node={node} mode={mode} renderChildren={renderChildren} mockData={mockData} />;
 
     // Root node: don't wrap in sortable
     if (mode !== 'edit') return element;

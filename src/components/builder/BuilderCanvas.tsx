@@ -1,6 +1,6 @@
 import { useDroppable } from '@dnd-kit/core';
 import { PageRenderer } from '@/components/schema/PageRenderer';
-import { Schema } from '@/types/schema';
+import { Schema, TemplateType } from '@/types/schema';
 import { CustomComponentMap } from '@/components/schema/NodeRegistry';
 
 interface BuilderCanvasProps {
@@ -9,6 +9,9 @@ interface BuilderCanvasProps {
   selectedNodeId: string | null;
   onSelectNode: (id: string) => void;
   customComponents?: CustomComponentMap;
+  templateType?: TemplateType;
+  canvasSize?: { width: number; height: number };
+  mockData?: Record<string, any>;
 }
 
 const DEVICE_WIDTHS = {
@@ -17,22 +20,41 @@ const DEVICE_WIDTHS = {
   mobile: '375px',
 };
 
-export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode, customComponents }: BuilderCanvasProps) {
+/** Default canvas presets per templateType */
+const TEMPLATE_CANVAS: Record<TemplateType, { width?: string; height?: string; scroll: boolean; checkerboard: boolean }> = {
+  page: { scroll: true, checkerboard: false },
+  header: { height: '120px', scroll: false, checkerboard: false },
+  footer: { height: '300px', scroll: false, checkerboard: false },
+  component: { width: '350px', height: '450px', scroll: false, checkerboard: true },
+  single: { scroll: true, checkerboard: false },
+};
+
+export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode, customComponents, templateType = 'page', canvasSize, mockData }: BuilderCanvasProps) {
   const { setNodeRef, isOver } = useDroppable({ id: schema.rootNodeId });
+
+  const preset = TEMPLATE_CANVAS[templateType];
+
+  // Resolve dimensions: canvasSize prop > preset > device width
+  const resolvedWidth = canvasSize ? `${canvasSize.width}px` : preset.width ?? DEVICE_WIDTHS[device];
+  const resolvedHeight = canvasSize ? `${canvasSize.height}px` : preset.height ?? undefined;
+
+  const isCompact = templateType === 'component' || templateType === 'header' || templateType === 'footer';
 
   return (
     <div
-      className="flex-1 overflow-auto flex justify-center p-6 nxr-canvas-grid"
-      style={{ backgroundColor: 'hsl(var(--muted) / 0.3)' }}
+      className={`flex-1 overflow-auto flex justify-center ${isCompact ? 'items-center' : ''} p-6 ${preset.checkerboard ? 'nxr-checkerboard' : 'nxr-canvas-grid'}`}
+      style={{ backgroundColor: preset.checkerboard ? undefined : 'hsl(var(--muted) / 0.3)' }}
       onClick={() => onSelectNode('')}
     >
       <div
         ref={setNodeRef}
         style={{
-          width: DEVICE_WIDTHS[device],
+          width: resolvedWidth,
           maxWidth: '100%',
-          minHeight: '100%',
-          transition: 'width 300ms ease, box-shadow 200ms ease',
+          height: resolvedHeight,
+          minHeight: resolvedHeight ?? (isCompact ? undefined : '100%'),
+          transition: 'width 300ms ease, height 300ms ease, box-shadow 200ms ease',
+          overflow: preset.scroll ? 'auto' : 'hidden',
         }}
         className={`bg-background border ${isOver ? 'ring-2 ring-primary/20' : ''}`}
         onClick={(e) => e.stopPropagation()}
@@ -43,6 +65,7 @@ export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode, cu
           selectedNodeId={selectedNodeId}
           onSelectNode={onSelectNode}
           customComponents={customComponents}
+          mockData={mockData}
         />
       </div>
     </div>

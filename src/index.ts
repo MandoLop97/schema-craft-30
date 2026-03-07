@@ -13,7 +13,7 @@ export type { NexoraBuilderAppProps } from './NexoraBuilderApp';
 export type { PublishPayload } from './components/builder/PublishDialog';
 
 // Schema types
-export type { Schema, SchemaNode, NodeType, BuiltInNodeType, NodeProps, NodeStyle, ThemeTokens, Page, PageDefinition, RenderMode } from './types/schema';
+export type { Schema, SchemaNode, NodeType, BuiltInNodeType, NodeProps, NodeStyle, ThemeTokens, Page, PageDefinition, RenderMode, TemplateType } from './types/schema';
 
 // Renderer — for hosts that want to render schemas outside the builder
 export { PageRenderer } from './components/schema/PageRenderer';
@@ -26,7 +26,7 @@ export { PageManager } from './components/builder/PageManager';
 export type { PageManagerProps } from './components/builder/PageManager';
 
 // Block registry — for hosts that want to inspect or extend available blocks
-export { blockRegistry, getBlockDef, getCategories, getBlocksByCategory, registerBlock, registerBlocks } from './lib/block-registry';
+export { blockRegistry, getBlockDef, getCategories, getBlocksByCategory, getCategoriesForTemplate, registerBlock, registerBlocks } from './lib/block-registry';
 export type { BlockDefinition, InspectorFieldDef } from './lib/block-registry';
 
 // Node utilities — for hosts that want to create or inspect nodes programmatically
