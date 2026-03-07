@@ -630,6 +630,50 @@ function StyleTab({ node, onUpdateStyle }: { node: SchemaNode; onUpdateStyle: (s
           </div>
         </div>
       ))}
+
+      {/* Background Image & Gradient section */}
+      <Separator className="my-3" />
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Fondo Avanzado</p>
+      <div className="space-y-2">
+        <ImageUploadField
+          label="Imagen de fondo"
+          value={node.style.backgroundImage?.replace(/^url\(["']?|["']?\)$/g, '') || ''}
+          onChange={(v) => onUpdateStyle({ backgroundImage: v ? `url(${v})` : undefined })}
+        />
+        <PropField
+          label="Background Size"
+          value={node.style.backgroundSize || ''}
+          onChange={(v) => onUpdateStyle({ backgroundSize: v || undefined })}
+        />
+        <PropField
+          label="Background Position"
+          value={node.style.backgroundPosition || ''}
+          onChange={(v) => onUpdateStyle({ backgroundPosition: v || undefined })}
+        />
+
+        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Gradiente</Label>
+        <GradientEditor
+          value={node.style.backgroundImage?.startsWith('linear-gradient') ? node.style.backgroundImage : ''}
+          onChange={(v) => onUpdateStyle({ backgroundImage: v || undefined })}
+        />
+
+        <div className="grid gap-1">
+          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Opacidad</Label>
+          <div className="flex items-center gap-2">
+            <Slider
+              min={0}
+              max={1}
+              step={0.05}
+              value={[parseFloat(node.style.opacity || '1')]}
+              onValueChange={([v]) => onUpdateStyle({ opacity: v < 1 ? String(v) : undefined })}
+              className="flex-1"
+            />
+            <span className="text-[10px] font-mono text-muted-foreground w-8 text-right">
+              {parseFloat(node.style.opacity || '1').toFixed(2)}
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
