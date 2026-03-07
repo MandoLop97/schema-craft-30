@@ -2,6 +2,7 @@ import { useDroppable } from '@dnd-kit/core';
 import { PageRenderer } from '@/components/schema/PageRenderer';
 import { Schema, TemplateType } from '@/types/schema';
 import { CustomComponentMap } from '@/components/schema/NodeRegistry';
+import { CustomStylesInjector } from '@/components/builder/CustomStylesInjector';
 
 interface BuilderCanvasProps {
   schema: Schema;
@@ -12,6 +13,8 @@ interface BuilderCanvasProps {
   templateType?: TemplateType;
   canvasSize?: { width: number; height: number };
   mockData?: Record<string, any>;
+  customStylesheets?: string[];
+  customCSS?: string;
 }
 
 const DEVICE_WIDTHS = {
@@ -29,7 +32,7 @@ const TEMPLATE_CANVAS: Record<TemplateType, { width?: string; height?: string; s
   single: { scroll: true, checkerboard: false },
 };
 
-export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode, customComponents, templateType = 'page', canvasSize, mockData }: BuilderCanvasProps) {
+export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode, customComponents, templateType = 'page', canvasSize, mockData, customStylesheets, customCSS }: BuilderCanvasProps) {
   const { setNodeRef, isOver } = useDroppable({ id: schema.rootNodeId });
 
   const preset = TEMPLATE_CANVAS[templateType];
@@ -60,6 +63,7 @@ export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode, cu
         className={`bg-background border nxr-responsive-canvas ${isOver ? 'ring-2 ring-primary/20' : ''}`}
         onClick={(e) => e.stopPropagation()}
       >
+        <CustomStylesInjector stylesheets={customStylesheets} css={customCSS} />
         <PageRenderer
           schema={schema}
           mode="edit"

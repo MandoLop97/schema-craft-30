@@ -164,6 +164,8 @@ export function NexoraBuilderApp({
         onPublishSubmit={onPublishSubmit}
         customComponents={customComponents}
         onBack={hasPages ? () => onPageChange?.('') : undefined}
+        customStylesheets={customStylesheets}
+        customCSS={customCSS}
       />
     </TooltipProvider>
   );

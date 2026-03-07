@@ -428,6 +428,8 @@ export function BuilderEditorShell({
             templateType={activePageDef?.templateType}
             canvasSize={activePageDef?.canvasSize}
             mockData={activePageDef?.mockData}
+            customStylesheets={customStylesheets}
+            customCSS={customCSS}
           />
 
           {/* Right Sidebar */}
