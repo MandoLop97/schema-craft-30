@@ -35,7 +35,7 @@ function createFooterSchema() {
 function createProductCardSchema() {
   return {
     id: 'schema-product-card', version: 1, updatedAt: new Date().toISOString(),
-    themeTokens: createDefaultHomeSchema().themeTokens, rootNodeId: 'root',
+    themeTokens: createDefaultHomeSchema().schema.themeTokens, rootNodeId: 'root',
     nodes: {
       root: { id: 'root', type: 'Section' as const, props: {}, style: { display: 'flex', flexDirection: 'column', padding: '1rem' }, children: ['card'] },
       card: { id: 'card', type: 'ProductCard' as const, props: { text: 'Demo Product', price: '$29.99', src: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop' }, style: {}, children: [] },
