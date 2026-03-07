@@ -12,6 +12,7 @@ const s = (style: NodeStyle): React.CSSProperties => style as unknown as React.C
 export function AnnouncementBarNode({ node }: NodeComponentProps) {
   return (
     <div
+      className="nxr-announcement"
       style={{
         backgroundColor: 'hsl(var(--primary))',
         color: 'hsl(var(--primary-foreground))',
@@ -43,6 +44,7 @@ export function FeatureBarNode({ node }: NodeComponentProps) {
   }));
   return (
     <div
+      className="nxr-feature-bar"
       style={{
         display: 'flex',
         justifyContent: 'center',
@@ -71,7 +73,7 @@ export function FeatureBarNode({ node }: NodeComponentProps) {
             <div style={{ minWidth: 0 }}>
               <p style={{ fontWeight: 600, fontSize: '0.8125rem', whiteSpace: 'nowrap' }}>{item.title}</p>
               {item.description && (
-                <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.7rem', whiteSpace: 'nowrap' }}>{item.description}</p>
+                <p className="nxr-feature-desc" style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.7rem', whiteSpace: 'nowrap' }}>{item.description}</p>
               )}
             </div>
           </div>
@@ -122,6 +124,7 @@ export function NewsletterSectionNode({ node }: NodeComponentProps) {
   const subtitle = node.props.subtitle || node.props.label || 'Get updates delivered to your inbox.';
   return (
     <div
+      className="nxr-newsletter"
       style={{
         padding: '3rem 2rem',
         textAlign: 'center',
@@ -133,25 +136,25 @@ export function NewsletterSectionNode({ node }: NodeComponentProps) {
       }}
       data-node-id={node.id}
     >
-      <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>
+      <h3 style={{ fontSize: 'clamp(1.25rem, 3cqi, 1.5rem)', fontWeight: 700, marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>
         {heading}
       </h3>
-      <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.9rem', marginBottom: '1.5rem', maxWidth: '28rem', marginLeft: 'auto', marginRight: 'auto', lineHeight: '1.6' }}>
+      <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: 'clamp(0.8rem, 2cqi, 0.9rem)', marginBottom: '1.5rem', maxWidth: '28rem', marginLeft: 'auto', marginRight: 'auto', lineHeight: '1.6' }}>
         {subtitle}
       </p>
-      <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', maxWidth: '24rem', margin: '0 auto' }}>
+      <div className="nxr-newsletter-form" style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', maxWidth: '24rem', margin: '0 auto', flexWrap: 'wrap' }}>
         <input
           placeholder={node.props.placeholder || 'Enter your email'}
           readOnly
           style={{
-            flex: 1,
+            flex: '1 1 200px',
+            minWidth: 0,
             padding: '0.625rem 0.875rem',
             border: '1px solid hsl(var(--border))',
             borderRadius: '0.5rem',
             fontSize: '0.875rem',
             outline: 'none',
             backgroundColor: 'hsl(var(--background))',
-            minWidth: 0,
           }}
         />
         <button
@@ -182,6 +185,7 @@ export function HeroSectionNode({ node }: NodeComponentProps) {
   const ctaLink = node.props.ctaLink || node.props.ctaHref || '#';
   return (
     <div
+      className="nxr-hero"
       style={{
         position: 'relative',
         display: 'flex',
@@ -220,7 +224,7 @@ export function HeroSectionNode({ node }: NodeComponentProps) {
           zIndex: 1,
         }}
       />
-      <div style={{ position: 'relative', zIndex: 2, maxWidth: '48rem', width: '100%' }}>
+      <div className="nxr-hero-content" style={{ position: 'relative', zIndex: 2, maxWidth: '48rem', width: '100%' }}>
         {node.props.overlayText && (
           <span style={{
             display: 'inline-block',
@@ -239,7 +243,7 @@ export function HeroSectionNode({ node }: NodeComponentProps) {
         )}
         <h1
           style={{
-            fontSize: 'clamp(2rem, 5vw, 3.5rem)',
+            fontSize: 'clamp(1.75rem, 6cqi, 3.5rem)',
             fontWeight: 800,
             color: '#fff',
             lineHeight: 1.1,
@@ -251,7 +255,7 @@ export function HeroSectionNode({ node }: NodeComponentProps) {
         </h1>
         <p
           style={{
-            fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
+            fontSize: 'clamp(0.875rem, 3cqi, 1.25rem)',
             color: 'rgba(255,255,255,0.85)',
             lineHeight: 1.6,
             marginBottom: '2rem',
@@ -262,10 +266,11 @@ export function HeroSectionNode({ node }: NodeComponentProps) {
         >
           {node.props.subtitle || 'Subtitle goes here'}
         </p>
-        <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+        <div className="nxr-hero-cta" style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
           {node.props.ctaText && (
             <a
               href={ctaLink}
+              className="nxr-hero-btn"
               style={{
                 display: 'inline-block',
                 padding: '0.875rem 2.5rem',
@@ -273,7 +278,7 @@ export function HeroSectionNode({ node }: NodeComponentProps) {
                 color: 'hsl(var(--primary-foreground))',
                 borderRadius: '0.5rem',
                 fontWeight: 600,
-                fontSize: '1rem',
+                fontSize: 'clamp(0.875rem, 2cqi, 1rem)',
                 textDecoration: 'none',
                 transition: 'transform 150ms ease, box-shadow 150ms ease',
                 boxShadow: '0 4px 14px rgba(0,0,0,0.25)',
@@ -285,6 +290,7 @@ export function HeroSectionNode({ node }: NodeComponentProps) {
           {node.props.secondaryCtaText && (
             <a
               href={node.props.secondaryCtaLink || '#'}
+              className="nxr-hero-btn-secondary"
               style={{
                 display: 'inline-block',
                 padding: '0.875rem 2.5rem',
@@ -292,7 +298,7 @@ export function HeroSectionNode({ node }: NodeComponentProps) {
                 color: '#fff',
                 borderRadius: '0.5rem',
                 fontWeight: 600,
-                fontSize: '1rem',
+                fontSize: 'clamp(0.875rem, 2cqi, 1rem)',
                 textDecoration: 'none',
                 border: '1px solid rgba(255,255,255,0.4)',
                 transition: 'background-color 150ms ease',

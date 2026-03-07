@@ -12,6 +12,7 @@ const s = (style: NodeStyle): React.CSSProperties => style as unknown as React.C
 export function NavbarNode({ node }: NodeComponentProps) {
   return (
     <nav
+      className="nxr-navbar"
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -28,10 +29,10 @@ export function NavbarNode({ node }: NodeComponentProps) {
       }}
       data-node-id={node.id}
     >
-      <span style={{ fontWeight: '700', fontSize: '1.125rem', letterSpacing: '0.04em' }}>
+      <span style={{ fontWeight: '700', fontSize: '1.125rem', letterSpacing: '0.04em', flexShrink: 0 }}>
         {node.props.logoText || 'Logo'}
       </span>
-      <div style={{ display: 'flex', gap: '1.75rem', alignItems: 'center', overflow: 'hidden' }}>
+      <div className="nxr-navbar-links" style={{ display: 'flex', gap: '1.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
         {node.props.links?.map((link, i) => (
           <a
             key={i}
@@ -56,6 +57,7 @@ export function NavbarNode({ node }: NodeComponentProps) {
 export function FooterNode({ node }: NodeComponentProps) {
   return (
     <footer
+      className="nxr-footer"
       style={{
         padding: '2.5rem 2rem',
         borderTop: '1px solid hsl(var(--border))',
@@ -66,7 +68,7 @@ export function FooterNode({ node }: NodeComponentProps) {
       }}
       data-node-id={node.id}
     >
-      <div style={{ maxWidth: '72rem', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+      <div className="nxr-footer-inner" style={{ maxWidth: '72rem', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <span style={{ fontWeight: '700', fontSize: '1rem', letterSpacing: '0.04em' }}>
             {node.props.logoText || 'Logo'}
