@@ -69,7 +69,7 @@ export function productCardNodes(
       id: btnId, type: 'Button',
       props: { text: 'Add to Cart', variant: 'outline' },
       style: { width: '100%', margin: '0.25rem 0 0 0' },
-      children: [],
+      children: [], locked: true,
     },
   };
 

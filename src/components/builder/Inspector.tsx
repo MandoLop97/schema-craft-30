@@ -1228,6 +1228,9 @@ selector {
 export function Inspector({ node, onUpdateProps, onUpdateStyle, onDelete, onDuplicate, onImageUpload, onUpdateCustomCSS, device, globalStyles, onUpdateAppliedGlobalStyles }: InspectorProps) {
   const locale = t();
 
+  // Locked nodes: show read-only banner, only allow style editing
+  const isLocked = node.locked === true;
+
   return (
     <div className="h-full flex flex-col">
       <div
@@ -1241,25 +1244,35 @@ export function Inspector({ node, onUpdateProps, onUpdateStyle, onDelete, onDupl
           <p className="text-[10px] text-muted-foreground font-mono">{node.id.slice(0, 12)}…</p>
         </div>
         <div className="flex items-center gap-0.5">
-          {onDuplicate && (
+          {onDuplicate && !isLocked && (
             <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors duration-200" onClick={onDuplicate} title="Duplicate">
               <Copy className="h-3.5 w-3.5" />
             </Button>
           )}
-          <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors duration-200" onClick={onDelete} title={locale.deleteNode}>
-            <Trash2 className="h-3.5 w-3.5" />
-          </Button>
+          {!isLocked && (
+            <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors duration-200" onClick={onDelete} title={locale.deleteNode}>
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+          )}
         </div>
       </div>
-      <Tabs defaultValue="props" className="flex-1 overflow-hidden flex flex-col">
+      {isLocked && (
+        <div className="mx-3 mt-2 p-2 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-[11px] flex items-center gap-1.5">
+          <span className="text-sm">🔒</span>
+          <span>Elemento bloqueado — solo se puede editar su estilo visual.</span>
+        </div>
+      )}
+      <Tabs defaultValue={isLocked ? 'style' : 'props'} className="flex-1 overflow-hidden flex flex-col">
         <TabsList className="mx-3 mt-2 w-auto">
-          <TabsTrigger value="props" className="text-xs">{locale.props}</TabsTrigger>
+          {!isLocked && <TabsTrigger value="props" className="text-xs">{locale.props}</TabsTrigger>}
           <TabsTrigger value="style" className="text-xs">{locale.style}</TabsTrigger>
         </TabsList>
         <div className="flex-1 overflow-y-auto">
-          <TabsContent value="props" className="mt-0">
-            <PropsTab node={node} onUpdateProps={onUpdateProps} onUpdateStyle={onUpdateStyle} onImageUpload={onImageUpload} />
-          </TabsContent>
+          {!isLocked && (
+            <TabsContent value="props" className="mt-0">
+              <PropsTab node={node} onUpdateProps={onUpdateProps} onUpdateStyle={onUpdateStyle} onImageUpload={onImageUpload} />
+            </TabsContent>
+          )}
           <TabsContent value="style" className="mt-0">
             <StyleTab
               node={node}

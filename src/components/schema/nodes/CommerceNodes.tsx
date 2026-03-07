@@ -1,7 +1,10 @@
-import React from 'react';
-import { SchemaNode, RenderMode, NodeStyle } from '@/types/schema';
+import React, { useEffect, useState, useMemo } from 'react';
+import { SchemaNode, RenderMode, NodeStyle, Schema } from '@/types/schema';
 import { nodeStyleToCSS } from '@/lib/style-utils';
 import { useThemeTokens } from '@/components/schema/ThemeContext';
+import { supabase } from '@/integrations/supabase/client';
+import { hydrateCardTemplate, ProductData } from '@/lib/card-template-utils';
+import { getNodeComponent } from '@/components/schema/NodeRegistry';
 
 interface NodeComponentProps {
   node: SchemaNode;
@@ -195,6 +198,186 @@ export function ProductCardNode({ node, mode, renderChildren }: NodeComponentPro
           </button>
         )}
       </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ProductGrid — loads template + products and renders a grid
+   ═══════════════════════════════════════════════════════════ */
+
+export function ProductGridNode({ node, mode }: NodeComponentProps) {
+  const [products, setProducts] = useState<ProductData[]>([]);
+  const [templateData, setTemplateData] = useState<{ nodes: Record<string, SchemaNode>; rootNodeId: string } | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const columns = Number(node.props.columns) || 4;
+  const limit = Number(node.props.limit) || 8;
+  const categoryFilter = node.props.category as string || '';
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchData() {
+      setLoading(true);
+
+      // Fetch template
+      const { data: templateRow } = await supabase
+        .from('page_schemas')
+        .select('schema_json')
+        .eq('slug', '__template/product-card')
+        .maybeSingle();
+
+      // Fetch products
+      let query = supabase
+        .from('products')
+        .select('*')
+        .limit(limit)
+        .order('created_at', { ascending: false });
+
+      if (categoryFilter) {
+        query = query.eq('category', categoryFilter);
+      }
+
+      const { data: productsData } = await query;
+
+      if (cancelled) return;
+
+      if (templateRow?.schema_json) {
+        const schema = templateRow.schema_json as unknown as Schema;
+        setTemplateData({ nodes: schema.nodes, rootNodeId: schema.rootNodeId });
+      }
+
+      setProducts((productsData || []) as ProductData[]);
+      setLoading(false);
+    }
+
+    fetchData();
+    return () => { cancelled = true; };
+  }, [limit, categoryFilter]);
+
+  // Build hydrated cards
+  const hydratedCards = useMemo(() => {
+    if (!templateData || products.length === 0) return [];
+
+    return products.map((product) => {
+      const { nodes: cardNodes, rootId } = hydrateCardTemplate(
+        templateData.nodes,
+        templateData.rootNodeId,
+        product,
+      );
+      return { rootId, nodes: cardNodes, productId: product.id };
+    });
+  }, [templateData, products]);
+
+  const handleAddToCart = (productId: string) => {
+    window.dispatchEvent(new CustomEvent('nexora:addToCart', { detail: { productId } }));
+  };
+
+  // Recursive renderer for hydrated nodes
+  const renderHydratedNode = (nodeId: string, nodes: Record<string, SchemaNode>): React.ReactNode => {
+    const n = nodes[nodeId];
+    if (!n || n.hidden) return null;
+
+    const Component = getNodeComponent(n.type);
+    if (!Component) return null;
+
+    const renderChildren = (childIds: string[]) => (
+      <>{childIds.map((cid) => renderHydratedNode(cid, nodes))}</>
+    );
+
+    // Wrap buttons with addToCart handler
+    if (n.type === 'Button' && n.props._productId) {
+      return (
+        <div key={n.id} onClick={() => handleAddToCart(n.props._productId)}>
+          <Component node={n} mode="public" renderChildren={renderChildren} />
+        </div>
+      );
+    }
+
+    return <Component key={n.id} node={n} mode="public" renderChildren={renderChildren} />;
+  };
+
+  // Edit mode: show placeholder grid
+  if (mode === 'edit') {
+    return (
+      <div
+        data-node-id={node.id}
+        style={{
+          ...s(node.style),
+          display: 'grid',
+          gridTemplateColumns: `repeat(${columns}, 1fr)`,
+        }}
+      >
+        {Array.from({ length: Math.min(columns, 4) }).map((_, i) => (
+          <div
+            key={i}
+            style={{
+              border: '1px dashed hsl(var(--border))',
+              borderRadius: '0.75rem',
+              padding: '2rem',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem',
+              minHeight: '200px',
+              backgroundColor: 'hsl(var(--muted) / 0.3)',
+            }}
+          >
+            <span style={{ fontSize: '2rem' }}>🛍️</span>
+            <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+              Product {i + 1}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // Loading state
+  if (loading) {
+    return (
+      <div
+        data-node-id={node.id}
+        style={{
+          ...s(node.style),
+          display: 'grid',
+          gridTemplateColumns: `repeat(${columns}, 1fr)`,
+        }}
+      >
+        {Array.from({ length: columns }).map((_, i) => (
+          <div key={i} style={{ borderRadius: '0.75rem', backgroundColor: 'hsl(var(--muted) / 0.3)', minHeight: '280px', animation: 'pulse 2s infinite' }} />
+        ))}
+      </div>
+    );
+  }
+
+  // No template found — fallback
+  if (!templateData) {
+    return (
+      <div data-node-id={node.id} style={{ ...s(node.style), textAlign: 'center', padding: '3rem', color: 'hsl(var(--muted-foreground))' }}>
+        <p>No se encontró el template de Product Card.</p>
+        <p style={{ fontSize: '0.75rem' }}>Diseña una card en el template <strong>__template/product-card</strong> primero.</p>
+      </div>
+    );
+  }
+
+  // Render hydrated grid
+  return (
+    <div
+      data-node-id={node.id}
+      style={{
+        ...s(node.style),
+        display: 'grid',
+        gridTemplateColumns: `repeat(${columns}, 1fr)`,
+      }}
+    >
+      {hydratedCards.map(({ rootId, nodes }) => (
+        <div key={rootId}>
+          {renderHydratedNode(rootId, nodes)}
+        </div>
+      ))}
     </div>
   );
 }
