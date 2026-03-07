@@ -19,19 +19,24 @@ export function SortableNodeWrapper({ nodeId, children, isSelected, nodeType, on
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
-    transition: transition || 'box-shadow 200ms ease, opacity 200ms ease, transform 200ms ease',
-    opacity: isDragging ? 0.5 : 1,
-    boxShadow: isSelected
-      ? '0 0 0 2px hsl(var(--primary) / 0.3), 0 0 12px hsl(var(--primary) / 0.08)'
-      : hovered && !isDragging
-        ? '0 0 0 1px hsl(var(--primary) / 0.15)'
-        : 'none',
+    transition: transition || 'box-shadow 250ms cubic-bezier(.4,0,.2,1), opacity 200ms ease, transform 200ms ease, outline 250ms cubic-bezier(.4,0,.2,1)',
+    opacity: isDragging ? 0.45 : 1,
     cursor: isDragging ? 'grabbing' : 'grab',
     position: 'relative',
-    borderRadius: '2px',
+    borderRadius: '4px',
+    outline: isSelected
+      ? '2px solid hsl(var(--primary) / 0.6)'
+      : hovered && !isDragging
+        ? '1.5px dashed hsl(var(--primary) / 0.25)'
+        : '1.5px solid transparent',
+    outlineOffset: '2px',
+    boxShadow: isSelected
+      ? '0 0 0 4px hsl(var(--primary) / 0.08), 0 0 20px hsl(var(--primary) / 0.06)'
+      : 'none',
     ...(isDragging && {
       transform: CSS.Transform.toString(transform ? { ...transform, scaleX: 1.01, scaleY: 1.01 } : null),
-      boxShadow: '0 8px 24px hsl(var(--foreground) / 0.12), 0 0 0 1px hsl(var(--primary) / 0.2)',
+      outline: '2px solid hsl(var(--primary) / 0.3)',
+      boxShadow: '0 12px 32px hsl(var(--foreground) / 0.1), 0 0 0 1px hsl(var(--primary) / 0.15)',
     }),
   };
 
@@ -49,44 +54,19 @@ export function SortableNodeWrapper({ nodeId, children, isSelected, nodeType, on
         onSelect(nodeId);
       }}
     >
+      {/* Selected label badge */}
       {isSelected && (
-        <div
-          style={{
-            position: 'absolute',
-            top: '-1.25rem',
-            left: '0.25rem',
-            fontSize: '0.6rem',
-            padding: '0.1rem 0.5rem',
-            backgroundColor: 'hsl(var(--primary))',
-            color: 'hsl(var(--primary-foreground))',
-            borderRadius: '0.25rem 0.25rem 0.25rem 0',
-            zIndex: 10,
-            fontWeight: 600,
-            letterSpacing: '0.02em',
-            pointerEvents: 'none',
-            backdropFilter: 'blur(4px)',
-            boxShadow: '0 2px 6px hsl(var(--primary) / 0.25)',
-            animation: 'slide-in-label 150ms ease-out',
-          }}
-        >
+        <div className="nxr-selection-label">
           {nodeType}
         </div>
       )}
-      {/* Left accent bar when selected */}
+      {/* Top accent line */}
       {isSelected && (
-        <div
-          style={{
-            position: 'absolute',
-            left: 0,
-            top: 0,
-            bottom: 0,
-            width: '2px',
-            backgroundColor: 'hsl(var(--primary))',
-            borderRadius: '2px',
-            zIndex: 10,
-            pointerEvents: 'none',
-          }}
-        />
+        <div className="nxr-selection-accent-top" />
+      )}
+      {/* Left accent bar */}
+      {isSelected && (
+        <div className="nxr-selection-accent-left" />
       )}
       {children}
     </div>
