@@ -1,102 +1,90 @@
 
-## Instrucción permanente: Versionado automático
 
-**IMPORTANTE**: Cada vez que se haga un cambio en el proyecto, incrementar la versión en:
-1. `package.json` → campo `"version"`
-2. `src/components/builder/BuilderEditorShell.tsx` → texto de versión en el status bar
+## Plan: Product Card Template como diseño maestro con data binding
 
-Formato: semver (major.minor.patch). Incrementar el **patch** (+1) en cada cambio. Versión actual: **1.2.1**
+### Problema actual
+La Product Card se edita como template en `__template/product-card`, pero no hay un mecanismo para que el proyecto consumidor (Template) tome ese diseño y lo aplique automáticamente a todos los productos, inyectando datos reales (nombre, precio, imagen, descuento) desde la tabla `products`.
 
----
+### Arquitectura propuesta
 
-## Phase 1: Schema-First Foundation + eCommerce Home
+El Builder ya guarda el schema del Product Card en `page_schemas` con `slug: '__template/product-card'`. Lo que falta es:
 
-### Overview
-Build the core schema system, page renderer, storage layer, and a clean eCommerce Home page — all driven by JSON schema. This foundation makes Phase 2 (Builder UI) straightforward to add.
+1. **Una función utilitaria que clone el template y lo hidrate con datos de producto**
+2. **Un componente `ProductGrid` que cargue el template + productos y renderice N cards**
+3. **Marcar el botón "Add to Cart" como no-editable (locked) y emitir un evento/callback**
 
----
+```text
+┌─────────────────────────────────────────────────┐
+│  page_schemas (DB)                              │
+│  slug: '__template/product-card'                │
+│  schema_json: { nodes: {...}, rootNodeId: ... } │
+└────────────────────┬────────────────────────────┘
+                     │ fetch template
+                     ▼
+┌──────────────────────────────┐
+│  hydrateCardTemplate(        │
+│    templateNodes,            │
+│    product: { name, price,   │
+│      image, badge, ... }     │
+│  ) → cloned nodes with      │
+│    real product data         │
+└──────────────┬───────────────┘
+               ▼
+┌──────────────────────────────┐
+│  ProductGrid node            │
+│  - Fetches template once     │
+│  - Fetches products from DB  │
+│  - Renders N hydrated cards  │
+│  - "Add to Cart" → callback  │
+└──────────────────────────────┘
+```
 
-### 1. Schema Types & Data Model
-Define TypeScript types for the entire schema system:
-- **Page** (id, slug, name, schemaId)
-- **Schema** (id, version, updatedAt, themeTokens, rootNodeId, nodes map)
-- **Node** (id, type, props, style, children, locked, hidden)
-- **ThemeTokens** (colors, typography, radius, spacing)
-- Support all node types: Section, Container, Grid, Stack, Text, Image, Button, Card, Badge, Divider, Input, ProductCard, Navbar, Footer
+### Cambios específicos
 
-### 2. Schema Store (LocalStorage)
-Create an abstraction layer (`SchemaStore`) with clean API:
-- `getPages()`, `getPageBySlug()`, `getSchema()`, `saveSchema()`
-- `createPage()`, `duplicatePage()`, `deletePage()`, `renamePage()`
-- All backed by LocalStorage, designed so swapping to a database later only changes the store internals
+#### 1. Función `hydrateCardTemplate` — `src/lib/card-template-utils.ts` (nuevo)
+- Recibe el schema del template (`nodes` + `rootNodeId`) y un objeto producto
+- Clona los nodos, genera IDs únicos por producto
+- Busca nodos por tipo para inyectar datos:
+  - `Image` → `src` = `product.image_url`
+  - `Text` con `level: 'h3'` → `text` = `product.name`
+  - `Text` con `fontWeight: '600'` (precio) → `text` = formateado `$product.price`
+  - `Text` con `textDecoration: 'line-through'` → `text` = `$product.original_price` (o hidden si no hay)
+  - `Badge` → `text` = `product.badge` (o hidden si no hay)
+  - `Button` → locked, texto fijo "Add to Cart"
+- Retorna nodos clonados listos para merge en un schema
 
-### 3. Node Registry & Components
-Build a component for each node type, all receiving props/style from schema:
-- **Layout**: Section, Container, Grid, Stack
-- **Content**: Text, Image, Divider, Badge
-- **UI**: Button, Card, Input
-- **Commerce**: ProductCard (mock with image, title, price, CTA)
-- **Site**: Navbar, Footer
+#### 2. Componente `ProductGridNode` — `src/components/schema/nodes/CommerceNodes.tsx`
+- Nuevo node type `ProductGrid` registrado en block registry
+- En modo `public`/`preview`: fetch del template desde DB + fetch de productos, renderiza grid de cards hidratadas
+- Props configurables: `columns` (2-4), `limit`, `category` (filtro)
+- El botón "Add to Cart" emite un `CustomEvent('nexora:addToCart', { productId })` que el proyecto Template escucha
 
-### 4. PageRenderer
-Core rendering engine:
-- Takes a schema + mode (`public` | `preview` | `edit`)
-- Recursively renders nodes from the tree using the Node Registry
-- In `public`/`preview` mode: clean output, no editing UI
-- In `edit` mode: adds selection outlines and drop zones (prepared for Phase 2)
-- Applies ThemeTokens as CSS variables
+#### 3. Bloquear botón "Add to Cart" en el template editor
+- En `createProductCardComposite` y `productCardNodes`, marcar el nodo Button con `locked: true`
+- En `Inspector.tsx`, cuando `node.locked === true` mostrar aviso "Este elemento no es editable" y deshabilitar campos
+- El texto del botón puede cambiarse pero la acción es fija
 
-### 5. eCommerce Home Page (Schema-based)
-Create a default `home` schema that produces a modern eCommerce landing page:
-- **Navbar** with logo and navigation links
-- **Hero section** with headline, subtext, and CTA button
-- **Featured products grid** with 3-4 ProductCard mocks
-- **Value propositions** section (icons + text)
-- **Footer** with links and copyright
-- Clean, minimal design inspired by modern eCommerce (think Stripe/Linear aesthetics)
+#### 4. Registrar `ProductGrid` en el block registry — `src/lib/block-registry.ts`
+- Nuevo bloque en categoría "Comercio"
+- `inspectorFields`: columns (select 2/3/4), limit (number), category (text filter)
+- `canHaveChildren: false`
 
-### 6. Route Setup
-- `/` → Renders Home from schema via PageRenderer (public mode)
-- `/preview?page=home` → Same but in preview mode
-- `/admin/export?page=home` → Shows raw JSON schema with copy button
-- `/license-blocked` → Placeholder lock screen
+#### 5. Actualizar `NodeRegistry` — `src/components/schema/NodeRegistry.tsx`
+- Registrar `ProductGridNode` como renderer para type `ProductGrid`
 
-### 7. License Gate (Mock)
-- `license_status` stored in LocalStorage (active/inactive/exceeded)
-- Admin routes check license; public site always works
-- `/license-blocked` shows status, reason, and placeholder "Enter License" button
+#### 6. Actualizar tipos — `src/types/schema.ts`
+- Agregar `'ProductGrid'` a `BuiltInNodeType`
+- Agregar `onAddToCart` como prop opcional en `NodeProps`
 
----
+### Archivos afectados
+- **Nuevo**: `src/lib/card-template-utils.ts`
+- **Modificados**: `src/components/schema/nodes/CommerceNodes.tsx`, `src/lib/block-registry.ts`, `src/components/schema/NodeRegistry.tsx`, `src/types/schema.ts`, `src/lib/default-schemas.ts`, `src/components/builder/Inspector.tsx`
 
-### What's NOT in Phase 1 (saved for Phase 2)
-- Full Builder UI (drag & drop canvas, left/right sidebars, inspector)
-- Undo/Redo history
-- AI Edit feature
-- Templates management (`/admin/templates`)
-- Theme editor (`/admin/theme`)
-- Device toggle & responsive overrides
+### Flujo del administrador
+1. Diseña la card en `__template/product-card` (cambia colores, tipografía, layout, etc.)
+2. Guarda → se persiste en `page_schemas`
+3. Agrega un bloque `ProductGrid` en la página Home o Products
+4. El grid carga automáticamente el template guardado + los productos de la DB
+5. Cada card muestra los datos reales del producto con el diseño personalizado
+6. El botón "Add to Cart" dispara un evento que el proyecto Template captura
 
-### Design Style
-Minimal, professional SaaS aesthetic — light background, clean typography, subtle borders, polished hover states.
-
-## ⚠️ REGLA FUNDAMENTAL: Alcance del proyecto
-
-**Este proyecto es un CONSTRUCTOR VISUAL (Builder) al 100%.** Su única responsabilidad es:
-1. Permitir diseñar y personalizar visualmente: **Header (Navbar)**, **Footer** y **Product Cards**
-2. Generar y guardar esquemas JSON en la base de datos
-3. Previsualizar el resultado en el canvas
-
-**NO es responsabilidad de este proyecto:**
-- Administrar productos (CRUD de productos) — eso lo hace la app consumidora (Template)
-- Gestionar inventario, pedidos o usuarios finales
-- Lógica de negocio, licencias o acceso al sitio final
-- Los productos y medios se **leen** de la base de datos para usarlos en el diseño, pero **no se crean ni editan** desde aquí
-
-**Los únicos componentes 100% editables/personalizables en el Builder son:**
-- **Navbar/Header**: logo, links, colores, estilos
-- **Footer**: logo, copyright, links, estilos  
-- **Product Cards**: layout, estilos, botones, imagen ratio, tipografía
-
-Las demás secciones del canvas (Hero, Sections, Grids, etc.) son bloques de contenido arrastrables y configurables pero NO tienen editores dedicados.
-
----
