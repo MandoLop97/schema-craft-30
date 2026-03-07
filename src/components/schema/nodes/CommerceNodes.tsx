@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { SchemaNode, RenderMode, NodeStyle, Schema } from '@/types/schema';
-import { nodeStyleToCSS } from '@/lib/style-utils';
+import { SchemaNode, RenderMode, NodeStyle, Schema, ThemeTokens } from '@/types/schema';
+import { nodeStyleToCSS, generatePseudoStateCSS, generateResponsiveCSS, themeTokensToCSS } from '@/lib/style-utils';
 import { useThemeTokens } from '@/components/schema/ThemeContext';
 import { supabase } from '@/integrations/supabase/client';
 import { hydrateCardTemplate, ProductData } from '@/lib/card-template-utils';
