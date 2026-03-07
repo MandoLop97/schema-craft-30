@@ -208,7 +208,7 @@ export function ProductCardNode({ node, mode, renderChildren }: NodeComponentPro
 
 export function ProductGridNode({ node, mode }: NodeComponentProps) {
   const [products, setProducts] = useState<ProductData[]>([]);
-  const [templateData, setTemplateData] = useState<{ nodes: Record<string, SchemaNode>; rootNodeId: string } | null>(null);
+  const [templateData, setTemplateData] = useState<{ nodes: Record<string, SchemaNode>; rootNodeId: string; themeTokens?: ThemeTokens } | null>(null);
   const [loading, setLoading] = useState(true);
 
   const columns = Number(node.props.columns) || 4;
@@ -245,7 +245,7 @@ export function ProductGridNode({ node, mode }: NodeComponentProps) {
 
       if (templateRow?.schema_json) {
         const schema = templateRow.schema_json as unknown as Schema;
-        setTemplateData({ nodes: schema.nodes, rootNodeId: schema.rootNodeId });
+        setTemplateData({ nodes: schema.nodes, rootNodeId: schema.rootNodeId, themeTokens: schema.themeTokens });
       }
 
       setProducts((productsData || []) as ProductData[]);
