@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { SchemaNode, RenderMode, NodeStyle } from '@/types/schema';
 import { nodeStyleToCSS } from '@/lib/style-utils';
 
@@ -11,13 +11,48 @@ interface NodeComponentProps {
 const s = (style: NodeStyle): React.CSSProperties => nodeStyleToCSS(style);
 
 export function SectionNode({ node, mode, renderChildren }: NodeComponentProps) {
+  const ref = useRef<HTMLElement>(null);
+  const parallaxEnabled = node.props.parallaxEnabled;
+  const parallaxSpeed = parseFloat(node.props.parallaxSpeed || '0.5');
+
+  useEffect(() => {
+    if (!parallaxEnabled || !ref.current) return;
+    const el = ref.current;
+    const bgImage = node.style.backgroundImage;
+    if (!bgImage) return;
+
+    const handleScroll = () => {
+      const scrollContainer = el.closest('[style*="overflow"]') || el.closest('.nxr-responsive-canvas');
+      if (!scrollContainer) return;
+      const rect = el.getBoundingClientRect();
+      const containerRect = scrollContainer.getBoundingClientRect();
+      const offset = rect.top - containerRect.top;
+      const yOffset = -(offset * parallaxSpeed);
+      el.style.backgroundPosition = `center ${yOffset}px`;
+    };
+
+    const scrollParent = el.closest('[style*="overflow"]') || el.closest('.nxr-responsive-canvas') || window;
+    (scrollParent as any).addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+
+    return () => {
+      (scrollParent as any).removeEventListener('scroll', handleScroll);
+    };
+  }, [parallaxEnabled, parallaxSpeed, node.style.backgroundImage]);
+
   return (
     <section
+      ref={ref}
       style={{
         width: '100%',
         boxSizing: 'border-box' as const,
         overflow: 'hidden',
         ...s(node.style),
+        ...(parallaxEnabled && node.style.backgroundImage ? {
+          backgroundAttachment: mode === 'public' ? 'fixed' : undefined,
+          backgroundSize: 'cover',
+          backgroundRepeat: 'no-repeat',
+        } : {}),
       }}
       data-node-id={node.id}
     >
