@@ -29,9 +29,9 @@ function getCategoryIcon(category: string): React.ElementType {
 /** Scaled-down live mini-render of a page schema */
 function PageThumbnail({ page }: { page: PageDefinition }) {
   const innerWidth = 1280;
-  const thumbWidth = 220;
+  const thumbWidth = 320;
   const scale = thumbWidth / innerWidth;
-  const thumbHeight = 140;
+  const thumbHeight = 200;
   const innerHeight = thumbHeight / scale;
 
   return (
