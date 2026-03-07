@@ -84,6 +84,7 @@ export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode, cu
           onDeleteNode={onDeleteNode}
           canPaste={canPaste}
           onEditSection={onEditSection}
+          onSaveAsTemplate={onSaveAsTemplate}
         />
       </div>
     </div>
