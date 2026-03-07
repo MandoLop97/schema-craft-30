@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Pencil, Copy, Trash2, CopyPlus, ClipboardPaste, Save, Move } from 'lucide-react';
+import { Pencil, Copy, Trash2, CopyPlus, ClipboardPaste, Save, Move, Paintbrush, ClipboardCheck } from 'lucide-react';
 import {
   ContextMenu,
   ContextMenuContent,
@@ -27,13 +27,16 @@ interface SortableNodeWrapperProps {
   canPaste?: boolean;
   onEditSection?: (nodeType: string) => void;
   onSaveAsTemplate?: (nodeId: string) => void;
+  onCopyStyle?: (nodeId: string) => void;
+  onPasteStyle?: (nodeId: string) => void;
+  canPasteStyle?: boolean;
   /** Pass the node's position-related styles so the wrapper can inherit absolute/fixed positioning */
   nodeStyle?: { position?: string; top?: string; left?: string; right?: string; bottom?: string; zIndex?: string };
   /** Callback to update node position when dragging absolute/fixed elements */
   onRepositionNode?: (nodeId: string, style: { top?: string; left?: string; right?: string; bottom?: string }) => void;
 }
 
-export function SortableNodeWrapper({ nodeId, children, isSelected, nodeType, onSelect, onCopy, onPaste, onDuplicate, onDelete, canPaste, onEditSection, onSaveAsTemplate, nodeStyle, onRepositionNode }: SortableNodeWrapperProps) {
+export function SortableNodeWrapper({ nodeId, children, isSelected, nodeType, onSelect, onCopy, onPaste, onDuplicate, onDelete, canPaste, onEditSection, onSaveAsTemplate, onCopyStyle, onPasteStyle, canPasteStyle, nodeStyle, onRepositionNode }: SortableNodeWrapperProps) {
   const [hovered, setHovered] = useState(false);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: nodeId,
@@ -254,6 +257,13 @@ export function SortableNodeWrapper({ nodeId, children, isSelected, nodeType, on
         <ContextMenuSeparator />
         <ContextMenuItem onClick={() => onSaveAsTemplate?.(nodeId)} className="gap-2 text-xs">
           <Save className="h-3.5 w-3.5" /> Guardar como Template
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem onClick={() => onCopyStyle?.(nodeId)} className="gap-2 text-xs">
+          <Paintbrush className="h-3.5 w-3.5" /> Copiar Estilo
+        </ContextMenuItem>
+        <ContextMenuItem onClick={() => onPasteStyle?.(nodeId)} disabled={!canPasteStyle} className="gap-2 text-xs">
+          <ClipboardCheck className="h-3.5 w-3.5" /> Pegar Estilo
         </ContextMenuItem>
         <ContextMenuSeparator />
         <ContextMenuItem onClick={() => onDelete?.(nodeId)} className="gap-2 text-xs text-destructive focus:text-destructive">

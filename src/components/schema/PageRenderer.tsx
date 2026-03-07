@@ -6,15 +6,16 @@ import { EditableDropZone } from './EditableDropZone';
 import { SortableNodeWrapper } from './SortableNodeWrapper';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { getBlockDef } from '@/lib/block-registry';
-import { generatePseudoStateCSS, generateResponsiveCSS } from '@/lib/style-utils';
+import { generatePseudoStateCSS, generateResponsiveCSS, mergeGlobalStyles } from '@/lib/style-utils';
+import { ScrollAnimationWrapper } from './ScrollAnimationWrapper';
 
 /** Given an HSL string like "222 84% 4.9%", returns a contrasting foreground HSL */
 function computeContrastForeground(hsl: string): string {
   const parts = hsl.replace(/%/g, '').trim().split(/\s+/).map(Number);
   const l = parts[2] ?? 50;
-  // If background is dark (L < 50), use white-ish foreground; otherwise dark
   return l < 50 ? '0 0% 98%' : '0 0% 3.9%';
 }
+
 interface PageRendererProps {
   schema: Schema;
   mode: RenderMode;
@@ -30,9 +31,28 @@ interface PageRendererProps {
   onEditSection?: (nodeType: string) => void;
   onSaveAsTemplate?: (nodeId: string) => void;
   onRepositionNode?: (nodeId: string, style: { top?: string; left?: string; right?: string; bottom?: string }) => void;
+  onCopyStyle?: (nodeId: string) => void;
+  onPasteStyle?: (nodeId: string) => void;
+  canPasteStyle?: boolean;
 }
 
-export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, customComponents, mockData, onCopyNode, onPasteNode, onDuplicateNode, onDeleteNode, canPaste, onEditSection, onSaveAsTemplate, onRepositionNode }: PageRendererProps) {
+export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, customComponents, mockData, onCopyNode, onPasteNode, onDuplicateNode, onDeleteNode, canPaste, onEditSection, onSaveAsTemplate, onRepositionNode, onCopyStyle, onPasteStyle, canPasteStyle }: PageRendererProps) {
+
+  const wrapWithScrollAnimation = (nodeId: string, element: React.ReactNode): React.ReactNode => {
+    if (mode === 'edit') return element;
+    const node = schema.nodes[nodeId];
+    if (!node?.props.scrollAnimation || node.props.scrollAnimation === 'none') return element;
+    return (
+      <ScrollAnimationWrapper
+        animation={node.props.scrollAnimation}
+        delay={node.props.scrollAnimationDelay}
+        duration={node.props.scrollAnimationDuration}
+      >
+        {element}
+      </ScrollAnimationWrapper>
+    );
+  };
+
   const renderNode = (nodeId: string): React.ReactNode => {
     const node = schema.nodes[nodeId];
     if (!node || node.hidden) return null;
@@ -48,7 +68,6 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
         return childIds.map((cid) => <React.Fragment key={cid}>{renderNode(cid)}</React.Fragment>);
       }
 
-      // In edit mode, wrap children in SortableContext for reordering
       return (
         <SortableContext items={childIds} strategy={verticalListSortingStrategy}>
           {childIds.map((cid) => {
@@ -85,6 +104,9 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
                 canPaste={canPaste}
                 onEditSection={onEditSection}
                 onSaveAsTemplate={onSaveAsTemplate}
+                onCopyStyle={onCopyStyle}
+                onPasteStyle={onPasteStyle}
+                canPasteStyle={canPasteStyle}
                 nodeStyle={childNode.style}
                 onRepositionNode={onRepositionNode}
               >
@@ -138,6 +160,9 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
                 canPaste={canPaste}
                 onEditSection={onEditSection}
                 onSaveAsTemplate={onSaveAsTemplate}
+                onCopyStyle={onCopyStyle}
+                onPasteStyle={onPasteStyle}
+                canPasteStyle={canPasteStyle}
                 nodeStyle={childNode.style}
                 onRepositionNode={onRepositionNode}
               >
@@ -152,7 +177,7 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
     const element = <Component node={node} mode={mode} renderChildren={renderChildren} mockData={mockData} />;
 
     // Root node: don't wrap in sortable
-    if (mode !== 'edit') return element;
+    if (mode !== 'edit') return wrapWithScrollAnimation(nodeId, element);
 
     if (nodeId === schema.rootNodeId) {
       return (
@@ -208,13 +233,10 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
     );
   };
 
-  /** Convert themeTokens into inline CSS custom properties so that
-   *  all descendant elements (which use hsl(var(--...)) tokens) reflect
-   *  the theme editor values in real-time. */
+  /** Convert themeTokens into inline CSS custom properties */
   const themeStyle = useMemo<React.CSSProperties>(() => {
     const t = schema.themeTokens;
     return {
-      // Colors (HSL values without the hsl() wrapper — matching the CSS var format)
       '--primary': t.colors.primary,
       '--secondary': t.colors.secondary,
       '--background': t.colors.background,
@@ -223,7 +245,6 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
       '--border': t.colors.border,
       '--accent': t.colors.accent || t.colors.secondary,
       '--accent-foreground': t.colors.text,
-      // Foreground variants — auto-computed for contrast
       '--primary-foreground': computeContrastForeground(t.colors.primary),
       '--secondary-foreground': computeContrastForeground(t.colors.secondary),
       '--muted-foreground': t.colors.muted,
@@ -232,43 +253,49 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
       '--popover': t.colors.background,
       '--popover-foreground': t.colors.text,
       '--input': t.colors.border,
-      // Typography
       fontFamily: t.typography.fontFamily,
       fontSize: t.typography.baseSize,
       '--nxr-heading-scale': String(t.typography.headingScale),
-      // Radius
       '--radius': t.radius.md,
       '--nxr-radius-sm': t.radius.sm,
       '--nxr-radius-lg': t.radius.lg,
-      // Spacing as custom properties for templates to consume
       '--nxr-space-xs': t.spacing.xs,
       '--nxr-space-sm': t.spacing.sm,
       '--nxr-space-md': t.spacing.md,
       '--nxr-space-lg': t.spacing.lg,
       '--nxr-space-xl': t.spacing.xl,
-      // Ensure text color follows theme
       color: `hsl(${t.colors.text})`,
       backgroundColor: `hsl(${t.colors.background})`,
-      // Global gradient (if set, overlays on top of background color)
       ...(t.gradient ? { backgroundImage: t.gradient } : {}),
     } as React.CSSProperties;
   }, [schema.themeTokens]);
 
-  // Generate dynamic CSS for pseudo-states and responsive overrides
+  // Generate dynamic CSS for pseudo-states, responsive overrides, and global styles
   const dynamicCSS = useMemo(() => {
     const rules: string[] = [];
+
+    // Global styles as CSS classes
+    if (schema.globalStyles) {
+      for (const [id, def] of Object.entries(schema.globalStyles)) {
+        const entries = Object.entries(def.style).filter(([k, v]) => v && !['hover', 'focus', 'active', 'responsive'].includes(k));
+        if (entries.length > 0) {
+          const declarations = entries.map(([key, value]) => `${camelToKebab(key)}: ${value}`).join('; ');
+          rules.push(`.nxr-gs-${id} { ${declarations}; }`);
+        }
+      }
+    }
+
     for (const node of Object.values(schema.nodes)) {
       const pseudo = generatePseudoStateCSS(node.id, node.style);
       if (pseudo) rules.push(pseudo);
       const responsive = generateResponsiveCSS(node.id, node.style);
       if (responsive) rules.push(responsive);
-      // Custom CSS per widget
       if (node.customCSS) {
         rules.push(node.customCSS.replace(/selector/g, `[data-node-id="${node.id}"]`));
       }
     }
     return rules.join('\n');
-  }, [schema.nodes]);
+  }, [schema.nodes, schema.globalStyles]);
 
   return (
     <ThemeProvider value={schema.themeTokens}>
@@ -278,4 +305,8 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
       </div>
     </ThemeProvider>
   );
+}
+
+function camelToKebab(str: string): string {
+  return str.replace(/[A-Z]/g, (m) => '-' + m.toLowerCase());
 }

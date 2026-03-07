@@ -94,6 +94,28 @@ export function generateResponsiveCSS(nodeId: string, style: NodeStyle): string 
   return rules.join('\n');
 }
 
+/**
+ * Merge global styles into a node's style object.
+ * Local node styles take priority over global styles.
+ */
+export function mergeGlobalStyles(
+  nodeStyle: NodeStyle,
+  appliedIds: string[] | undefined,
+  globalStyles: Record<string, { label: string; style: Partial<NodeStyle> }> | undefined
+): NodeStyle {
+  if (!appliedIds?.length || !globalStyles) return nodeStyle;
+
+  let merged: NodeStyle = {};
+  for (const id of appliedIds) {
+    const gs = globalStyles[id];
+    if (gs) {
+      merged = { ...merged, ...gs.style };
+    }
+  }
+  // Local overrides global
+  return { ...merged, ...nodeStyle };
+}
+
 function camelToKebab(str: string): string {
   return str.replace(/[A-Z]/g, (m) => '-' + m.toLowerCase());
 }

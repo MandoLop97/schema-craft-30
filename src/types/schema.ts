@@ -187,6 +187,10 @@ export interface NodeProps {
   videoUrl?: string;
   autoplay?: boolean;
   muted?: boolean;
+  /** Scroll animation */
+  scrollAnimation?: 'fadeIn' | 'slideUp' | 'slideLeft' | 'slideRight' | 'scaleIn' | 'none';
+  scrollAnimationDelay?: string;
+  scrollAnimationDuration?: string;
   /** Allow arbitrary extra props from custom blocks */
   [key: string]: any;
 }
@@ -202,6 +206,8 @@ export interface SchemaNode {
   customName?: string;
   /** Raw CSS applied to this specific widget */
   customCSS?: string;
+  /** IDs of global styles applied to this node */
+  appliedGlobalStyles?: string[];
 }
 
 export interface ThemeTokens {
@@ -236,6 +242,11 @@ export interface ThemeTokens {
   defaultCardLayout?: 'vertical' | 'horizontal' | 'minimal' | 'overlay';
 }
 
+export interface GlobalStyleDef {
+  label: string;
+  style: Partial<NodeStyle>;
+}
+
 export interface Schema {
   id: string;
   version: number;
@@ -243,6 +254,8 @@ export interface Schema {
   themeTokens: ThemeTokens;
   rootNodeId: string;
   nodes: Record<string, SchemaNode>;
+  /** Reusable global style classes */
+  globalStyles?: Record<string, GlobalStyleDef>;
 }
 
 export interface Page {

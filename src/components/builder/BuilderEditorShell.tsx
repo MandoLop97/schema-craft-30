@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors, closestCenter, defaultDropAnimationSideEffects } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { useSchemaHistory } from '@/hooks/use-schema-history';
-import { Schema, NodeType, SchemaNode, PageDefinition, ThemeTokens, TemplateType } from '@/types/schema';
+import { Schema, NodeType, NodeStyle, SchemaNode, PageDefinition, ThemeTokens, TemplateType } from '@/types/schema';
 import { createNode, createNodeTree, duplicateNodeTree } from '@/lib/node-factory';
 import { canDropInto } from '@/lib/block-registry';
 import { t } from '@/lib/i18n';
@@ -73,6 +73,7 @@ export function BuilderEditorShell({
   const [previewOpen, setPreviewOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const clipboardRef = useRef<string | null>(null);
+  const clipboardStyleRef = useRef<NodeStyle | null>(null);
 
   // Scroll to selected node on canvas when selection changes (e.g. from Layers panel)
   // and trigger a brief flash highlight to help locate it visually
@@ -375,6 +376,26 @@ export function BuilderEditorShell({
     }
   }, [schema.nodes, updateSchema]);
 
+  // Copy/Paste Style handlers
+  const handleCopyStyleById = useCallback((nodeId: string) => {
+    const node = schema.nodes[nodeId];
+    if (node) {
+      clipboardStyleRef.current = JSON.parse(JSON.stringify(node.style));
+      toast.success('Estilo copiado');
+    }
+  }, [schema.nodes]);
+
+  const handlePasteStyleById = useCallback((nodeId: string) => {
+    if (!clipboardStyleRef.current) return;
+    updateSchema((s) => {
+      if (s.nodes[nodeId]) {
+        s.nodes[nodeId].style = { ...s.nodes[nodeId].style, ...clipboardStyleRef.current! };
+      }
+      return s;
+    });
+    toast.success('Estilo pegado');
+  }, [updateSchema]);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -414,6 +435,15 @@ export function BuilderEditorShell({
         e.preventDefault();
         handleDuplicate();
       }
+      // Copy/Paste Style: Ctrl+Alt+C / Ctrl+Alt+V
+      if ((e.metaKey || e.ctrlKey) && e.altKey && e.key === 'c' && !isInput) {
+        e.preventDefault();
+        if (selectedNodeId) handleCopyStyleById(selectedNodeId);
+      }
+      if ((e.metaKey || e.ctrlKey) && e.altKey && e.key === 'v' && !isInput) {
+        e.preventDefault();
+        if (selectedNodeId) handlePasteStyleById(selectedNodeId);
+      }
       if (e.key === 'Delete' || e.key === 'Backspace') {
         if (isInput) return;
         if (selectedNodeId && selectedNodeId !== schema.rootNodeId) handleDelete();
@@ -421,7 +451,7 @@ export function BuilderEditorShell({
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [undo, redo, handleSave, handleDelete, handleDuplicate, selectedNodeId, schema.rootNodeId, schema.nodes, updateSchema]);
+  }, [undo, redo, handleSave, handleDelete, handleDuplicate, selectedNodeId, schema.rootNodeId, schema.nodes, updateSchema, handleCopyStyleById, handlePasteStyleById]);
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
@@ -567,6 +597,9 @@ export function BuilderEditorShell({
             onDuplicateNode={handleDuplicateById}
             onDeleteNode={handleDeleteById}
             canPaste={!!clipboardRef.current}
+            onCopyStyle={handleCopyStyleById}
+            onPasteStyle={handlePasteStyleById}
+            canPasteStyle={!!clipboardStyleRef.current}
             onRepositionNode={(nodeId, posStyle) => {
               updateSchema((s) => {
                 if (s.nodes[nodeId]) {
@@ -611,6 +644,15 @@ export function BuilderEditorShell({
                   onDelete={handleDelete}
                   onDuplicate={handleDuplicate}
                   onImageUpload={onImageUpload}
+                  device={device}
+                  globalStyles={schema.globalStyles}
+                  onUpdateAppliedGlobalStyles={(ids) => {
+                    if (!selectedNodeId) return;
+                    updateSchema((s) => {
+                      s.nodes[selectedNodeId].appliedGlobalStyles = ids.length > 0 ? ids : undefined;
+                      return s;
+                    });
+                  }}
                   onUpdateCustomCSS={(css) => {
                     if (!selectedNodeId) return;
                     updateSchema((s) => {
