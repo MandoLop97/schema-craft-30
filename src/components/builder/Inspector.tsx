@@ -399,6 +399,38 @@ function PropsTab({ node, onUpdateProps }: { node: SchemaNode; onUpdateProps: (p
       {node.type === 'HeroSection' && <HeroSectionPropsEditor node={node} onUpdate={onUpdateProps} />}
       {(node.type === 'Accordion' || node.type === 'TabsBlock') && <PanelsPropsEditor node={node} onUpdate={onUpdateProps} />}
       {node.type === 'VideoEmbed' && <VideoEmbedPropsEditor node={node} onUpdate={onUpdateProps} />}
+      {/* Custom inspector fields for host-registered blocks */}
+      {(() => {
+        const def = getBlockDef(node.type);
+        if (def?.inspectorFields && def.inspectorFields.length > 0) {
+          return def.inspectorFields.map((field) => {
+            const val = (p as any)[field.key] ?? '';
+            if (field.type === 'color') {
+              return <ColorField key={field.key} label={field.label} value={String(val)} onChange={(v) => onUpdateProps({ [field.key]: v })} />;
+            }
+            if (field.type === 'select' && field.options) {
+              return (
+                <div key={field.key} className="grid gap-1">
+                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">{field.label}</Label>
+                  <Select value={String(val)} onValueChange={(v) => onUpdateProps({ [field.key]: v })}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {field.options.map((o) => (
+                        <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              );
+            }
+            if (field.type === 'number') {
+              return <PropField key={field.key} label={field.label} value={String(val)} onChange={(v) => onUpdateProps({ [field.key]: parseFloat(v) || 0 } as any)} />;
+            }
+            return <PropField key={field.key} label={field.label} value={String(val)} onChange={(v) => onUpdateProps({ [field.key]: v })} />;
+          });
+        }
+        return null;
+      })()}
     </div>
   );
 }
