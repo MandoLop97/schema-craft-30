@@ -119,3 +119,48 @@ export function mergeGlobalStyles(
 function camelToKebab(str: string): string {
   return str.replace(/[A-Z]/g, (m) => '-' + m.toLowerCase());
 }
+
+/** Given an HSL string like "222 84% 4.9%", returns a contrasting foreground HSL */
+function computeContrastForeground(hsl: string): string {
+  const parts = hsl.replace(/%/g, '').trim().split(/\s+/).map(Number);
+  const l = parts[2] ?? 50;
+  return l < 50 ? '0 0% 98%' : '0 0% 3.9%';
+}
+
+/**
+ * Convert ThemeTokens into inline CSS custom properties (same logic as PageRenderer).
+ * Useful for scoping a template's theme onto a container div.
+ */
+export function themeTokensToCSS(t: import('@/types/schema').ThemeTokens): React.CSSProperties {
+  return {
+    '--primary': t.colors.primary,
+    '--secondary': t.colors.secondary,
+    '--background': t.colors.background,
+    '--foreground': t.colors.text,
+    '--muted': t.colors.muted,
+    '--border': t.colors.border,
+    '--accent': t.colors.accent || t.colors.secondary,
+    '--accent-foreground': t.colors.text,
+    '--primary-foreground': computeContrastForeground(t.colors.primary),
+    '--secondary-foreground': computeContrastForeground(t.colors.secondary),
+    '--muted-foreground': t.colors.muted,
+    '--card': t.colors.background,
+    '--card-foreground': t.colors.text,
+    '--popover': t.colors.background,
+    '--popover-foreground': t.colors.text,
+    '--input': t.colors.border,
+    fontFamily: t.typography.fontFamily,
+    fontSize: t.typography.baseSize,
+    '--nxr-heading-scale': String(t.typography.headingScale),
+    '--radius': t.radius.md,
+    '--nxr-radius-sm': t.radius.sm,
+    '--nxr-radius-lg': t.radius.lg,
+    '--nxr-space-xs': t.spacing.xs,
+    '--nxr-space-sm': t.spacing.sm,
+    '--nxr-space-md': t.spacing.md,
+    '--nxr-space-lg': t.spacing.lg,
+    '--nxr-space-xl': t.spacing.xl,
+    color: `hsl(${t.colors.text})`,
+    ...(t.gradient ? { backgroundImage: t.gradient } : {}),
+  } as React.CSSProperties;
+}
