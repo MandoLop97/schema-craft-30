@@ -91,6 +91,13 @@ export interface NexoraBuilderAppProps {
    * Defaults to 'es' (Spanish).
    */
   locale?: 'es' | 'en' | BuilderLocale;
+
+  /**
+   * Map of custom React components that override built-in node renderers.
+   * Keys are NodeType strings (e.g. 'HeroSection', 'Footer').
+   * Components receive { node, mode, renderChildren } props.
+   */
+  customComponents?: CustomComponentMap;
 }
 
 export function NexoraBuilderApp({
