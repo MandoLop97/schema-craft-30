@@ -87,8 +87,8 @@ export const blockRegistry: BlockDefinition[] = [
   { type: 'ProductCard', label: 'Product Card', category: 'Commerce', icon: ShoppingBag, canHaveChildren: false, defaultProps: { text: 'Product Name', price: '$99', src: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop' }, defaultStyle: {} },
 
   // ── Site ── (top-level or inside Section only)
-  { type: 'Navbar', label: 'Navbar', category: 'Site', icon: Navigation, canHaveChildren: false, defaultProps: { logoText: 'Brand', links: [{ text: 'Home', href: '#' }] }, defaultStyle: {}, allowedParents: ['Section'] },
-  { type: 'Footer', label: 'Footer', category: 'Site', icon: PanelBottom, canHaveChildren: false, defaultProps: { logoText: 'Brand', copyright: '© 2026', links: [{ text: 'Privacy', href: '#' }] }, defaultStyle: {}, allowedParents: ['Section'] },
+  { type: 'Navbar', label: 'Navbar', category: 'Site', icon: Navigation, canHaveChildren: false, defaultProps: { logoText: 'Brand', links: [{ text: 'Home', href: '#' }] }, defaultStyle: {}, allowedParents: ['Section'], allowedTemplateTypes: ['header'] },
+  { type: 'Footer', label: 'Footer', category: 'Site', icon: PanelBottom, canHaveChildren: false, defaultProps: { logoText: 'Brand', copyright: '© 2026', links: [{ text: 'Privacy', href: '#' }] }, defaultStyle: {}, allowedParents: ['Section'], allowedTemplateTypes: ['footer'] },
 
   // ── Template Custom ──
   { type: 'AnnouncementBar', label: 'Announcement Bar', category: 'Template', icon: Megaphone, canHaveChildren: false, defaultProps: { text: '🎉 Free shipping on orders over $50!', href: '#' }, defaultStyle: {}, allowedParents: ['Section'] },
