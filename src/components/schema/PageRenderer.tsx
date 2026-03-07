@@ -1,6 +1,6 @@
 import React from 'react';
 import { Schema, RenderMode } from '@/types/schema';
-import { getNodeComponent } from './NodeRegistry';
+import { getNodeComponent, CustomComponentMap } from './NodeRegistry';
 import { EditableDropZone } from './EditableDropZone';
 import { SortableNodeWrapper } from './SortableNodeWrapper';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -11,6 +11,12 @@ interface PageRendererProps {
   mode: RenderMode;
   selectedNodeId?: string | null;
   onSelectNode?: (nodeId: string) => void;
+  /**
+   * Optional map of custom React components provided by the host.
+   * Keys are NodeType strings; values are React components that receive NodeComponentProps.
+   * Custom components take priority over built-in renderers.
+   */
+  customComponents?: CustomComponentMap;
 }
 
 export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode }: PageRendererProps) {
