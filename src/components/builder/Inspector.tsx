@@ -323,17 +323,52 @@ function PropsTab({ node, onUpdateProps }: { node: SchemaNode; onUpdateProps: (p
       {node.type === 'Badge' && <PropField label="Text" value={p.text || ''} onChange={(v) => onUpdateProps({ text: v })} />}
       {node.type === 'Input' && <PropField label="Placeholder" value={p.placeholder || ''} onChange={(v) => onUpdateProps({ placeholder: v })} />}
       {node.type === 'Section' && (
-        <div className="grid gap-1">
-          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Align Items</Label>
-          <Select value={p.direction || 'stretch'} onValueChange={(v) => onUpdateProps({ direction: v as any })}>
-            <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {['stretch', 'flex-start', 'center', 'flex-end'].map((v) => (
-                <SelectItem key={v} value={v}>{v}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <>
+          <div className="grid gap-1">
+            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Display</Label>
+            <Select value={node.style.display || 'block'} onValueChange={(v) => onUpdateProps({} as any) || onUpdateStyle?.({ display: v as any })}>
+              <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {['block', 'flex', 'grid'].map((v) => (
+                  <SelectItem key={v} value={v}>{v}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid gap-1">
+            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Flex Direction</Label>
+            <Select value={node.style.flexDirection || 'column'} onValueChange={(v) => onUpdateStyle?.({ flexDirection: v as any })}>
+              <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {['column', 'row', 'column-reverse', 'row-reverse'].map((v) => (
+                  <SelectItem key={v} value={v}>{v}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid gap-1">
+            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Align Items</Label>
+            <Select value={node.style.alignItems || 'stretch'} onValueChange={(v) => onUpdateStyle?.({ alignItems: v as any })}>
+              <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {['stretch', 'flex-start', 'center', 'flex-end'].map((v) => (
+                  <SelectItem key={v} value={v}>{v}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid gap-1">
+            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Justify Content</Label>
+            <Select value={node.style.justifyContent || 'flex-start'} onValueChange={(v) => onUpdateStyle?.({ justifyContent: v as any })}>
+              <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {['flex-start', 'center', 'flex-end', 'space-between', 'space-around', 'space-evenly'].map((v) => (
+                  <SelectItem key={v} value={v}>{v}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </>
       )}
       {node.type === 'Container' && (
         <PropField label="Max Width" value={p.text || '72rem'} onChange={(v) => onUpdateProps({ text: v })} />
