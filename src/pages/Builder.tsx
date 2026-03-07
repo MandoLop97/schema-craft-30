@@ -89,9 +89,12 @@ export default function Builder() {
         return;
       }
 
-      if (!data || data.length === 0) {
-        // Seed default pages
-        const rows = DEFAULT_PAGES.map((p) => ({
+      const existingSlugs = new Set((data || []).map((r: any) => r.slug));
+
+      // Seed any missing default pages
+      const missing = DEFAULT_PAGES.filter((p) => !existingSlugs.has(p.slug));
+      if (missing.length > 0) {
+        const rows = missing.map((p) => ({
           slug: p.slug,
           title: p.title,
           schema_json: p.schema as any,
@@ -102,20 +105,13 @@ export default function Builder() {
         }));
         const { error: seedErr } = await supabase.from('page_schemas').insert(rows);
         if (seedErr) {
-          console.error('Error seeding defaults:', seedErr);
+          console.error('Error seeding missing pages:', seedErr);
         }
-        // Map defaults directly
-        setPages(DEFAULT_PAGES.map((p) => ({
-          slug: p.slug,
-          title: p.title,
-          schema: p.schema as Schema,
-          templateType: p.templateType as any,
-          category: p.category,
-          canvasSize: p.canvasSize,
-          mockData: p.mockData,
-        })));
-      } else {
-        setPages(data.map((row: any) => ({
+      }
+
+      // Combine existing DB rows + freshly seeded missing pages
+      const allPages: PageDefinition[] = [
+        ...(data || []).map((row: any) => ({
           slug: row.slug,
           title: row.title,
           schema: row.schema_json as Schema,
@@ -123,8 +119,19 @@ export default function Builder() {
           category: row.category,
           canvasSize: row.canvas_size ?? undefined,
           mockData: row.mock_data ?? undefined,
-        })));
-      }
+        })),
+        ...missing.map((p) => ({
+          slug: p.slug,
+          title: p.title,
+          schema: p.schema as Schema,
+          templateType: p.templateType as any,
+          category: p.category,
+          canvasSize: p.canvasSize,
+          mockData: p.mockData,
+        })),
+      ];
+
+      setPages(allPages);
       setLoading(false);
     }
     load();
