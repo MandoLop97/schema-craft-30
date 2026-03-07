@@ -99,6 +99,14 @@ export interface NexoraBuilderAppProps {
    * Components receive { node, mode, renderChildren } props.
    */
   customComponents?: CustomComponentMap;
+
+  /**
+   * Additional block definitions to register in the palette.
+   * Each entry makes a new block type available for drag-and-drop.
+   * Pair with `customComponents` to provide the React renderer.
+   */
+  extraBlocks?: BlockDefinition[];
+}
 }
 
 export function NexoraBuilderApp({
