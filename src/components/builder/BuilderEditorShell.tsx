@@ -138,40 +138,62 @@ export function BuilderEditorShell({
 
     const activeData = active.data.current;
 
-      if (activeData?.type === 'palette') {
+    if (activeData?.type === 'palette') {
       const nodeType = activeData.nodeType as NodeType;
       const newNode = createNode(nodeType);
 
       let dropped = false;
       updateSchema((s) => {
-        let parentId = String(over.id);
-        const parentNode = s.nodes[parentId];
+        const findParentId = (targetId: string): string | undefined =>
+          Object.values(s.nodes).find((n) => n.children.includes(targetId))?.id;
 
-        if (!parentNode || !isContainerType(parentNode.type)) {
-          const actualParent = Object.values(s.nodes).find((n) => n.children.includes(parentId));
-          parentId = actualParent ? actualParent.id : s.rootNodeId;
+        let initialTargetId = String(over.id);
+        const overData = over.data.current as { type?: string } | undefined;
+
+        // If dropping over a sortable leaf, use its parent as insertion candidate
+        if (overData?.type === 'sortable') {
+          initialTargetId = findParentId(initialTargetId) ?? s.rootNodeId;
         }
 
-        const isRoot = parentId === s.rootNodeId;
-        const parentType = s.nodes[parentId].type;
+        // Walk up the tree and find the nearest valid drop parent
+        const candidateParentIds: string[] = [];
+        const visited = new Set<string>();
+        let cursorId: string | undefined = initialTargetId;
 
-        if (!canDropInto(nodeType, parentType, isRoot)) {
-          // Auto-wrap in a Section when dropping at root level
-          if (isRoot) {
-            const wrapperSection = createNode('Section');
-            s.nodes[wrapperSection.id] = wrapperSection;
-            s.nodes[newNode.id] = newNode;
-            wrapperSection.children.push(newNode.id);
-            s.nodes[parentId].children.push(wrapperSection.id);
-            dropped = true;
-            return s;
-          }
+        while (cursorId && !visited.has(cursorId)) {
+          visited.add(cursorId);
+          if (s.nodes[cursorId]) candidateParentIds.push(cursorId);
+          if (cursorId === s.rootNodeId) break;
+          cursorId = findParentId(cursorId);
+        }
+
+        if (!candidateParentIds.includes(s.rootNodeId)) {
+          candidateParentIds.push(s.rootNodeId);
+        }
+
+        const validParentId = candidateParentIds.find((candidateId) => {
+          const candidate = s.nodes[candidateId];
+          if (!candidate) return false;
+          return canDropInto(nodeType, candidate.type, candidateId === s.rootNodeId);
+        });
+
+        if (validParentId) {
+          s.nodes[newNode.id] = newNode;
+          s.nodes[validParentId].children.push(newNode.id);
+          dropped = true;
           return s;
         }
 
-        s.nodes[newNode.id] = newNode;
-        s.nodes[parentId].children.push(newNode.id);
-        dropped = true;
+        // Last fallback: auto-wrap in Section at root when direct drop is not allowed
+        if (canDropInto(nodeType, 'Section', false)) {
+          const wrapperSection = createNode('Section');
+          s.nodes[wrapperSection.id] = wrapperSection;
+          s.nodes[newNode.id] = newNode;
+          wrapperSection.children.push(newNode.id);
+          s.nodes[s.rootNodeId].children.push(wrapperSection.id);
+          dropped = true;
+        }
+
         return s;
       });
 
