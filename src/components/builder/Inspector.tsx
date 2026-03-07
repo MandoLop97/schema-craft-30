@@ -575,6 +575,97 @@ function VideoEmbedPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate:
     </>
   );
 }
+function ProductCardPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: Partial<NodeProps>) => void }) {
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const p = node.props;
+  return (
+    <>
+      {/* Product Picker */}
+      <Button
+        variant="outline"
+        size="sm"
+        className="w-full text-xs gap-1.5 h-8"
+        onClick={() => setPickerOpen(true)}
+      >
+        <ShoppingBag className="h-3.5 w-3.5" />
+        Seleccionar Producto
+      </Button>
+      <ProductPicker
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onSelect={(product) => {
+          onUpdate({
+            name: product.name,
+            text: product.name,
+            price: `$${product.price.toFixed(2)}`,
+            originalPrice: product.original_price ? `$${product.original_price.toFixed(2)}` : '',
+            badge: product.badge || '',
+            image: product.image_url,
+            src: product.image_url,
+            alt: product.name,
+          });
+        }}
+      />
+      <Separator className="my-1" />
+
+      {/* Layout */}
+      <div className="grid gap-1">
+        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Layout</Label>
+        <Select value={p.cardLayout || 'vertical'} onValueChange={(v) => onUpdate({ cardLayout: v })}>
+          <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="vertical">Vertical</SelectItem>
+            <SelectItem value="horizontal">Horizontal</SelectItem>
+            <SelectItem value="minimal">Minimal</SelectItem>
+            <SelectItem value="overlay">Overlay</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Image ratio */}
+      <div className="grid gap-1">
+        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Image Ratio</Label>
+        <Select value={p.imageRatio || '1/1'} onValueChange={(v) => onUpdate({ imageRatio: v })}>
+          <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="1/1">1:1 Cuadrado</SelectItem>
+            <SelectItem value="4/3">4:3</SelectItem>
+            <SelectItem value="3/4">3:4 Retrato</SelectItem>
+            <SelectItem value="16/9">16:9 Panorámico</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <Separator className="my-1" />
+
+      {/* Image & Info */}
+      <ImageUploadField label="Imagen" value={p.image || p.src || ''} onChange={(v) => onUpdate({ src: v, image: v })} />
+      <PropField label="Nombre" value={p.name || p.text || ''} onChange={(v) => onUpdate({ text: v, name: v })} />
+      <PropField label="Precio" value={p.price || ''} onChange={(v) => onUpdate({ price: v })} />
+      <PropField label="Precio Original" value={p.originalPrice || ''} onChange={(v) => onUpdate({ originalPrice: v })} />
+      <PropField label="Badge" value={p.badge || ''} onChange={(v) => onUpdate({ badge: v })} />
+
+      <Separator className="my-1" />
+
+      {/* Button config */}
+      <PropField label="Texto del Botón" value={p.ctaText || 'Add to Cart'} onChange={(v) => onUpdate({ ctaText: v })} />
+      <div className="grid gap-1">
+        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Estilo del Botón</Label>
+        <Select value={p.btnVariant || 'outline'} onValueChange={(v) => onUpdate({ btnVariant: v })}>
+          <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="outline">Contorno</SelectItem>
+            <SelectItem value="filled">Relleno</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="flex items-center justify-between">
+        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Mostrar Botón</Label>
+        <Switch checked={p.hideButton !== true} onCheckedChange={(v) => onUpdate({ hideButton: !v })} />
+      </div>
+    </>
+  );
+}
 
 /* ── Props Tab ── */
 
