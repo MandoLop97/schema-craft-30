@@ -58,6 +58,8 @@ export function NexoraBuilderApp({
   extraBlocks,
   customStylesheets,
   customCSS,
+  onImageUpload,
+  resolveAssetUrl,
 }: NexoraBuilderAppProps) {
   // Register extra blocks
   useEffect(() => {
