@@ -6,6 +6,13 @@ import { SortableNodeWrapper } from './SortableNodeWrapper';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { getBlockDef } from '@/lib/block-registry';
 
+/** Given an HSL string like "222 84% 4.9%", returns a contrasting foreground HSL */
+function computeContrastForeground(hsl: string): string {
+  const parts = hsl.replace(/%/g, '').trim().split(/\s+/).map(Number);
+  const l = parts[2] ?? 50;
+  // If background is dark (L < 50), use white-ish foreground; otherwise dark
+  return l < 50 ? '0 0% 98%' : '0 0% 3.9%';
+}
 interface PageRendererProps {
   schema: Schema;
   mode: RenderMode;
