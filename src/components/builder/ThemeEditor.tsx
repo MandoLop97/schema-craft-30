@@ -365,6 +365,32 @@ export function ThemeEditor({ themeTokens, onUpdate }: ThemeEditorProps) {
             <ThemeUnitField label="LG" value={themeTokens.spacing.lg} onChange={(v) => update(['spacing', 'lg'], v)} min={0} max={6} step={0.1} />
             <ThemeUnitField label="XL" value={themeTokens.spacing.xl} onChange={(v) => update(['spacing', 'xl'], v)} min={0} max={8} step={0.1} />
           </div>
+
+          <Separator className="my-3" />
+
+          {/* Product Card Layout */}
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Tarjeta de Producto</p>
+          <div className="space-y-1">
+            <Label className="text-[9px] uppercase tracking-wider text-muted-foreground">Diseño por defecto</Label>
+            <Select
+              value={themeTokens.defaultCardLayout || 'vertical'}
+              onValueChange={(v) => {
+                const next = JSON.parse(JSON.stringify(themeTokens)) as ThemeTokens;
+                next.defaultCardLayout = v as ThemeTokens['defaultCardLayout'];
+                onUpdate(next);
+              }}
+            >
+              <SelectTrigger className="h-7 text-[11px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="vertical">Vertical</SelectItem>
+                <SelectItem value="horizontal">Horizontal</SelectItem>
+                <SelectItem value="minimal">Minimal</SelectItem>
+                <SelectItem value="overlay">Overlay</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </ScrollArea>
     </div>

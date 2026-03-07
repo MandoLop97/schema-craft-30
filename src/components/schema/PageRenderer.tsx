@@ -271,9 +271,11 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
   }, [schema.nodes]);
 
   return (
-    <div style={{ ...themeStyle, containerType: 'inline-size' as any }}>
-      {dynamicCSS && <style dangerouslySetInnerHTML={{ __html: dynamicCSS }} />}
-      {renderNode(schema.rootNodeId)}
-    </div>
+    <ThemeProvider value={schema.themeTokens}>
+      <div style={{ ...themeStyle, containerType: 'inline-size' as any }}>
+        {dynamicCSS && <style dangerouslySetInnerHTML={{ __html: dynamicCSS }} />}
+        {renderNode(schema.rootNodeId)}
+      </div>
+    </ThemeProvider>
   );
 }
