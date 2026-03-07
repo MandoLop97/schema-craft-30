@@ -39,6 +39,8 @@ function createProductCardSchema() {
   const { rootId, nodes: cardNodes } = productCardNodes('card', {
     name: 'Demo Product',
     price: '$29.99',
+    originalPrice: '$49.99',
+    badge: 'New',
     image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop',
   });
   return {
