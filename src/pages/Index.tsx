@@ -11,21 +11,26 @@ function stripSiteNodes(schema: Schema, hasHeader: boolean, hasFooter: boolean):
   if (hasHeader) { siteTypes.add('Navbar'); siteTypes.add('AnnouncementBar'); }
   if (hasFooter) siteTypes.add('Footer');
 
-  const rootChildren = schema.rootNodeIds
-    .map(id => schema.nodes.find(n => n.id === id))
-    .filter(Boolean);
+  const rootNode = schema.nodes[schema.rootNodeId];
+  if (!rootNode?.children) return schema;
 
   const removedIds = new Set(
-    rootChildren.filter(n => siteTypes.has(n!.type)).map(n => n!.id)
+    rootNode.children.filter(id => {
+      const node = schema.nodes[id];
+      return node && siteTypes.has(node.type);
+    })
   );
 
   if (removedIds.size === 0) return schema;
 
-  return {
-    ...schema,
-    rootNodeIds: schema.rootNodeIds.filter(id => !removedIds.has(id)),
-    nodes: schema.nodes.filter(n => !removedIds.has(n.id)),
+  const newNodes = { ...schema.nodes };
+  newNodes[schema.rootNodeId] = {
+    ...rootNode,
+    children: rootNode.children.filter(id => !removedIds.has(id)),
   };
+  removedIds.forEach(id => delete newNodes[id]);
+
+  return { ...schema, nodes: newNodes };
 }
 
 interface PublishedContent {
