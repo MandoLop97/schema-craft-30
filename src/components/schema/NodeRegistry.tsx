@@ -6,7 +6,7 @@ import { ButtonNode, CardNode, InputNode } from './nodes/UINodes';
 import { ProductCardNode } from './nodes/CommerceNodes';
 import { NavbarNode, FooterNode } from './nodes/SiteNodes';
 import { AnnouncementBarNode, FeatureBarNode, TestimonialCardNode, NewsletterSectionNode, HeroSectionNode } from './nodes/TemplateNodes';
-import { AccordionNode, TabsBlockNode, VideoEmbedNode } from './nodes/InteractiveNodes';
+import { AccordionNode, TabsBlockNode, VideoEmbedNode, FormBlockNode } from './nodes/InteractiveNodes';
 
 export interface NodeComponentProps {
   node: SchemaNode;
