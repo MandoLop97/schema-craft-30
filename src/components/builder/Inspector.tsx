@@ -441,6 +441,18 @@ function NavbarPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p:
       <PropField label="Logo Text" value={node.props.logoText || ''} onChange={(v) => onUpdate({ logoText: v })} />
       <LinksEditor links={node.props.links || []} onChange={(links) => onUpdate({ links })} />
       <Separator className="my-3" />
+      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Menú Móvil</Label>
+      <div className="space-y-1">
+        <Label className="text-xs">Estilo del menú móvil</Label>
+        <Select value={node.props.mobileMenuStyle || 'sidebar'} onValueChange={(v) => onUpdate({ mobileMenuStyle: v })}>
+          <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="sidebar">Lateral (Sidebar)</SelectItem>
+            <SelectItem value="dropdown">Desplegable (Dropdown)</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <Separator className="my-3" />
       <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Banner de anuncio</Label>
       <PropField label="Texto del banner" value={node.props.announcementText || ''} onChange={(v) => onUpdate({ announcementText: v })} placeholder="Ej: Free shipping on orders over $100" />
       <PropField label="Link del banner" value={node.props.announcementHref || ''} onChange={(v) => onUpdate({ announcementHref: v })} placeholder="https://..." />
