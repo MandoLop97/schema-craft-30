@@ -735,6 +735,21 @@ function PropsTab({ node, onUpdateProps, onUpdateStyle, onImageUpload }: { node:
               </SelectContent>
             </Select>
           </div>
+          <Separator className="my-2" />
+          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Parallax</Label>
+          <div className="flex items-center justify-between">
+            <Label className="text-xs">Activar Parallax</Label>
+            <Switch checked={!!p.parallaxEnabled} onCheckedChange={(v) => onUpdateProps({ parallaxEnabled: v })} />
+          </div>
+          {p.parallaxEnabled && (
+            <div className="grid gap-1">
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Velocidad (0.1 - 1.0)</Label>
+              <div className="flex items-center gap-2">
+                <Slider min={0.1} max={1} step={0.05} value={[parseFloat(p.parallaxSpeed || '0.5')]} onValueChange={([v]) => onUpdateProps({ parallaxSpeed: String(v) })} className="flex-1" />
+                <span className="text-[10px] font-mono text-muted-foreground w-8 text-right">{parseFloat(p.parallaxSpeed || '0.5').toFixed(2)}</span>
+              </div>
+            </div>
+          )}
         </>
       )}
       {node.type === 'Container' && (
