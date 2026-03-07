@@ -531,10 +531,14 @@ export function BuilderEditorShell({
             canPaste={!!clipboardRef.current}
             onEditSection={(nodeType) => {
               if (!onPageChange || !pages) return;
-              const typeToSlug: Record<string, string> = { Navbar: 'header', Footer: 'footer' };
+              const typeToSlug: Record<string, string> = { Navbar: 'header', Footer: 'footer', ProductCard: 'component' };
               const slug = typeToSlug[nodeType];
               if (slug) {
-                const page = pages.find((p) => p.slug === slug || p.templateType === (nodeType === 'Navbar' ? 'header' : 'footer'));
+                const page = pages.find((p) =>
+                  nodeType === 'ProductCard'
+                    ? p.templateType === 'component' || p.slug.includes('product-card')
+                    : p.slug === slug || p.templateType === (nodeType === 'Navbar' ? 'header' : 'footer')
+                );
                 if (page) onPageChange(page.slug);
               }
             }}
