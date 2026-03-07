@@ -3,7 +3,7 @@ import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, u
 import { arrayMove } from '@dnd-kit/sortable';
 import { useSchemaHistory } from '@/hooks/use-schema-history';
 import { Schema, NodeType, SchemaNode, PageDefinition, ThemeTokens, TemplateType } from '@/types/schema';
-import { createNode, isContainerType, duplicateNodeTree } from '@/lib/node-factory';
+import { createNode, duplicateNodeTree } from '@/lib/node-factory';
 import { canDropInto } from '@/lib/block-registry';
 import { t } from '@/lib/i18n';
 import { TopBar } from '@/components/builder/TopBar';
