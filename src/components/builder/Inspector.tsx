@@ -5,11 +5,12 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { t } from '@/lib/i18n';
+import { getBlockDef, InspectorFieldDef } from '@/lib/block-registry';
 
 interface InspectorProps {
   node: SchemaNode;
