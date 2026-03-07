@@ -186,6 +186,21 @@ All colors MUST be HSL.
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* View enter transition (PageManager ↔ Editor) */
+.nxr-view-enter {
+  animation: nxr-view-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes nxr-view-in {
+  from { opacity: 0; transform: scale(0.97) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Reusable fade-in-up for empty states */
+.nxr-fade-in-up-anim {
+  animation: nxr-fade-in-up 0.3s ease-out both;
+}
+
 /* Checkerboard background for component editing */
 .nxr-checkerboard {
   background-color: hsl(var(--muted) / 0.15);
