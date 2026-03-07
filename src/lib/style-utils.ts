@@ -1,4 +1,5 @@
 import { NodeStyle } from '@/types/schema';
+import React from 'react';
 
 /** Keys that are NOT directly valid CSS properties — they're virtual/meta properties */
 const META_KEYS = new Set<string>(['hover', 'focus', 'active', 'responsive', 'backgroundGradient']);
