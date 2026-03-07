@@ -16,6 +16,13 @@ type CardLayout = 'vertical' | 'horizontal' | 'minimal' | 'overlay';
 export function ProductCardNode({ node, mode, renderChildren }: NodeComponentProps) {
   // ── Composite mode: if node has children, render them instead of monolithic HTML ──
   if (node.children && node.children.length > 0) {
+    // Filter children based on visibility toggles
+    const filteredChildren = node.children.filter((childId) => {
+      if (node.props.showBadge === false && childId.endsWith('-badge')) return false;
+      if (node.props.showOriginalPrice === false && childId.endsWith('-old-price')) return false;
+      return true;
+    });
+
     return (
       <div
         style={{
@@ -24,7 +31,7 @@ export function ProductCardNode({ node, mode, renderChildren }: NodeComponentPro
         data-node-id={node.id}
         className="group hover:shadow-lg hover:-translate-y-0.5"
       >
-        {renderChildren(node.children)}
+        {renderChildren(filteredChildren)}
       </div>
     );
   }
