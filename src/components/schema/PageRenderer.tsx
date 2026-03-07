@@ -222,6 +222,8 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
       // Ensure text color follows theme
       color: `hsl(${t.colors.text})`,
       backgroundColor: `hsl(${t.colors.background})`,
+      // Global gradient (if set, overlays on top of background color)
+      ...(t.gradient ? { backgroundImage: t.gradient } : {}),
     } as React.CSSProperties;
   }, [schema.themeTokens]);
 
