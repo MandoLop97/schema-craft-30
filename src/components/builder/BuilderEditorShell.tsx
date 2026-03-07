@@ -298,7 +298,7 @@ export function BuilderEditorShell({
               </TabsList>
               <ScrollArea className="flex-1">
                 <TabsContent value="blocks" className="mt-0">
-                  <BlocksPalette />
+                  <BlocksPalette templateType={activePageDef?.templateType} />
                 </TabsContent>
                 <TabsContent value="layers" className="mt-0">
                   <LayersPanel

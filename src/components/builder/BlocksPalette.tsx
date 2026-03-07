@@ -1,6 +1,6 @@
 import { useDraggable } from '@dnd-kit/core';
-import { NodeType } from '@/types/schema';
-import { blockRegistry, getCategories, getBlocksByCategory, BlockDefinition } from '@/lib/block-registry';
+import { NodeType, TemplateType } from '@/types/schema';
+import { blockRegistry, getCategories, getBlocksByCategory, getCategoriesForTemplate, BlockDefinition } from '@/lib/block-registry';
 import { translateCategory } from '@/lib/i18n';
 import { EDITOR_VERSION } from '@/lib/version';
 
@@ -29,21 +29,29 @@ function DraggableBlock({ block }: { block: BlockDefinition }) {
   );
 }
 
-export function BlocksPalette() {
-  const categories = getCategories();
+interface BlocksPaletteProps {
+  templateType?: TemplateType;
+}
+
+export function BlocksPalette({ templateType }: BlocksPaletteProps) {
+  const categories = getCategoriesForTemplate(templateType);
 
   return (
     <div className="p-3 space-y-4">
-      {categories.map((cat) => (
-        <div key={cat}>
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">{translateCategory(cat)}</p>
-          <div className="grid grid-cols-2 gap-1.5">
-            {getBlocksByCategory(cat).map((b) => (
-              <DraggableBlock key={b.type} block={b} />
-            ))}
+      {categories.map((cat) => {
+        const blocks = getBlocksByCategory(cat, templateType);
+        if (blocks.length === 0) return null;
+        return (
+          <div key={cat}>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">{translateCategory(cat)}</p>
+            <div className="grid grid-cols-2 gap-1.5">
+              {blocks.map((b) => (
+                <DraggableBlock key={b.type} block={b} />
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
       <div className="pt-3 border-t border-border">
         <span className="text-[10px] text-muted-foreground font-mono">v{EDITOR_VERSION}</span>
       </div>
