@@ -440,6 +440,12 @@ function NavbarPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p:
     <>
       <PropField label="Logo Text" value={node.props.logoText || ''} onChange={(v) => onUpdate({ logoText: v })} />
       <LinksEditor links={node.props.links || []} onChange={(links) => onUpdate({ links })} />
+      <Separator className="my-3" />
+      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Banner de anuncio</Label>
+      <PropField label="Texto del banner" value={node.props.announcementText || ''} onChange={(v) => onUpdate({ announcementText: v })} placeholder="Ej: Free shipping on orders over $100" />
+      <PropField label="Link del banner" value={node.props.announcementHref || ''} onChange={(v) => onUpdate({ announcementHref: v })} placeholder="https://..." />
+      <PropField label="Color de fondo" value={node.props.announcementBg || ''} onChange={(v) => onUpdate({ announcementBg: v })} placeholder="hsl(var(--foreground))" />
+      <PropField label="Color de texto" value={node.props.announcementColor || ''} onChange={(v) => onUpdate({ announcementColor: v })} placeholder="hsl(var(--background))" />
     </>
   );
 }
