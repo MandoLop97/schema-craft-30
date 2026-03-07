@@ -62,9 +62,10 @@ export function BadgeNode({ node }: NodeComponentProps) {
 
 export function SpacerNode({ node }: NodeComponentProps) {
   const height = node.props.height || node.style.height || '2rem';
+  const baseStyle = s(node.style);
   return (
     <div
-      style={{ height, width: '100%', ...s(node.style), height: height }}
+      style={{ ...baseStyle, height, width: '100%' }}
       data-node-id={node.id}
       aria-hidden="true"
     />
