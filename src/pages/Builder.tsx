@@ -7,14 +7,16 @@ import { PageDefinition } from '@/types/schema';
 import { createHomeSchema, createProductsSchema } from '@/lib/default-schemas';
 import { createDefaultHomeSchema } from '@/lib/default-schema';
 
-/* ── Minimal header schema ── */
+/* ── Header schema — uses the same Navbar as main pages ── */
 function createHeaderSchema() {
+  const home = createHomeSchema();
+  const navbar = home.nodes['navbar'];
   return {
     id: 'schema-header', version: 1, updatedAt: new Date().toISOString(),
-    themeTokens: createDefaultHomeSchema().schema.themeTokens, rootNodeId: 'root',
+    themeTokens: home.themeTokens, rootNodeId: 'root',
     nodes: {
       root: { id: 'root', type: 'Section' as const, props: {}, style: { display: 'flex', flexDirection: 'column' }, children: ['navbar'] },
-      navbar: { id: 'navbar', type: 'Navbar' as const, props: { logoText: 'STORE', links: [{ text: 'Home', href: '#' }, { text: 'Shop', href: '#' }] }, style: {}, children: [] },
+      navbar: navbar ? { ...navbar } : { id: 'navbar', type: 'Navbar' as const, props: { logoText: 'STORE', links: [{ text: 'Home', href: '#' }, { text: 'Shop', href: '#' }] }, style: {}, children: [] },
     },
   };
 }
