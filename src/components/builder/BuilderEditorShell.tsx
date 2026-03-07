@@ -141,7 +141,6 @@ export function BuilderEditorShell({
     if (activeData?.type === 'palette') {
       const nodeType = activeData.nodeType as NodeType;
       const tree = createNodeTree(nodeType);
-      const newRootNode = tree.nodes[tree.rootId];
 
       let dropped = false;
       updateSchema((s) => {
