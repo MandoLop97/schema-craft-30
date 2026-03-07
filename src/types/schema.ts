@@ -1,6 +1,6 @@
 // Schema-First Data Model for Nexora Visual Builder
 
-export type NodeType =
+export type BuiltInNodeType =
   | 'Section' | 'Container' | 'Grid' | 'Stack'
   | 'Text' | 'Image' | 'Divider' | 'Badge'
   | 'Button' | 'Card' | 'Input'
@@ -9,6 +9,9 @@ export type NodeType =
   | 'AnnouncementBar' | 'FeatureBar' | 'TestimonialCard' | 'NewsletterSection'
   | 'HeroSection'
   | 'Accordion' | 'TabsBlock' | 'VideoEmbed';
+
+/** Extensible node type — accepts all built-in types plus any custom string. */
+export type NodeType = BuiltInNodeType | (string & {});
 
 export interface NodeStyle {
   padding?: string;

@@ -4,6 +4,7 @@ import { createDefaultHomeSchema } from '@/lib/default-schema';
 import { validateSchema } from '@/lib/schema-validator';
 import { BuilderEditorShell } from '@/components/builder/BuilderEditorShell';
 import { PublishPayload } from '@/components/builder/PublishDialog';
+import { BlockDefinition, registerBlocks } from '@/lib/block-registry';
 import { PageManager } from '@/components/builder/PageManager';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from '@/components/ui/sonner';
@@ -98,6 +99,13 @@ export interface NexoraBuilderAppProps {
    * Components receive { node, mode, renderChildren } props.
    */
   customComponents?: CustomComponentMap;
+
+  /**
+   * Additional block definitions to register in the palette.
+   * Each entry makes a new block type available for drag-and-drop.
+   * Pair with `customComponents` to provide the React renderer.
+   */
+  extraBlocks?: BlockDefinition[];
 }
 
 export function NexoraBuilderApp({
@@ -116,7 +124,15 @@ export function NexoraBuilderApp({
   onPublishSubmit,
   locale: localeProp,
   customComponents,
+  extraBlocks,
 }: NexoraBuilderAppProps) {
+  // Register extra blocks
+  useEffect(() => {
+    if (extraBlocks && extraBlocks.length > 0) {
+      registerBlocks(extraBlocks);
+    }
+  }, [extraBlocks]);
+
   // Apply locale
   useEffect(() => {
     if (!localeProp) return;
