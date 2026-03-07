@@ -11,6 +11,7 @@ export function productCardNodes(
   id: string,
   opts: { name: string; price: string; image: string; badge?: string; originalPrice?: string }
 ): { rootId: string; nodes: Nodes } {
+  const imgWrapperId = `${id}-img-wrap`;
   const imgId = `${id}-img`;
   const bodyId = `${id}-body`;
   const titleId = `${id}-title`;
@@ -20,7 +21,7 @@ export function productCardNodes(
   const badgeId = `${id}-badge`;
   const btnId = `${id}-btn`;
 
-  const children = [imgId, bodyId];
+  const imgWrapChildren: string[] = [imgId];
   const bodyChildren = [titleId, priceRowId, btnId];
   const priceChildren: string[] = [priceId];
   if (opts.originalPrice) priceChildren.push(oldPriceId);
@@ -29,7 +30,12 @@ export function productCardNodes(
     [id]: {
       id, type: 'ProductCard', props: {},
       style: { borderRadius: '0.75rem', overflow: 'hidden', borderWidth: '1px', borderColor: 'hsl(var(--border))', backgroundColor: 'hsl(var(--card))', transition: 'box-shadow 0.2s, transform 0.2s' },
-      children,
+      children: [imgWrapperId, bodyId],
+    },
+    [imgWrapperId]: {
+      id: imgWrapperId, type: 'Container', props: {},
+      style: { position: 'relative', overflow: 'hidden', width: '100%' },
+      children: imgWrapChildren,
     },
     [imgId]: {
       id: imgId, type: 'Image',
@@ -68,15 +74,13 @@ export function productCardNodes(
   };
 
   if (opts.badge) {
-    children.splice(1, 0, badgeId); // insert badge between image and body
+    imgWrapChildren.push(badgeId);
     nodes[badgeId] = {
       id: badgeId, type: 'Badge',
       props: { text: opts.badge },
-      style: { position: 'absolute', top: '0.75rem', left: '0.75rem' },
+      style: { position: 'absolute', top: '5%', left: '5%', zIndex: '1' },
       children: [],
     };
-    // Make ProductCard root relative for absolute badge
-    nodes[id].style.position = 'relative';
   }
 
   if (opts.originalPrice) {

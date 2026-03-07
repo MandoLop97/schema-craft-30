@@ -761,6 +761,47 @@ function ProductCardPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate
 
 /* ── Props Tab ── */
 
+function PositionAnchorControls({ node, onUpdateStyle }: { node: SchemaNode; onUpdateStyle: (s: Partial<NodeStyle>) => void }) {
+  const pos = node.style.position;
+  if (pos !== 'absolute' && pos !== 'fixed') return null;
+
+  const anchors: { label: string; icon: string; style: Partial<NodeStyle> }[] = [
+    { label: 'Top Left', icon: '↖', style: { top: '5%', left: '5%', right: '', bottom: '' } },
+    { label: 'Top Center', icon: '↑', style: { top: '5%', left: '50%', right: '', bottom: '', transform: 'translateX(-50%)' } },
+    { label: 'Top Right', icon: '↗', style: { top: '5%', right: '5%', left: '', bottom: '' } },
+    { label: 'Center Left', icon: '←', style: { top: '50%', left: '5%', right: '', bottom: '', transform: 'translateY(-50%)' } },
+    { label: 'Center', icon: '•', style: { top: '50%', left: '50%', right: '', bottom: '', transform: 'translate(-50%, -50%)' } },
+    { label: 'Center Right', icon: '→', style: { top: '50%', right: '5%', left: '', bottom: '', transform: 'translateY(-50%)' } },
+    { label: 'Bottom Left', icon: '↙', style: { bottom: '5%', left: '5%', right: '', top: '' } },
+    { label: 'Bottom Center', icon: '↓', style: { bottom: '5%', left: '50%', right: '', top: '', transform: 'translateX(-50%)' } },
+    { label: 'Bottom Right', icon: '↘', style: { bottom: '5%', right: '5%', left: '', top: '' } },
+  ];
+
+  return (
+    <div className="space-y-2">
+      <Separator className="my-2" />
+      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Posición Rápida</Label>
+      <div className="grid grid-cols-3 gap-1">
+        {anchors.map((a) => (
+          <button
+            key={a.label}
+            className="h-7 rounded border border-border bg-muted/30 hover:bg-primary/10 hover:border-primary/30 text-xs font-medium transition-colors cursor-pointer"
+            onClick={() => onUpdateStyle(a.style)}
+            title={a.label}
+          >
+            {a.icon}
+          </button>
+        ))}
+      </div>
+      <NumericStyleField label="Top" value={node.style.top || ''} onChange={(v) => onUpdateStyle({ top: v || undefined })} placeholder="5%" allowNegative />
+      <NumericStyleField label="Left" value={node.style.left || ''} onChange={(v) => onUpdateStyle({ left: v || undefined })} placeholder="5%" allowNegative />
+      <NumericStyleField label="Right" value={node.style.right || ''} onChange={(v) => onUpdateStyle({ right: v || undefined })} placeholder="" allowNegative />
+      <NumericStyleField label="Bottom" value={node.style.bottom || ''} onChange={(v) => onUpdateStyle({ bottom: v || undefined })} placeholder="" allowNegative />
+      <NumericStyleField label="Z-Index" value={node.style.zIndex || ''} onChange={(v) => onUpdateStyle({ zIndex: v || undefined })} placeholder="1" />
+    </div>
+  );
+}
+
 function PropsTab({ node, onUpdateProps, onUpdateStyle, onImageUpload }: { node: SchemaNode; onUpdateProps: (p: Partial<NodeProps>) => void; onUpdateStyle: (s: Partial<NodeStyle>) => void; onImageUpload?: (file: File) => Promise<string> }) {
   const p = node.props;
   return (
@@ -1000,6 +1041,9 @@ function PropsTab({ node, onUpdateProps, onUpdateStyle, onImageUpload }: { node:
         }
         return null;
       })()}
+
+      {/* Quick positioning for absolute/fixed nodes */}
+      <PositionAnchorControls node={node} onUpdateStyle={onUpdateStyle} />
     </div>
   );
 }

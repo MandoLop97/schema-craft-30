@@ -250,10 +250,22 @@ export function BuilderEditorShell({
         };
         const descendants = allDescendantIds(selectedNodeId);
         if ('showBadge' in props) {
-          descendants.forEach((did) => {
-            if (did.endsWith('-badge') || s.nodes[did]?.type === 'Badge') {
-              s.nodes[did].hidden = props.showBadge === false;
-            }
+          // Search badge in all descendants (including nested in image wrapper)
+          const allNodes = Object.values(s.nodes);
+          const findBadgesInTree = (rootId: string): string[] => {
+            const result: string[] = [];
+            const visit = (id: string) => {
+              const n = s.nodes[id];
+              if (!n) return;
+              if (n.type === 'Badge' || id.endsWith('-badge')) result.push(id);
+              n.children.forEach(visit);
+            };
+            visit(rootId);
+            return result;
+          };
+          const badgeIds = findBadgesInTree(selectedNodeId);
+          badgeIds.forEach((did) => {
+            s.nodes[did].hidden = props.showBadge === false;
           });
         }
         if ('showOriginalPrice' in props) {
