@@ -115,7 +115,7 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
       );
     };
 
-    const element = <Component node={node} mode={mode} renderChildren={renderChildren} />;
+    const element = <Component node={node} mode={mode} renderChildren={renderChildren} mockData={mockData} />;
 
     // Root node: don't wrap in sortable
     if (mode !== 'edit') return element;
