@@ -455,7 +455,155 @@ export function ThemeEditor({ themeTokens, onUpdate }: ThemeEditorProps) {
             </div>
           </div>
         </div>
+
+        {/* ── Global Styles Section ── */}
+        {onUpdateGlobalStyles && (
+          <>
+            <Separator className="my-4" />
+            <GlobalStylesManager globalStyles={globalStyles || {}} onUpdate={onUpdateGlobalStyles} />
+          </>
+        )}
       </ScrollArea>
     </div>
   );
+}
+
+/* ── Global Styles Manager ── */
+
+const STYLE_PRESETS: { label: string; style: Partial<NodeStyle> }[] = [
+  { label: 'Heading Grande', style: { fontSize: '2.5rem', fontWeight: '700', lineHeight: '1.2', letterSpacing: '-0.02em' } },
+  { label: 'Texto Sutil', style: { fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))', lineHeight: '1.6' } },
+  { label: 'Card Shadow', style: { borderRadius: '0.75rem', boxShadow: '0 4px 12px rgba(0,0,0,0.08)', padding: '1.5rem' } },
+  { label: 'Botón Primario', style: { backgroundColor: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))', padding: '0.75rem 1.5rem', borderRadius: '0.5rem', fontWeight: '600' } },
+];
+
+function GlobalStylesManager({ globalStyles, onUpdate }: { globalStyles: Record<string, GlobalStyleDef>; onUpdate: (styles: Record<string, GlobalStyleDef>) => void }) {
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editLabel, setEditLabel] = useState('');
+  const [editCss, setEditCss] = useState('');
+
+  const handleCreate = () => {
+    const id = `gs-${Date.now().toString(36)}`;
+    onUpdate({ ...globalStyles, [id]: { label: 'Nuevo Estilo', style: {} } });
+    setEditingId(id);
+    setEditLabel('Nuevo Estilo');
+    setEditCss('');
+  };
+
+  const handleCreateFromPreset = (preset: typeof STYLE_PRESETS[0]) => {
+    const id = `gs-${Date.now().toString(36)}`;
+    onUpdate({ ...globalStyles, [id]: { label: preset.label, style: { ...preset.style } } });
+  };
+
+  const handleDelete = (id: string) => {
+    const next = { ...globalStyles };
+    delete next[id];
+    onUpdate(next);
+    if (editingId === id) setEditingId(null);
+  };
+
+  const handleStartEdit = (id: string) => {
+    const gs = globalStyles[id];
+    setEditingId(id);
+    setEditLabel(gs.label);
+    setEditCss(Object.entries(gs.style)
+      .filter(([, v]) => v && typeof v === 'string')
+      .map(([k, v]) => `${camelToKebab(k)}: ${v}`)
+      .join(';\n'));
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingId) return;
+    const style: Partial<NodeStyle> = {};
+    editCss.split(/[;\n]/).forEach((line) => {
+      const [prop, ...rest] = line.split(':');
+      if (prop && rest.length) {
+        const key = kebabToCamel(prop.trim());
+        (style as any)[key] = rest.join(':').trim();
+      }
+    });
+    onUpdate({ ...globalStyles, [editingId]: { label: editLabel, style } });
+    setEditingId(null);
+  };
+
+  const entries = Object.entries(globalStyles);
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Estilos Globales</Label>
+        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleCreate} title="Crear estilo global">
+          <Plus className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+      <p className="text-[9px] text-muted-foreground">Clases reutilizables que puedes aplicar a cualquier nodo desde el Inspector.</p>
+
+      {/* Presets */}
+      <Collapsible>
+        <CollapsibleTrigger className="text-[9px] text-primary hover:underline cursor-pointer">
+          + Crear desde preset
+        </CollapsibleTrigger>
+        <CollapsibleContent className="mt-1 space-y-1">
+          {STYLE_PRESETS.map((preset, i) => (
+            <button
+              key={i}
+              onClick={() => handleCreateFromPreset(preset)}
+              className="w-full text-left text-[10px] px-2 py-1.5 rounded border border-border hover:border-primary/40 hover:bg-muted/30 transition-colors cursor-pointer"
+            >
+              {preset.label}
+            </button>
+          ))}
+        </CollapsibleContent>
+      </Collapsible>
+
+      {/* List */}
+      {entries.length === 0 && (
+        <p className="text-[10px] text-muted-foreground italic text-center py-2">Sin estilos globales</p>
+      )}
+      {entries.map(([id, def]) => (
+        <div key={id} className="border rounded-md p-2 space-y-1">
+          {editingId === id ? (
+            <div className="space-y-2">
+              <Input className="h-7 text-xs" value={editLabel} onChange={(e) => setEditLabel(e.target.value)} placeholder="Nombre del estilo" />
+              <textarea
+                className="w-full text-[10px] font-mono p-2 border rounded-md bg-muted/30 min-h-[60px] resize-y"
+                value={editCss}
+                onChange={(e) => setEditCss(e.target.value)}
+                placeholder={"font-size: 2rem;\nfont-weight: 700;\ncolor: #333;"}
+              />
+              <div className="flex gap-1 justify-end">
+                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setEditingId(null)}><X className="h-3 w-3" /></Button>
+                <Button variant="default" size="icon" className="h-6 w-6" onClick={handleSaveEdit}><Check className="h-3 w-3" /></Button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-xs font-medium">{def.label}</span>
+                <p className="text-[9px] text-muted-foreground font-mono">
+                  {Object.keys(def.style).length} props
+                </p>
+              </div>
+              <div className="flex gap-0.5">
+                <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-primary" onClick={() => handleStartEdit(id)}>
+                  <Edit2 className="h-3 w-3" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-destructive" onClick={() => handleDelete(id)}>
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function camelToKebab(str: string): string {
+  return str.replace(/[A-Z]/g, (m) => '-' + m.toLowerCase());
+}
+
+function kebabToCamel(str: string): string {
+  return str.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
 }
