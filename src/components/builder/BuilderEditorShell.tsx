@@ -555,7 +555,7 @@ export function BuilderEditorShell({
             onDuplicateNode={handleDuplicateById}
             onDeleteNode={handleDeleteById}
             canPaste={!!clipboardRef.current}
-            onEditSection={(nodeType) => {
+            onEditSection={activePageDef?.templateType === 'page' ? (nodeType) => {
               if (!onPageChange || !pages) return;
               const typeToSlug: Record<string, string> = { Navbar: 'header', Footer: 'footer', ProductCard: 'component' };
               const slug = typeToSlug[nodeType];
@@ -567,7 +567,7 @@ export function BuilderEditorShell({
                 );
                 if (page) onPageChange(page.slug);
               }
-            }}
+            } : undefined}
           />
 
           {/* Right Sidebar */}
