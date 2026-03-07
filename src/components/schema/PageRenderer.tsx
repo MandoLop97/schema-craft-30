@@ -138,6 +138,7 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
                 onEditSection={onEditSection}
                 onSaveAsTemplate={onSaveAsTemplate}
                 nodeStyle={childNode.style}
+                onRepositionNode={onRepositionNode}
               >
                 {wrappedChild}
               </SortableNodeWrapper>
