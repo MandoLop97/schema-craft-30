@@ -15,40 +15,136 @@ export type BuiltInNodeType =
 export type NodeType = BuiltInNodeType | (string & {});
 
 export interface NodeStyle {
+  // ── Layout & Box Model ──
   padding?: string;
   margin?: string;
   gap?: string;
-  color?: string;
-  backgroundColor?: string;
-  borderColor?: string;
-  borderWidth?: string;
-  borderRadius?: string;
-  boxShadow?: string;
   width?: string;
   height?: string;
   minHeight?: string;
   maxWidth?: string;
-  alignItems?: string;
-  justifyContent?: string;
-  textAlign?: string;
-  fontSize?: string;
-  fontWeight?: string;
-  lineHeight?: string;
-  letterSpacing?: string;
+  minWidth?: string;
+  maxHeight?: string;
   display?: string;
   flexDirection?: string;
+  flexWrap?: string;
+  flexGrow?: string;
+  flexShrink?: string;
+  alignItems?: string;
+  justifyContent?: string;
+  alignSelf?: string;
   gridTemplateColumns?: string;
-  backgroundImage?: string;
-  backgroundSize?: string;
-  backgroundPosition?: string;
-  opacity?: string;
+  gridTemplateRows?: string;
+  gridColumn?: string;
+  gridRow?: string;
   overflow?: string;
+  overflowX?: string;
+  overflowY?: string;
   position?: string;
   top?: string;
   left?: string;
   right?: string;
   bottom?: string;
   zIndex?: string;
+  float?: string;
+  clear?: string;
+
+  // ── Typography ──
+  color?: string;
+  fontSize?: string;
+  fontWeight?: string;
+  fontFamily?: string;
+  fontStyle?: string;
+  lineHeight?: string;
+  letterSpacing?: string;
+  textAlign?: string;
+  textTransform?: string;
+  textDecoration?: string;
+  textShadow?: string;
+  wordSpacing?: string;
+  whiteSpace?: string;
+  textOverflow?: string;
+
+  // ── Background ──
+  backgroundColor?: string;
+  backgroundImage?: string;
+  backgroundSize?: string;
+  backgroundPosition?: string;
+  backgroundRepeat?: string;
+  backgroundAttachment?: string;
+  backgroundBlendMode?: string;
+  backgroundGradient?: string;
+  backgroundClip?: string;
+
+  // ── Border ──
+  borderColor?: string;
+  borderWidth?: string;
+  borderRadius?: string;
+  borderStyle?: string;
+  borderTop?: string;
+  borderBottom?: string;
+  borderLeft?: string;
+  borderRight?: string;
+  borderTopLeftRadius?: string;
+  borderTopRightRadius?: string;
+  borderBottomLeftRadius?: string;
+  borderBottomRightRadius?: string;
+
+  // ── Outline ──
+  outline?: string;
+  outlineOffset?: string;
+  outlineColor?: string;
+  outlineStyle?: string;
+  outlineWidth?: string;
+
+  // ── Shadow & Effects ──
+  boxShadow?: string;
+  opacity?: string;
+  filter?: string;
+  backdropFilter?: string;
+  mixBlendMode?: string;
+  clipPath?: string;
+  cursor?: string;
+  pointerEvents?: string;
+  userSelect?: string;
+  visibility?: string;
+
+  // ── Transforms ──
+  transform?: string;
+  transformOrigin?: string;
+  perspective?: string;
+  perspectiveOrigin?: string;
+
+  // ── Transitions ──
+  transition?: string;
+  transitionProperty?: string;
+  transitionDuration?: string;
+  transitionTimingFunction?: string;
+  transitionDelay?: string;
+
+  // ── Animations ──
+  animation?: string;
+  animationName?: string;
+  animationDuration?: string;
+  animationDelay?: string;
+  animationTimingFunction?: string;
+  animationIterationCount?: string;
+  animationFillMode?: string;
+  animationDirection?: string;
+  animationPlayState?: string;
+
+  // ── Pseudo-state overrides ──
+  hover?: Partial<Omit<NodeStyle, 'hover' | 'focus' | 'active' | 'responsive'>>;
+  focus?: Partial<Omit<NodeStyle, 'hover' | 'focus' | 'active' | 'responsive'>>;
+  active?: Partial<Omit<NodeStyle, 'hover' | 'focus' | 'active' | 'responsive'>>;
+
+  // ── Responsive overrides by breakpoint ──
+  responsive?: {
+    sm?: Partial<Omit<NodeStyle, 'hover' | 'focus' | 'active' | 'responsive'>>;
+    md?: Partial<Omit<NodeStyle, 'hover' | 'focus' | 'active' | 'responsive'>>;
+    lg?: Partial<Omit<NodeStyle, 'hover' | 'focus' | 'active' | 'responsive'>>;
+    xl?: Partial<Omit<NodeStyle, 'hover' | 'focus' | 'active' | 'responsive'>>;
+  };
 }
 
 export interface NodeProps {
@@ -74,36 +170,23 @@ export interface NodeProps {
   ctaHref?: string;
   overlayOpacity?: string;
   // ── Aliases for template compatibility ──
-  /** Alias for `text` in HeroSection/Newsletter */
   heading?: string;
-  /** Alias for `ctaHref` in HeroSection */
   ctaLink?: string;
-  /** Secondary CTA button text */
   secondaryCtaText?: string;
-  /** Secondary CTA button link */
   secondaryCtaLink?: string;
-  /** Overlay label text in HeroSection */
   overlayText?: string;
-  /** Alias for `text` in ProductCard */
   name?: string;
-  /** Alias for `src` in ProductCard */
   image?: string;
-  /** Alias for `text` in TestimonialCard */
   quote?: string;
-  /** Alias for `label` in TestimonialCard */
   author?: string;
-  /** Alias for `variant` (stars) in TestimonialCard */
   stars?: number;
-  /** Alias for `href` in Button */
   link?: string;
-  /** Accordion/Tabs panels: array of { title, description } */
   panels?: { title: string; description: string }[];
-  /** Video embed URL */
   videoUrl?: string;
-  /** Autoplay flag */
   autoplay?: boolean;
-  /** Muted flag */
   muted?: boolean;
+  /** Allow arbitrary extra props from custom blocks */
+  [key: string]: any;
 }
 
 export interface SchemaNode {
@@ -114,7 +197,6 @@ export interface SchemaNode {
   children: string[];
   locked?: boolean;
   hidden?: boolean;
-  /** User-defined custom name for this node (shown in Layers panel) */
   customName?: string;
 }
 
@@ -145,7 +227,6 @@ export interface ThemeTokens {
     lg: string;
     xl: string;
   };
-  /** Global gradient applied as background */
   gradient?: string;
 }
 
@@ -170,18 +251,37 @@ export interface PageDefinition {
   title: string;
   schema: Schema;
   status?: 'published' | 'draft';
-  /** Type of template being edited. Determines canvas behavior. */
   templateType?: TemplateType;
-  /** Category for grouping in the sidebar (e.g. "Páginas", "Elementos Globales", "Templates") */
   category?: string;
-  /** Optional icon component for the page list */
   icon?: React.ComponentType;
-  /** Custom canvas dimensions. Overrides templateType defaults. */
   canvasSize?: { width: number; height: number };
-  /** Mock data injected into custom components in edit/preview mode */
   mockData?: Record<string, any>;
 }
 
 export type RenderMode = 'public' | 'preview' | 'edit';
 
 export type TemplateType = 'page' | 'header' | 'footer' | 'component' | 'single';
+
+/** Predefined animation presets available in the Inspector */
+export type AnimationPreset =
+  | 'fadeIn' | 'fadeOut'
+  | 'slideUp' | 'slideDown' | 'slideLeft' | 'slideRight'
+  | 'scaleIn' | 'scaleOut'
+  | 'bounceIn' | 'pulse' | 'shake'
+  | 'none';
+
+/** Maps animation preset names to CSS animation values */
+export const ANIMATION_PRESETS: Record<AnimationPreset, string> = {
+  none: '',
+  fadeIn: 'nxr-fadeIn 0.5s ease-out forwards',
+  fadeOut: 'nxr-fadeOut 0.5s ease-out forwards',
+  slideUp: 'nxr-slideUp 0.5s ease-out forwards',
+  slideDown: 'nxr-slideDown 0.5s ease-out forwards',
+  slideLeft: 'nxr-slideLeft 0.5s ease-out forwards',
+  slideRight: 'nxr-slideRight 0.5s ease-out forwards',
+  scaleIn: 'nxr-scaleIn 0.4s ease-out forwards',
+  scaleOut: 'nxr-scaleOut 0.4s ease-out forwards',
+  bounceIn: 'nxr-bounceIn 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards',
+  pulse: 'nxr-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+  shake: 'nxr-shake 0.5s ease-in-out',
+};

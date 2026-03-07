@@ -13,10 +13,26 @@ export interface InspectorFieldDef {
   key: string;
   /** Display label */
   label: string;
-  /** Field type: text input, select dropdown, or color picker */
-  type: 'text' | 'select' | 'color' | 'number';
+  /** Field type */
+  type: 'text' | 'select' | 'color' | 'number' | 'image' | 'toggle' | 'slider' | 'textarea' | 'link' | 'icon' | 'spacing' | 'group';
   /** Options for 'select' type */
   options?: { label: string; value: string }[];
+  /** Min value for 'slider' and 'number' */
+  min?: number;
+  /** Max value for 'slider' and 'number' */
+  max?: number;
+  /** Step for 'slider' and 'number' */
+  step?: number;
+  /** Placeholder for 'text', 'textarea', 'link' */
+  placeholder?: string;
+  /** Rows for 'textarea' */
+  rows?: number;
+  /** Accept string for 'image' (e.g. "image/*") */
+  accept?: string;
+  /** Child fields for 'group' type */
+  children?: InspectorFieldDef[];
+  /** Default value */
+  defaultValue?: any;
 }
 
 export interface BlockDefinition {
@@ -27,54 +43,31 @@ export interface BlockDefinition {
   canHaveChildren: boolean;
   defaultProps: NodeProps;
   defaultStyle: NodeStyle;
-  /**
-   * Which parent node types this block can be dropped into.
-   * Empty array = can go anywhere (root or any container).
-   * undefined = can go anywhere.
-   */
   allowedParents?: NodeType[];
-  /**
-   * Which child node types this container accepts.
-   * undefined = accepts anything allowed.
-   * Only relevant for canHaveChildren=true blocks.
-   */
   allowedChildren?: NodeType[];
-  /**
-   * Custom inspector fields for this block type.
-   * When defined, these fields are rendered in the Props tab of the inspector.
-   * Only relevant for custom/host-defined blocks.
-   */
   inspectorFields?: InspectorFieldDef[];
-  /**
-   * Restrict this block to specific template types.
-   * If undefined or empty, the block appears in all template types.
-   */
   allowedTemplateTypes?: TemplateType[];
 }
 
 // ── Category definitions for hierarchy ──
-
-/** Layout blocks: structural containers */
 const LAYOUT_TYPES: NodeType[] = ['Section', 'Container', 'Grid', 'Stack'];
-/** Site-level blocks: should only be at root or inside Section */
 const SITE_TYPES: NodeType[] = ['Navbar', 'Footer', 'AnnouncementBar'];
-/** Content that goes inside any container */
 const CONTENT_TYPES: NodeType[] = ['Text', 'Image', 'Divider', 'Badge', 'Button', 'Card', 'Input', 'ProductCard', 'TestimonialCard', 'NewsletterSection', 'FeatureBar', 'HeroSection', 'Accordion', 'TabsBlock', 'VideoEmbed'];
 
 export const blockRegistry: BlockDefinition[] = [
-  // ── Layout ── (can nest inside other layout, but Section is top-level preferred)
+  // ── Layout ──
   { type: 'Section', label: 'Section', category: 'Layout', icon: Square, canHaveChildren: true, defaultProps: {}, defaultStyle: { padding: '3rem 2rem', display: 'flex', flexDirection: 'column', gap: '1rem' } },
   { type: 'Container', label: 'Container', category: 'Layout', icon: AlignVerticalJustifyStart, canHaveChildren: true, defaultProps: {}, defaultStyle: { maxWidth: '72rem', margin: '0 auto' }, allowedParents: ['Section', 'Container', 'Grid', 'Stack'] },
   { type: 'Grid', label: 'Grid', category: 'Layout', icon: LayoutGrid, canHaveChildren: true, defaultProps: { columns: 3 }, defaultStyle: { gap: '1.5rem' }, allowedParents: ['Section', 'Container', 'Stack', 'Grid'] },
   { type: 'Stack', label: 'Stack', category: 'Layout', icon: Columns, canHaveChildren: true, defaultProps: { direction: 'vertical' }, defaultStyle: { gap: '1rem' }, allowedParents: ['Section', 'Container', 'Grid', 'Stack'] },
 
-  // ── Content ── (can go in any container)
+  // ── Content ──
   { type: 'Text', label: 'Text', category: 'Content', icon: Type, canHaveChildren: false, defaultProps: { text: 'New text block', level: 'p' }, defaultStyle: {} },
   { type: 'Image', label: 'Image', category: 'Content', icon: ImageIcon, canHaveChildren: false, defaultProps: { src: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&h=400&fit=crop', alt: 'Placeholder' }, defaultStyle: { width: '100%', borderRadius: '0.5rem' } },
   { type: 'Divider', label: 'Divider', category: 'Content', icon: Minus, canHaveChildren: false, defaultProps: {}, defaultStyle: {} },
   { type: 'Badge', label: 'Badge', category: 'Content', icon: Tag, canHaveChildren: false, defaultProps: { text: 'Badge' }, defaultStyle: {} },
 
-  // ── UI ── (can go in any container)
+  // ── UI ──
   { type: 'Button', label: 'Button', category: 'UI', icon: Square, canHaveChildren: false, defaultProps: { text: 'Button', variant: 'default' }, defaultStyle: {} },
   { type: 'Card', label: 'Card', category: 'UI', icon: CreditCard, canHaveChildren: false, defaultProps: { items: [{ title: 'Card Title', description: 'Card description goes here.' }] }, defaultStyle: { padding: '1.5rem' } },
   { type: 'Input', label: 'Input', category: 'UI', icon: TextCursorInput, canHaveChildren: false, defaultProps: { placeholder: 'Enter text...' }, defaultStyle: {} },
@@ -86,7 +79,7 @@ export const blockRegistry: BlockDefinition[] = [
   // ── Commerce ──
   { type: 'ProductCard', label: 'Product Card', category: 'Commerce', icon: ShoppingBag, canHaveChildren: false, defaultProps: { text: 'Product Name', price: '$99', src: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop' }, defaultStyle: {} },
 
-  // ── Site ── (top-level or inside Section only)
+  // ── Site ──
   { type: 'Navbar', label: 'Navbar', category: 'Site', icon: Navigation, canHaveChildren: false, defaultProps: { logoText: 'Brand', links: [{ text: 'Home', href: '#' }] }, defaultStyle: {}, allowedParents: ['Section'], allowedTemplateTypes: ['header'] },
   { type: 'Footer', label: 'Footer', category: 'Site', icon: PanelBottom, canHaveChildren: false, defaultProps: { logoText: 'Brand', copyright: '© 2026', links: [{ text: 'Privacy', href: '#' }] }, defaultStyle: {}, allowedParents: ['Section'], allowedTemplateTypes: ['footer'] },
 
@@ -105,11 +98,6 @@ export function getBlockDef(type: NodeType): BlockDefinition | undefined {
   return registryMap.get(type);
 }
 
-/**
- * Register a custom block definition at runtime.
- * It will appear in the blocks palette and support drag-and-drop.
- * If a block with the same type already exists it will be replaced.
- */
 export function registerBlock(def: BlockDefinition): void {
   const existing = registryMap.get(def.type);
   if (existing) {
@@ -121,7 +109,6 @@ export function registerBlock(def: BlockDefinition): void {
   registryMap.set(def.type, def);
 }
 
-/** Register multiple custom blocks at once. */
 export function registerBlocks(defs: BlockDefinition[]): void {
   defs.forEach(registerBlock);
 }
@@ -140,39 +127,26 @@ export function getBlocksByCategory(category: string, templateType?: TemplateTyp
   });
 }
 
-/** Get categories that have at least one block for the given templateType */
 export function getCategoriesForTemplate(templateType?: TemplateType): string[] {
   return getCategories().filter((cat) => getBlocksByCategory(cat, templateType).length > 0);
 }
 
-/**
- * Check if a child node type can be placed inside a given parent node type.
- * - If child has allowedParents defined, parent must be in that list OR be the root.
- * - If parent has allowedChildren defined, child must be in that list.
- * - Otherwise, parent must be a container (canHaveChildren).
- */
 export function canDropInto(childType: NodeType, parentType: NodeType, isRoot: boolean): boolean {
   const childDef = getBlockDef(childType);
   const parentDef = getBlockDef(parentType);
 
   if (!childDef || !parentDef) return false;
-
-  // Parent must be a container
   if (!parentDef.canHaveChildren && !isRoot) return false;
 
-  // If root (the Page-level container), allow layout and site blocks
   if (isRoot) {
-    // Only layout and site-level blocks at root
     const rootAllowed: NodeType[] = [...LAYOUT_TYPES, ...SITE_TYPES, 'HeroSection', 'NewsletterSection', 'FeatureBar', 'Accordion', 'TabsBlock', 'VideoEmbed'];
     return rootAllowed.includes(childType);
   }
 
-  // Check child's allowedParents constraint
   if (childDef.allowedParents && childDef.allowedParents.length > 0) {
     if (!childDef.allowedParents.includes(parentType)) return false;
   }
 
-  // Check parent's allowedChildren constraint
   if (parentDef.allowedChildren && parentDef.allowedChildren.length > 0) {
     if (!parentDef.allowedChildren.includes(childType)) return false;
   }

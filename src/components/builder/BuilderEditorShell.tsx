@@ -37,6 +37,8 @@ export interface BuilderEditorShellProps {
   onBack?: () => void;
   customStylesheets?: string[];
   customCSS?: string;
+  onImageUpload?: (file: File) => Promise<string>;
+  resolveAssetUrl?: (path: string) => string;
 }
 
 export function BuilderEditorShell({
@@ -55,6 +57,8 @@ export function BuilderEditorShell({
   onBack,
   customStylesheets,
   customCSS,
+  onImageUpload,
+  resolveAssetUrl,
 }: BuilderEditorShellProps) {
   const locale = t();
   const { schema, setSchema, undo, redo, canUndo, canRedo } = useSchemaHistory(initialSchema);
@@ -448,6 +452,7 @@ export function BuilderEditorShell({
                   onUpdateStyle={handleUpdateStyle}
                   onDelete={handleDelete}
                   onDuplicate={handleDuplicate}
+                  onImageUpload={onImageUpload}
                 />
               </ScrollArea>
             ) : (

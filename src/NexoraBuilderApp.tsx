@@ -33,6 +33,10 @@ export interface NexoraBuilderAppProps {
   customStylesheets?: string[];
   /** Raw CSS string to inject into the canvas */
   customCSS?: string;
+  /** Callback for image uploads from inspector fields */
+  onImageUpload?: (file: File) => Promise<string>;
+  /** Resolve asset paths to full URLs */
+  resolveAssetUrl?: (path: string) => string;
 }
 
 export function NexoraBuilderApp({
@@ -54,6 +58,8 @@ export function NexoraBuilderApp({
   extraBlocks,
   customStylesheets,
   customCSS,
+  onImageUpload,
+  resolveAssetUrl,
 }: NexoraBuilderAppProps) {
   // Register extra blocks
   useEffect(() => {
@@ -166,6 +172,8 @@ export function NexoraBuilderApp({
         onBack={hasPages ? () => onPageChange?.('') : undefined}
         customStylesheets={customStylesheets}
         customCSS={customCSS}
+        onImageUpload={onImageUpload}
+        resolveAssetUrl={resolveAssetUrl}
       />
     </TooltipProvider>
   );
