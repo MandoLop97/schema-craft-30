@@ -125,6 +125,7 @@ export function NexoraBuilderApp({
   onPublishSubmit,
   locale: localeProp,
   customComponents,
+  extraBlocks,
 }: NexoraBuilderAppProps) {
   // Apply locale
   useEffect(() => {
