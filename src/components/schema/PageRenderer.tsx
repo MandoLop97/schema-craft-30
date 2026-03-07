@@ -1,5 +1,5 @@
-import React from 'react';
-import { Schema, RenderMode } from '@/types/schema';
+import React, { useMemo } from 'react';
+import { Schema, RenderMode, ThemeTokens } from '@/types/schema';
 import { getNodeComponent, CustomComponentMap } from './NodeRegistry';
 import { EditableDropZone } from './EditableDropZone';
 import { SortableNodeWrapper } from './SortableNodeWrapper';
