@@ -82,6 +82,7 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
                 onDelete={onDeleteNode}
                 canPaste={canPaste}
                 onEditSection={onEditSection}
+                onSaveAsTemplate={onSaveAsTemplate}
               >
                 {wrappedChild}
               </SortableNodeWrapper>
