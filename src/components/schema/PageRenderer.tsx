@@ -16,7 +16,7 @@ interface PageRendererProps {
   mockData?: Record<string, any>;
 }
 
-export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, customComponents }: PageRendererProps) {
+export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, customComponents, mockData }: PageRendererProps) {
   const renderNode = (nodeId: string): React.ReactNode => {
     const node = schema.nodes[nodeId];
     if (!node || node.hidden) return null;
