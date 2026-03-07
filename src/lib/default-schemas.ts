@@ -7,7 +7,7 @@ type Nodes = Record<string, SchemaNode>;
  * Creates a composite ProductCard node tree with individually editable sub-elements.
  * Returns the rootId and all generated nodes for merging into a schema.
  */
-function productCardNodes(
+export function productCardNodes(
   id: string,
   opts: { name: string; price: string; image: string; badge?: string; originalPrice?: string }
 ): { rootId: string; nodes: Nodes } {
