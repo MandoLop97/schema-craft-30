@@ -20,8 +20,12 @@ interface PageRendererProps {
   selectedNodeId?: string | null;
   onSelectNode?: (nodeId: string) => void;
   customComponents?: CustomComponentMap;
-  /** Mock data passed to custom components in edit/preview mode */
   mockData?: Record<string, any>;
+  onCopyNode?: (nodeId: string) => void;
+  onPasteNode?: (nodeId: string) => void;
+  onDuplicateNode?: (nodeId: string) => void;
+  onDeleteNode?: (nodeId: string) => void;
+  canPaste?: boolean;
 }
 
 export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, customComponents, mockData }: PageRendererProps) {
