@@ -188,10 +188,41 @@ function SortableLayerItem({
           <Icon className={`h-3 w-3 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
         </div>
 
-        {/* Type name */}
-        <span className={`truncate flex-1 font-medium ${isSelected ? 'text-primary' : ''}`}>
-          {node.type}
-        </span>
+        {/* Type name — double click to rename */}
+        {isEditing ? (
+          <input
+            className="truncate flex-1 font-medium bg-background border border-primary/30 rounded px-1 py-0 text-[11px] outline-none focus:ring-1 focus:ring-primary/50"
+            value={editName}
+            autoFocus
+            onClick={(e) => e.stopPropagation()}
+            onChange={(e) => setEditName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                const trimmed = editName.trim();
+                if (trimmed && onRenameNode) onRenameNode(node.id, trimmed);
+                setIsEditing(false);
+              } else if (e.key === 'Escape') {
+                setIsEditing(false);
+              }
+            }}
+            onBlur={() => {
+              const trimmed = editName.trim();
+              if (trimmed && onRenameNode) onRenameNode(node.id, trimmed);
+              setIsEditing(false);
+            }}
+          />
+        ) : (
+          <span
+            className={`truncate flex-1 font-medium ${isSelected ? 'text-primary' : ''}`}
+            onDoubleClick={(e) => {
+              e.stopPropagation();
+              setEditName(displayName);
+              setIsEditing(true);
+            }}
+          >
+            {displayName}
+          </span>
+        )}
 
         {/* Preview text */}
         {previewText && (
