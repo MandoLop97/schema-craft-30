@@ -1,12 +1,14 @@
 import { useDroppable } from '@dnd-kit/core';
 import { PageRenderer } from '@/components/schema/PageRenderer';
 import { Schema } from '@/types/schema';
+import { CustomComponentMap } from '@/components/schema/NodeRegistry';
 
 interface BuilderCanvasProps {
   schema: Schema;
   device: 'desktop' | 'tablet' | 'mobile';
   selectedNodeId: string | null;
   onSelectNode: (id: string) => void;
+  customComponents?: CustomComponentMap;
 }
 
 const DEVICE_WIDTHS = {
