@@ -135,6 +135,7 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
                 canPaste={canPaste}
                 onEditSection={onEditSection}
                 onSaveAsTemplate={onSaveAsTemplate}
+                nodeStyle={childNode.style}
               >
                 {wrappedChild}
               </SortableNodeWrapper>
