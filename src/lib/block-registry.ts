@@ -4,6 +4,7 @@ import {
   CreditCard, TextCursorInput, ShoppingBag, Navigation, PanelBottom,
   Megaphone, Sparkles, MessageSquareQuote, Mail, Layers,
   ListCollapse, LayoutDashboard, Play,
+  MoveVertical, Star, Share2,
 } from 'lucide-react';
 import { NodeType, NodeProps, NodeStyle, TemplateType } from '@/types/schema';
 import React from 'react';
