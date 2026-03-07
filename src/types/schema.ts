@@ -114,6 +114,8 @@ export interface SchemaNode {
   children: string[];
   locked?: boolean;
   hidden?: boolean;
+  /** User-defined custom name for this node (shown in Layers panel) */
+  customName?: string;
 }
 
 export interface ThemeTokens {

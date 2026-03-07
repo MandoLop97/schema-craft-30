@@ -377,6 +377,14 @@ export function BuilderEditorShell({
                       });
                       toast.success('Node moved');
                     }}
+                    onRenameNode={(nodeId, newName) => {
+                      updateSchema((s) => {
+                        if (s.nodes[nodeId]) {
+                          s.nodes[nodeId].customName = newName;
+                        }
+                        return s;
+                      });
+                    }}
                   />
                 </TabsContent>
                 <TabsContent value="theme" className="mt-0">

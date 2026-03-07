@@ -33,6 +33,7 @@ interface LayersPanelProps {
   onDuplicateNode?: (nodeId: string) => void;
   onDeleteNode?: (nodeId: string) => void;
   onMoveNode?: (nodeId: string, newParentId: string, index: number) => void;
+  onRenameNode?: (nodeId: string, newName: string) => void;
 }
 
 /** Depth-based accent colors for tree lines */
@@ -70,6 +71,7 @@ function SortableLayerItem({
   onDuplicateNode,
   onDeleteNode,
   onMoveNode,
+  onRenameNode,
   isOverTarget,
 }: {
   node: SchemaNode;
@@ -81,13 +83,17 @@ function SortableLayerItem({
   onDuplicateNode?: (nodeId: string) => void;
   onDeleteNode?: (nodeId: string) => void;
   onMoveNode?: (nodeId: string, newParentId: string, index: number) => void;
+  onRenameNode?: (nodeId: string, newName: string) => void;
   isOverTarget?: boolean;
 }) {
   const [expanded, setExpanded] = useState(depth < 2);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState('');
   const hasChildren = node.children.length > 0;
   const isSelected = selectedNodeId === node.id;
   const nodeIsContainer = isContainer(node.type);
   const Icon = getNodeIcon(node.type);
+  const displayName = node.customName || node.type;
 
   const {
     attributes,
@@ -182,10 +188,41 @@ function SortableLayerItem({
           <Icon className={`h-3 w-3 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
         </div>
 
-        {/* Type name */}
-        <span className={`truncate flex-1 font-medium ${isSelected ? 'text-primary' : ''}`}>
-          {node.type}
-        </span>
+        {/* Type name — double click to rename */}
+        {isEditing ? (
+          <input
+            className="truncate flex-1 font-medium bg-background border border-primary/30 rounded px-1 py-0 text-[11px] outline-none focus:ring-1 focus:ring-primary/50"
+            value={editName}
+            autoFocus
+            onClick={(e) => e.stopPropagation()}
+            onChange={(e) => setEditName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                const trimmed = editName.trim();
+                if (trimmed && onRenameNode) onRenameNode(node.id, trimmed);
+                setIsEditing(false);
+              } else if (e.key === 'Escape') {
+                setIsEditing(false);
+              }
+            }}
+            onBlur={() => {
+              const trimmed = editName.trim();
+              if (trimmed && onRenameNode) onRenameNode(node.id, trimmed);
+              setIsEditing(false);
+            }}
+          />
+        ) : (
+          <span
+            className={`truncate flex-1 font-medium ${isSelected ? 'text-primary' : ''}`}
+            onDoubleClick={(e) => {
+              e.stopPropagation();
+              setEditName(displayName);
+              setIsEditing(true);
+            }}
+          >
+            {displayName}
+          </span>
+        )}
 
         {/* Preview text */}
         {previewText && (
@@ -233,6 +270,7 @@ function SortableLayerItem({
           onDuplicateNode={onDuplicateNode}
           onDeleteNode={onDeleteNode}
           onMoveNode={onMoveNode}
+          onRenameNode={onRenameNode}
         />
       )}
     </div>
@@ -249,6 +287,7 @@ function SortableChildrenList({
   onDuplicateNode,
   onDeleteNode,
   onMoveNode,
+  onRenameNode,
 }: {
   parentNode: SchemaNode;
   schema: Schema;
@@ -259,6 +298,7 @@ function SortableChildrenList({
   onDuplicateNode?: (nodeId: string) => void;
   onDeleteNode?: (nodeId: string) => void;
   onMoveNode?: (nodeId: string, newParentId: string, index: number) => void;
+  onRenameNode?: (nodeId: string, newName: string) => void;
 }) {
   return (
     <SortableContext
@@ -280,6 +320,7 @@ function SortableChildrenList({
             onDuplicateNode={onDuplicateNode}
             onDeleteNode={onDeleteNode}
             onMoveNode={onMoveNode}
+            onRenameNode={onRenameNode}
           />
         );
       })}
@@ -295,6 +336,7 @@ export function LayersPanel({
   onDuplicateNode,
   onDeleteNode,
   onMoveNode,
+  onRenameNode,
 }: LayersPanelProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -405,7 +447,7 @@ export function LayersPanel({
               <div className="h-5 w-5 rounded flex items-center justify-center bg-primary/10">
                 <RootIcon className="h-3 w-3 text-primary" />
               </div>
-              <span className="truncate flex-1 font-semibold">{root.type}</span>
+              <span className="truncate flex-1 font-semibold">{root.customName || root.type}</span>
               <span className="text-[9px] text-muted-foreground/50 font-mono">{root.children.length}</span>
             </div>
 
@@ -424,6 +466,7 @@ export function LayersPanel({
                   onDuplicateNode={onDuplicateNode}
                   onDeleteNode={onDeleteNode}
                   onMoveNode={onMoveNode}
+                  onRenameNode={onRenameNode}
                 />
               );
             })}
@@ -436,7 +479,7 @@ export function LayersPanel({
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] font-medium nxr-drag-overlay-layer"
             >
               <DragIcon className="h-3 w-3" />
-              {draggedNode.type}
+              {draggedNode.customName || draggedNode.type}
             </div>
           )}
         </DragOverlay>
