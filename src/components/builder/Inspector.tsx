@@ -694,18 +694,10 @@ function ProductCardPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate
       <Separator className="my-1" />
 
       {/* Layout */}
-      <div className="grid gap-1">
-        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Layout</Label>
-        <Select value={p.cardLayout || 'vertical'} onValueChange={(v) => onUpdate({ cardLayout: v })}>
-          <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="vertical">Vertical</SelectItem>
-            <SelectItem value="horizontal">Horizontal</SelectItem>
-            <SelectItem value="minimal">Minimal</SelectItem>
-            <SelectItem value="overlay">Overlay</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      <CardLayoutField
+        value={p.cardLayout}
+        onChange={(v) => onUpdate({ cardLayout: v })}
+      />
 
       {/* Image ratio */}
       <div className="grid gap-1">
