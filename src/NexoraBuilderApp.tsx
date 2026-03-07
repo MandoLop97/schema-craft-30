@@ -60,6 +60,7 @@ export function NexoraBuilderApp({
   extraBlocks,
   customStylesheets,
   customCSS,
+  customScripts,
   onImageUpload,
   resolveAssetUrl,
 }: NexoraBuilderAppProps) {
