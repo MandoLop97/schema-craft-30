@@ -67,6 +67,9 @@ export const blockRegistry: BlockDefinition[] = [
   { type: 'Image', label: 'Image', category: 'Content', icon: ImageIcon, canHaveChildren: false, defaultProps: { src: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&h=400&fit=crop', alt: 'Placeholder' }, defaultStyle: { width: '100%', borderRadius: '0.5rem' } },
   { type: 'Divider', label: 'Divider', category: 'Content', icon: Minus, canHaveChildren: false, defaultProps: {}, defaultStyle: {} },
   { type: 'Badge', label: 'Badge', category: 'Content', icon: Tag, canHaveChildren: false, defaultProps: { text: 'Badge' }, defaultStyle: {} },
+  { type: 'Spacer', label: 'Spacer', category: 'Content', icon: MoveVertical, canHaveChildren: false, defaultProps: { height: '2rem' }, defaultStyle: {} },
+  { type: 'Icon', label: 'Icon', category: 'Content', icon: Star, canHaveChildren: false, defaultProps: { iconName: 'Star', iconSize: '24', iconColor: 'currentColor' }, defaultStyle: {} },
+  { type: 'SocialIcons', label: 'Social Icons', category: 'Content', icon: Share2, canHaveChildren: false, defaultProps: { socialItems: [{ platform: 'facebook', url: '' }, { platform: 'instagram', url: '' }, { platform: 'twitter', url: '' }], socialIconSize: '20', socialStyle: 'default' }, defaultStyle: {} },
 
   // ── UI ──
   { type: 'Button', label: 'Button', category: 'UI', icon: Square, canHaveChildren: false, defaultProps: { text: 'Button', variant: 'default' }, defaultStyle: {} },
