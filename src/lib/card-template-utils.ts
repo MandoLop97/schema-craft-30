@@ -58,10 +58,23 @@ export function hydrateCardTemplate(
       appliedGlobalStyles: node.appliedGlobalStyles ? [...node.appliedGlobalStyles] : undefined,
     };
 
+    // Normalize root node styles for grid context
+    if (oldId === rootNodeId) {
+      delete cloned.style.width;
+      delete cloned.style.maxWidth;
+      delete cloned.style.minWidth;
+      cloned.style.width = '100%';
+      cloned.style.height = 'auto';
+      cloned.style.overflow = 'hidden';
+    }
+
     // Inject product data based on node type and style hints
     if (cloned.type === 'Image') {
       cloned.props.src = product.image_url || '/placeholder.svg';
       cloned.props.alt = product.name;
+      cloned.style.width = '100%';
+      cloned.style.height = 'auto';
+      cloned.style.objectFit = 'cover';
     } else if (cloned.type === 'Text') {
       if (cloned.props.level === 'h3') {
         // Product name
