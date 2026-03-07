@@ -273,6 +273,52 @@ function ThemeNumberField({
   );
 }
 
+/** Mini SVG previews for card layouts */
+function CardPreviewVertical() {
+  return (
+    <svg width="48" height="52" viewBox="0 0 48 52" fill="none" className="shrink-0">
+      <rect x="1" y="1" width="46" height="50" rx="4" stroke="currentColor" strokeWidth="1" opacity="0.3" />
+      <rect x="4" y="4" width="40" height="24" rx="2" fill="currentColor" opacity="0.15" />
+      <rect x="4" y="31" width="28" height="3" rx="1" fill="currentColor" opacity="0.4" />
+      <rect x="4" y="37" width="16" height="3" rx="1" fill="currentColor" opacity="0.25" />
+      <rect x="4" y="44" width="40" height="5" rx="2" fill="currentColor" opacity="0.2" />
+    </svg>
+  );
+}
+
+function CardPreviewHorizontal() {
+  return (
+    <svg width="48" height="36" viewBox="0 0 48 36" fill="none" className="shrink-0">
+      <rect x="1" y="1" width="46" height="34" rx="4" stroke="currentColor" strokeWidth="1" opacity="0.3" />
+      <rect x="4" y="4" width="16" height="28" rx="2" fill="currentColor" opacity="0.15" />
+      <rect x="24" y="8" width="18" height="3" rx="1" fill="currentColor" opacity="0.4" />
+      <rect x="24" y="14" width="12" height="3" rx="1" fill="currentColor" opacity="0.25" />
+      <rect x="24" y="24" width="16" height="5" rx="2" fill="currentColor" opacity="0.2" />
+    </svg>
+  );
+}
+
+function CardPreviewMinimal() {
+  return (
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" className="shrink-0">
+      <rect x="2" y="2" width="44" height="30" rx="3" fill="currentColor" opacity="0.12" />
+      <rect x="2" y="36" width="24" height="3" rx="1" fill="currentColor" opacity="0.35" />
+      <rect x="2" y="42" width="14" height="3" rx="1" fill="currentColor" opacity="0.25" />
+    </svg>
+  );
+}
+
+function CardPreviewOverlay() {
+  return (
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" className="shrink-0">
+      <rect x="1" y="1" width="46" height="46" rx="4" fill="currentColor" opacity="0.12" />
+      <rect x="1" y="24" width="46" height="23" rx="0" fill="currentColor" opacity="0.15" />
+      <rect x="6" y="30" width="20" height="3" rx="1" fill="currentColor" opacity="0.5" />
+      <rect x="6" y="36" width="12" height="3" rx="1" fill="currentColor" opacity="0.35" />
+    </svg>
+  );
+}
+
 export function ThemeEditor({ themeTokens, onUpdate }: ThemeEditorProps) {
   const update = (path: string[], value: string | number) => {
     const next = JSON.parse(JSON.stringify(themeTokens)) as ThemeTokens;
