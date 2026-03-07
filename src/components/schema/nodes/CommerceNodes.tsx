@@ -418,12 +418,14 @@ export function ProductGridNode({ node, mode }: NodeComponentProps) {
     <div
       data-node-id={node.id}
       style={{
+        ...templateThemeStyle,
         ...s(node.style),
         display: 'grid',
         gridTemplateColumns: `repeat(auto-fill, minmax(250px, 1fr))`,
         gap: (node.props.gap as string) || '1.5rem',
       }}
     >
+      {templateDynamicCSS && <style dangerouslySetInnerHTML={{ __html: templateDynamicCSS }} />}
       {hydratedCards.map(({ rootId, nodes }) => (
         <div key={rootId} style={{ width: '100%', minWidth: 0, overflow: 'hidden' }}>
           {renderHydratedNode(rootId, nodes)}
