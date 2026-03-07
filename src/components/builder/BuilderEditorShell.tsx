@@ -61,6 +61,7 @@ export function BuilderEditorShell({
   const [publishMode, setPublishMode] = useState<'draft' | 'published'>('published');
   const [previewOpen, setPreviewOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
+  const clipboardRef = useRef<string | null>(null);
 
   const hasPages = pages && pages.length > 0;
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
