@@ -39,6 +39,8 @@ function createProductCardSchema() {
   const { rootId, nodes: cardNodes } = productCardNodes('card', {
     name: 'Demo Product',
     price: '$29.99',
+    originalPrice: '$49.99',
+    badge: 'New',
     image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop',
   });
   return {
@@ -60,7 +62,7 @@ const DEMO_PAGES: PageDefinition[] = [
   {
     slug: '__template/product-card', title: 'Product Card', schema: createProductCardSchema(),
     templateType: 'component', category: 'Templates',
-    canvasSize: { width: 350, height: 450 },
+    canvasSize: { width: 400, height: 620 },
     mockData: { product: { name: 'Demo Product', price: 29.99, image: '/placeholder.svg', rating: 4.5 } },
   },
 ];
