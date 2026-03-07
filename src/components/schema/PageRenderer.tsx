@@ -27,9 +27,10 @@ interface PageRendererProps {
   onDeleteNode?: (nodeId: string) => void;
   canPaste?: boolean;
   onEditSection?: (nodeType: string) => void;
+  onSaveAsTemplate?: (nodeId: string) => void;
 }
 
-export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, customComponents, mockData, onCopyNode, onPasteNode, onDuplicateNode, onDeleteNode, canPaste, onEditSection }: PageRendererProps) {
+export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, customComponents, mockData, onCopyNode, onPasteNode, onDuplicateNode, onDeleteNode, canPaste, onEditSection, onSaveAsTemplate }: PageRendererProps) {
   const renderNode = (nodeId: string): React.ReactNode => {
     const node = schema.nodes[nodeId];
     if (!node || node.hidden) return null;
@@ -81,6 +82,7 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
                 onDelete={onDeleteNode}
                 canPaste={canPaste}
                 onEditSection={onEditSection}
+                onSaveAsTemplate={onSaveAsTemplate}
               >
                 {wrappedChild}
               </SortableNodeWrapper>
@@ -131,6 +133,7 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
                 onDelete={onDeleteNode}
                 canPaste={canPaste}
                 onEditSection={onEditSection}
+                onSaveAsTemplate={onSaveAsTemplate}
               >
                 {wrappedChild}
               </SortableNodeWrapper>

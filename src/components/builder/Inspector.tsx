@@ -594,6 +594,71 @@ function VideoEmbedPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate:
     </>
   );
 }
+
+function FormBlockPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: Partial<NodeProps>) => void }) {
+  const fields: any[] = node.props.formFields || [];
+  return (
+    <>
+      <PropField label="Título del formulario" value={node.props.formTitle || ''} onChange={(v) => onUpdate({ formTitle: v })} />
+      <Separator className="my-2" />
+      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Campos</Label>
+      {fields.map((field: any, i: number) => (
+        <div key={i} className="space-y-1 border rounded-md p-2 relative">
+          <Button variant="ghost" size="icon" className="absolute top-1 right-1 h-5 w-5 text-muted-foreground hover:text-destructive" onClick={() => {
+            onUpdate({ formFields: fields.filter((_: any, idx: number) => idx !== i) });
+          }}>
+            <Trash2 className="h-3 w-3" />
+          </Button>
+          <div className="grid grid-cols-2 gap-1">
+            <Select value={field.type || 'text'} onValueChange={(v) => {
+              const updated = [...fields]; updated[i] = { ...field, type: v }; onUpdate({ formFields: updated });
+            }}>
+              <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="text">Texto</SelectItem>
+                <SelectItem value="email">Email</SelectItem>
+                <SelectItem value="tel">Teléfono</SelectItem>
+                <SelectItem value="textarea">Área de texto</SelectItem>
+                <SelectItem value="select">Selector</SelectItem>
+              </SelectContent>
+            </Select>
+            <Input className="h-7 text-xs" placeholder="Label" value={field.label || ''} onChange={(e) => {
+              const updated = [...fields]; updated[i] = { ...field, label: e.target.value }; onUpdate({ formFields: updated });
+            }} />
+          </div>
+          <Input className="h-7 text-xs" placeholder="Placeholder" value={field.placeholder || ''} onChange={(e) => {
+            const updated = [...fields]; updated[i] = { ...field, placeholder: e.target.value }; onUpdate({ formFields: updated });
+          }} />
+          {field.type === 'select' && (
+            <Input className="h-7 text-xs" placeholder="Opciones (separadas por coma)" value={field.options || ''} onChange={(e) => {
+              const updated = [...fields]; updated[i] = { ...field, options: e.target.value }; onUpdate({ formFields: updated });
+            }} />
+          )}
+          <div className="flex items-center gap-2">
+            <Switch checked={field.required !== false} onCheckedChange={(v) => {
+              const updated = [...fields]; updated[i] = { ...field, required: v }; onUpdate({ formFields: updated });
+            }} />
+            <span className="text-[10px] text-muted-foreground">Requerido</span>
+          </div>
+        </div>
+      ))}
+      <Button variant="outline" size="sm" className="text-xs w-full" onClick={() => onUpdate({ formFields: [...fields, { type: 'text', label: 'Nuevo campo', placeholder: '', required: false }] })}>+ Agregar Campo</Button>
+      <Separator className="my-2" />
+      <PropField label="Texto del botón" value={node.props.formBtnText || 'Enviar'} onChange={(v) => onUpdate({ formBtnText: v })} />
+      <div className="grid gap-1">
+        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Estilo del botón</Label>
+        <Select value={node.props.formBtnVariant || 'filled'} onValueChange={(v) => onUpdate({ formBtnVariant: v })}>
+          <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="filled">Relleno</SelectItem>
+            <SelectItem value="outline">Contorno</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </>
+  );
+}
+
 function ProductCardPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: Partial<NodeProps>) => void }) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const p = node.props;
@@ -735,6 +800,21 @@ function PropsTab({ node, onUpdateProps, onUpdateStyle, onImageUpload }: { node:
               </SelectContent>
             </Select>
           </div>
+          <Separator className="my-2" />
+          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Parallax</Label>
+          <div className="flex items-center justify-between">
+            <Label className="text-xs">Activar Parallax</Label>
+            <Switch checked={!!p.parallaxEnabled} onCheckedChange={(v) => onUpdateProps({ parallaxEnabled: v })} />
+          </div>
+          {p.parallaxEnabled && (
+            <div className="grid gap-1">
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Velocidad (0.1 - 1.0)</Label>
+              <div className="flex items-center gap-2">
+                <Slider min={0.1} max={1} step={0.05} value={[parseFloat(p.parallaxSpeed || '0.5')]} onValueChange={([v]) => onUpdateProps({ parallaxSpeed: String(v) })} className="flex-1" />
+                <span className="text-[10px] font-mono text-muted-foreground w-8 text-right">{parseFloat(p.parallaxSpeed || '0.5').toFixed(2)}</span>
+              </div>
+            </div>
+          )}
         </>
       )}
       {node.type === 'Container' && (
@@ -842,6 +922,7 @@ function PropsTab({ node, onUpdateProps, onUpdateStyle, onImageUpload }: { node:
       {node.type === 'HeroSection' && <HeroSectionPropsEditor node={node} onUpdate={onUpdateProps} />}
       {(node.type === 'Accordion' || node.type === 'TabsBlock') && <PanelsPropsEditor node={node} onUpdate={onUpdateProps} />}
       {node.type === 'VideoEmbed' && <VideoEmbedPropsEditor node={node} onUpdate={onUpdateProps} />}
+      {node.type === 'FormBlock' && <FormBlockPropsEditor node={node} onUpdate={onUpdateProps} />}
       {node.type === 'Spacer' && (
         <PropField label="Altura" value={p.height || '2rem'} onChange={(v) => onUpdateProps({ height: v })} placeholder="2rem" />
       )}

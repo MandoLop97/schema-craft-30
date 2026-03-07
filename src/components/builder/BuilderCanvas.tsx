@@ -21,6 +21,7 @@ interface BuilderCanvasProps {
   onDeleteNode?: (nodeId: string) => void;
   canPaste?: boolean;
   onEditSection?: (nodeType: string) => void;
+  onSaveAsTemplate?: (nodeId: string) => void;
 }
 
 const DEVICE_WIDTHS = {
@@ -38,7 +39,7 @@ const TEMPLATE_CANVAS: Record<TemplateType, { width?: string; height?: string; s
   single: { scroll: true, checkerboard: false },
 };
 
-export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode, customComponents, templateType = 'page', canvasSize, mockData, customStylesheets, customCSS, onCopyNode, onPasteNode, onDuplicateNode, onDeleteNode, canPaste, onEditSection }: BuilderCanvasProps) {
+export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode, customComponents, templateType = 'page', canvasSize, mockData, customStylesheets, customCSS, onCopyNode, onPasteNode, onDuplicateNode, onDeleteNode, canPaste, onEditSection, onSaveAsTemplate }: BuilderCanvasProps) {
   const { setNodeRef, isOver } = useDroppable({ id: schema.rootNodeId });
 
   const preset = TEMPLATE_CANVAS[templateType];
@@ -83,6 +84,7 @@ export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode, cu
           onDeleteNode={onDeleteNode}
           canPaste={canPaste}
           onEditSection={onEditSection}
+          onSaveAsTemplate={onSaveAsTemplate}
         />
       </div>
     </div>

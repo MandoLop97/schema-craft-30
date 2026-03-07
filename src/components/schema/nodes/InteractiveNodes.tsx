@@ -131,16 +131,12 @@ export function TabsBlockNode({ node }: NodeComponentProps) {
 export function VideoEmbedNode({ node }: NodeComponentProps) {
   const url = node.props.videoUrl || '';
   
-  // Convert YouTube/Vimeo URLs to embed format
   const getEmbedUrl = (raw: string): string | null => {
     if (!raw) return null;
-    // YouTube
     const ytMatch = raw.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]+)/);
     if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}${node.props.autoplay ? '?autoplay=1' : ''}${node.props.muted ? '&mute=1' : ''}`;
-    // Vimeo
     const vimeoMatch = raw.match(/vimeo\.com\/(\d+)/);
     if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}${node.props.autoplay ? '?autoplay=1' : ''}${node.props.muted ? '&muted=1' : ''}`;
-    // Already an embed URL or other
     return raw;
   };
 
@@ -151,7 +147,7 @@ export function VideoEmbedNode({ node }: NodeComponentProps) {
       style={{
         position: 'relative',
         width: '100%',
-        paddingBottom: '56.25%', // 16:9 aspect ratio
+        paddingBottom: '56.25%',
         backgroundColor: 'hsl(var(--muted))',
         borderRadius: '0.5rem',
         overflow: 'hidden',
@@ -189,5 +185,114 @@ export function VideoEmbedNode({ node }: NodeComponentProps) {
         </div>
       )}
     </div>
+  );
+}
+
+/* ── FormBlock ── */
+
+interface FormField {
+  type: 'text' | 'email' | 'tel' | 'textarea' | 'select';
+  label: string;
+  placeholder: string;
+  required: boolean;
+  options?: string; // comma-separated for select
+}
+
+const DEFAULT_FORM_FIELDS: FormField[] = [
+  { type: 'text', label: 'Nombre', placeholder: 'Tu nombre', required: true },
+  { type: 'email', label: 'Email', placeholder: 'tu@email.com', required: true },
+  { type: 'tel', label: 'Teléfono', placeholder: '+1 234 567 890', required: false },
+  { type: 'textarea', label: 'Mensaje', placeholder: 'Escribe tu mensaje...', required: false },
+];
+
+export function FormBlockNode({ node }: NodeComponentProps) {
+  const fields: FormField[] = node.props.formFields || DEFAULT_FORM_FIELDS;
+  const btnText = node.props.formBtnText || 'Enviar';
+  const btnVariant = node.props.formBtnVariant || 'filled';
+  const formTitle = node.props.formTitle || '';
+
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '0.625rem 0.75rem',
+    fontSize: '0.875rem',
+    border: '1px solid hsl(var(--border))',
+    borderRadius: 'var(--radius, 0.375rem)',
+    backgroundColor: 'hsl(var(--background))',
+    color: 'hsl(var(--foreground))',
+    outline: 'none',
+    boxSizing: 'border-box',
+  };
+
+  const labelStyle: React.CSSProperties = {
+    fontSize: '0.8125rem',
+    fontWeight: 500,
+    color: 'hsl(var(--foreground))',
+    marginBottom: '0.25rem',
+    display: 'block',
+  };
+
+  return (
+    <form
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1rem',
+        ...s(node.style),
+      }}
+      data-node-id={node.id}
+      onSubmit={(e) => e.preventDefault()}
+    >
+      {formTitle && (
+        <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'hsl(var(--foreground))', margin: 0 }}>
+          {formTitle}
+        </h3>
+      )}
+      {fields.map((field, i) => (
+        <div key={i} style={{ display: 'flex', flexDirection: 'column' }}>
+          <label style={labelStyle}>
+            {field.label}
+            {field.required && <span style={{ color: 'hsl(var(--destructive))', marginLeft: '2px' }}>*</span>}
+          </label>
+          {field.type === 'textarea' ? (
+            <textarea
+              placeholder={field.placeholder}
+              style={{ ...inputStyle, minHeight: '80px', resize: 'vertical' }}
+              readOnly
+            />
+          ) : field.type === 'select' ? (
+            <select style={inputStyle}>
+              <option value="">{field.placeholder || 'Seleccionar...'}</option>
+              {(field.options || '').split(',').filter(Boolean).map((opt, j) => (
+                <option key={j} value={opt.trim()}>{opt.trim()}</option>
+              ))}
+            </select>
+          ) : (
+            <input
+              type={field.type}
+              placeholder={field.placeholder}
+              style={inputStyle}
+              readOnly
+            />
+          )}
+        </div>
+      ))}
+      <button
+        type="submit"
+        style={{
+          padding: '0.75rem 1.5rem',
+          fontSize: '0.875rem',
+          fontWeight: 600,
+          border: btnVariant === 'outline' ? '2px solid hsl(var(--primary))' : 'none',
+          borderRadius: 'var(--radius, 0.375rem)',
+          backgroundColor: btnVariant === 'outline' ? 'transparent' : 'hsl(var(--primary))',
+          color: btnVariant === 'outline' ? 'hsl(var(--primary))' : 'hsl(var(--primary-foreground))',
+          cursor: 'pointer',
+          transition: 'opacity 0.15s',
+          alignSelf: 'flex-start',
+        }}
+      >
+        {btnText}
+      </button>
+    </form>
   );
 }

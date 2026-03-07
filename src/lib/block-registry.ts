@@ -4,7 +4,7 @@ import {
   CreditCard, TextCursorInput, ShoppingBag, Navigation, PanelBottom,
   Megaphone, Sparkles, MessageSquareQuote, Mail, Layers,
   ListCollapse, LayoutDashboard, Play,
-  MoveVertical, Star, Share2,
+  MoveVertical, Star, Share2, FileText,
 } from 'lucide-react';
 import { NodeType, NodeProps, NodeStyle, TemplateType } from '@/types/schema';
 import React from 'react';
@@ -53,7 +53,7 @@ export interface BlockDefinition {
 // ── Category definitions for hierarchy ──
 const LAYOUT_TYPES: NodeType[] = ['Section', 'Container', 'Grid', 'Stack'];
 const SITE_TYPES: NodeType[] = ['Navbar', 'Footer', 'AnnouncementBar'];
-const CONTENT_TYPES: NodeType[] = ['Text', 'Image', 'Divider', 'Badge', 'Spacer', 'Icon', 'SocialIcons', 'Button', 'Card', 'Input', 'ProductCard', 'TestimonialCard', 'NewsletterSection', 'FeatureBar', 'HeroSection', 'Accordion', 'TabsBlock', 'VideoEmbed'];
+const CONTENT_TYPES: NodeType[] = ['Text', 'Image', 'Divider', 'Badge', 'Spacer', 'Icon', 'SocialIcons', 'Button', 'Card', 'Input', 'ProductCard', 'TestimonialCard', 'NewsletterSection', 'FeatureBar', 'HeroSection', 'Accordion', 'TabsBlock', 'VideoEmbed', 'FormBlock'];
 
 export const blockRegistry: BlockDefinition[] = [
   // ── Layout ──
@@ -79,6 +79,7 @@ export const blockRegistry: BlockDefinition[] = [
   { type: 'Accordion', label: 'Accordion', category: 'Interactive', icon: ListCollapse, canHaveChildren: false, defaultProps: { panels: [{ title: 'What is this?', description: 'This is an accordion panel with collapsible content.' }, { title: 'How does it work?', description: 'Click on the header to expand or collapse each panel.' }] }, defaultStyle: {} },
   { type: 'TabsBlock', label: 'Tabs', category: 'Interactive', icon: LayoutDashboard, canHaveChildren: false, defaultProps: { panels: [{ title: 'Overview', description: 'This is the overview tab content.' }, { title: 'Details', description: 'Detailed information goes here.' }] }, defaultStyle: {} },
   { type: 'VideoEmbed', label: 'Video', category: 'Interactive', icon: Play, canHaveChildren: false, defaultProps: { videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', alt: 'Video' }, defaultStyle: { borderRadius: '0.5rem' } },
+  { type: 'FormBlock', label: 'Form', category: 'Interactive', icon: FileText, canHaveChildren: false, defaultProps: { formTitle: 'Contáctanos', formFields: [{ type: 'text', label: 'Nombre', placeholder: 'Tu nombre', required: true }, { type: 'email', label: 'Email', placeholder: 'tu@email.com', required: true }, { type: 'tel', label: 'Teléfono', placeholder: '+1 234 567 890', required: false }, { type: 'textarea', label: 'Mensaje', placeholder: 'Escribe tu mensaje...', required: false }], formBtnText: 'Enviar', formBtnVariant: 'filled' }, defaultStyle: { padding: '1.5rem' } },
 
   // ── Commerce ──
   { type: 'ProductCard', label: 'Product Card', category: 'Commerce', icon: ShoppingBag, canHaveChildren: false, defaultProps: { text: 'Product Name', price: '$99', src: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop' }, defaultStyle: {} },

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Pencil, Copy, Trash2, CopyPlus, ClipboardPaste } from 'lucide-react';
+import { Pencil, Copy, Trash2, CopyPlus, ClipboardPaste, Save } from 'lucide-react';
 import {
   ContextMenu,
   ContextMenuContent,
@@ -26,9 +26,10 @@ interface SortableNodeWrapperProps {
   onDelete?: (id: string) => void;
   canPaste?: boolean;
   onEditSection?: (nodeType: string) => void;
+  onSaveAsTemplate?: (nodeId: string) => void;
 }
 
-export function SortableNodeWrapper({ nodeId, children, isSelected, nodeType, onSelect, onCopy, onPaste, onDuplicate, onDelete, canPaste, onEditSection }: SortableNodeWrapperProps) {
+export function SortableNodeWrapper({ nodeId, children, isSelected, nodeType, onSelect, onCopy, onPaste, onDuplicate, onDelete, canPaste, onEditSection, onSaveAsTemplate }: SortableNodeWrapperProps) {
   const [hovered, setHovered] = useState(false);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: nodeId,
@@ -116,6 +117,10 @@ export function SortableNodeWrapper({ nodeId, children, isSelected, nodeType, on
         </ContextMenuItem>
         <ContextMenuItem onClick={() => onDuplicate?.(nodeId)} className="gap-2 text-xs">
           <CopyPlus className="h-3.5 w-3.5" /> Duplicar
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem onClick={() => onSaveAsTemplate?.(nodeId)} className="gap-2 text-xs">
+          <Save className="h-3.5 w-3.5" /> Guardar como Template
         </ContextMenuItem>
         <ContextMenuSeparator />
         <ContextMenuItem onClick={() => onDelete?.(nodeId)} className="gap-2 text-xs text-destructive focus:text-destructive">
