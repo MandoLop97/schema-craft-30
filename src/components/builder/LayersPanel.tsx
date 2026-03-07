@@ -24,6 +24,7 @@ interface LayersPanelProps {
   selectedNodeId: string | null;
   onSelectNode: (id: string) => void;
   onReorderChildren?: (parentId: string, newChildren: string[]) => void;
+  onDuplicateNode?: (nodeId: string) => void;
 }
 
 function SortableLayerItem({
