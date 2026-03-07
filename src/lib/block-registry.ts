@@ -5,7 +5,7 @@ import {
   Megaphone, Sparkles, MessageSquareQuote, Mail, Layers,
   ListCollapse, LayoutDashboard, Play,
 } from 'lucide-react';
-import { NodeType, NodeProps, NodeStyle } from '@/types/schema';
+import { NodeType, NodeProps, NodeStyle, TemplateType } from '@/types/schema';
 import React from 'react';
 
 export interface InspectorFieldDef {
