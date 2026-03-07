@@ -1,7 +1,7 @@
 import React from 'react';
 import { SchemaNode, NodeType, RenderMode } from '@/types/schema';
 import { SectionNode, ContainerNode, GridNode, StackNode } from './nodes/LayoutNodes';
-import { TextNode, ImageNode, DividerNode, BadgeNode } from './nodes/ContentNodes';
+import { TextNode, ImageNode, DividerNode, BadgeNode, SpacerNode, IconNode, SocialIconsNode } from './nodes/ContentNodes';
 import { ButtonNode, CardNode, InputNode } from './nodes/UINodes';
 import { ProductCardNode } from './nodes/CommerceNodes';
 import { NavbarNode, FooterNode } from './nodes/SiteNodes';
@@ -44,6 +44,9 @@ const registry: Record<NodeType, NodeComponent> = {
   Accordion: AccordionNode,
   TabsBlock: TabsBlockNode,
   VideoEmbed: VideoEmbedNode,
+  Spacer: SpacerNode,
+  Icon: IconNode,
+  SocialIcons: SocialIconsNode,
 };
 
 export function getNodeComponent(type: NodeType, customComponents?: CustomComponentMap): NodeComponent | undefined {

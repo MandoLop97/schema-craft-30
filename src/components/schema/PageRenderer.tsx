@@ -20,11 +20,15 @@ interface PageRendererProps {
   selectedNodeId?: string | null;
   onSelectNode?: (nodeId: string) => void;
   customComponents?: CustomComponentMap;
-  /** Mock data passed to custom components in edit/preview mode */
   mockData?: Record<string, any>;
+  onCopyNode?: (nodeId: string) => void;
+  onPasteNode?: (nodeId: string) => void;
+  onDuplicateNode?: (nodeId: string) => void;
+  onDeleteNode?: (nodeId: string) => void;
+  canPaste?: boolean;
 }
 
-export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, customComponents, mockData }: PageRendererProps) {
+export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, customComponents, mockData, onCopyNode, onPasteNode, onDuplicateNode, onDeleteNode, canPaste }: PageRendererProps) {
   const renderNode = (nodeId: string): React.ReactNode => {
     const node = schema.nodes[nodeId];
     if (!node || node.hidden) return null;
@@ -70,6 +74,11 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
                 isSelected={selectedNodeId === cid}
                 nodeType={childNode.type}
                 onSelect={(id) => onSelectNode?.(id)}
+                onCopy={onCopyNode}
+                onPaste={onPasteNode}
+                onDuplicate={onDuplicateNode}
+                onDelete={onDeleteNode}
+                canPaste={canPaste}
               >
                 {wrappedChild}
               </SortableNodeWrapper>
@@ -114,6 +123,11 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
                 isSelected={selectedNodeId === cid}
                 nodeType={childNode.type}
                 onSelect={(id) => onSelectNode?.(id)}
+                onCopy={onCopyNode}
+                onPaste={onPasteNode}
+                onDuplicate={onDuplicateNode}
+                onDelete={onDeleteNode}
+                canPaste={canPaste}
               >
                 {wrappedChild}
               </SortableNodeWrapper>
@@ -236,6 +250,10 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
       if (pseudo) rules.push(pseudo);
       const responsive = generateResponsiveCSS(node.id, node.style);
       if (responsive) rules.push(responsive);
+      // Custom CSS per widget
+      if (node.customCSS) {
+        rules.push(node.customCSS.replace(/selector/g, `[data-node-id="${node.id}"]`));
+      }
     }
     return rules.join('\n');
   }, [schema.nodes]);

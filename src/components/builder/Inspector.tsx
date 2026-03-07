@@ -25,6 +25,7 @@ interface InspectorProps {
   onDelete: () => void;
   onDuplicate?: () => void;
   onImageUpload?: (file: File) => Promise<string>;
+  onUpdateCustomCSS?: (css: string) => void;
 }
 
 /* ── Reusable field components ── */
@@ -841,6 +842,59 @@ function PropsTab({ node, onUpdateProps, onUpdateStyle, onImageUpload }: { node:
       {node.type === 'HeroSection' && <HeroSectionPropsEditor node={node} onUpdate={onUpdateProps} />}
       {(node.type === 'Accordion' || node.type === 'TabsBlock') && <PanelsPropsEditor node={node} onUpdate={onUpdateProps} />}
       {node.type === 'VideoEmbed' && <VideoEmbedPropsEditor node={node} onUpdate={onUpdateProps} />}
+      {node.type === 'Spacer' && (
+        <PropField label="Altura" value={p.height || '2rem'} onChange={(v) => onUpdateProps({ height: v })} placeholder="2rem" />
+      )}
+      {node.type === 'Icon' && (
+        <>
+          <PropField label="Nombre del ícono (Lucide)" value={p.iconName || 'Star'} onChange={(v) => onUpdateProps({ iconName: v })} placeholder="Star, Heart, ShoppingBag..." />
+          <PropField label="Tamaño (px)" value={p.iconSize || '24'} onChange={(v) => onUpdateProps({ iconSize: v })} />
+          <ColorField label="Color" value={p.iconColor || 'currentColor'} onChange={(v) => onUpdateProps({ iconColor: v })} />
+        </>
+      )}
+      {node.type === 'SocialIcons' && (
+        <>
+          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Redes Sociales</Label>
+          {(p.socialItems || []).map((item: any, i: number) => (
+            <div key={i} className="flex gap-1 items-start">
+              <div className="grid grid-cols-2 gap-1 flex-1">
+                <Select value={item.platform} onValueChange={(v) => {
+                  const updated = [...(p.socialItems || [])]; updated[i] = { ...item, platform: v }; onUpdateProps({ socialItems: updated });
+                }}>
+                  <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {['facebook', 'instagram', 'twitter', 'youtube', 'linkedin', 'github', 'tiktok'].map((pl) => (
+                      <SelectItem key={pl} value={pl}>{pl}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Input className="h-7 text-xs" placeholder="URL" value={item.url || ''} onChange={(e) => {
+                  const updated = [...(p.socialItems || [])]; updated[i] = { ...item, url: e.target.value }; onUpdateProps({ socialItems: updated });
+                }} />
+              </div>
+              <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive" onClick={() => {
+                onUpdateProps({ socialItems: (p.socialItems || []).filter((_: any, idx: number) => idx !== i) });
+              }}>
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            </div>
+          ))}
+          <Button variant="outline" size="sm" className="text-xs w-full" onClick={() => onUpdateProps({ socialItems: [...(p.socialItems || []), { platform: 'facebook', url: '' }] })}>+ Agregar Red</Button>
+          <Separator className="my-2" />
+          <PropField label="Tamaño ícono (px)" value={p.socialIconSize || '20'} onChange={(v) => onUpdateProps({ socialIconSize: v })} />
+          <div className="grid gap-1">
+            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Estilo</Label>
+            <Select value={p.socialStyle || 'default'} onValueChange={(v) => onUpdateProps({ socialStyle: v })}>
+              <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="default">Simple</SelectItem>
+                <SelectItem value="colored">Color de marca</SelectItem>
+                <SelectItem value="rounded">Redondeado + Color</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </>
+      )}
       {/* Custom inspector fields */}
       {(() => {
         const def = getBlockDef(node.type);
@@ -889,7 +943,7 @@ function CollapsibleStyleGroup({ title, children, defaultOpen = true }: { title:
   );
 }
 
-function StyleTab({ node, onUpdateStyle }: { node: SchemaNode; onUpdateStyle: (s: Partial<NodeStyle>) => void }) {
+function StyleTab({ node, onUpdateStyle, onUpdateCustomCSS }: { node: SchemaNode; onUpdateStyle: (s: Partial<NodeStyle>) => void; onUpdateCustomCSS?: (css: string) => void }) {
   const locale = t();
   const st = node.style;
 
@@ -1087,13 +1141,26 @@ function StyleTab({ node, onUpdateStyle }: { node: SchemaNode; onUpdateStyle: (s
         {renderSelect('Overflow', 'overflow', ['visible', 'hidden', 'scroll', 'auto'])}
         {renderSelect('Display', 'display', ['block', 'flex', 'grid', 'inline', 'inline-block', 'inline-flex', 'none'])}
       </CollapsibleStyleGroup>
+
+      {/* Custom CSS per widget */}
+      <Separator className="my-1" />
+      <CollapsibleStyleGroup title="CSS Personalizado" defaultOpen={false}>
+        <p className="text-[9px] text-muted-foreground mb-1">CSS aplicado solo a este widget. Usa <code className="bg-muted px-0.5 rounded">selector</code> como referencia al elemento.</p>
+        <Textarea
+          className="text-xs font-mono min-h-[80px]"
+          value={node.customCSS || ''}
+          onChange={(e) => onUpdateCustomCSS?.(e.target.value)}
+          placeholder={`/* Ejemplo */\nselector {\n  box-shadow: 0 4px 12px rgba(0,0,0,0.15);\n}`}
+          rows={5}
+        />
+      </CollapsibleStyleGroup>
     </div>
   );
 }
 
 /* ── Main Inspector ── */
 
-export function Inspector({ node, onUpdateProps, onUpdateStyle, onDelete, onDuplicate, onImageUpload }: InspectorProps) {
+export function Inspector({ node, onUpdateProps, onUpdateStyle, onDelete, onDuplicate, onImageUpload, onUpdateCustomCSS }: InspectorProps) {
   const locale = t();
 
   return (
@@ -1141,7 +1208,7 @@ export function Inspector({ node, onUpdateProps, onUpdateStyle, onDelete, onDupl
             <PropsTab node={node} onUpdateProps={onUpdateProps} onUpdateStyle={onUpdateStyle} onImageUpload={onImageUpload} />
           </TabsContent>
           <TabsContent value="style" className="mt-0">
-            <StyleTab node={node} onUpdateStyle={onUpdateStyle} />
+            <StyleTab node={node} onUpdateStyle={onUpdateStyle} onUpdateCustomCSS={onUpdateCustomCSS} />
           </TabsContent>
         </div>
       </Tabs>
