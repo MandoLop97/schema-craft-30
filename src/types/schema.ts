@@ -165,6 +165,16 @@ export interface PageDefinition {
   title: string;
   schema: Schema;
   status?: 'published' | 'draft';
+  /** Type of template being edited. Determines canvas behavior. */
+  templateType?: TemplateType;
+  /** Category for grouping in the sidebar (e.g. "Páginas", "Elementos Globales", "Templates") */
+  category?: string;
+  /** Optional icon component for the page list */
+  icon?: React.ComponentType;
+  /** Custom canvas dimensions. Overrides templateType defaults. */
+  canvasSize?: { width: number; height: number };
+  /** Mock data injected into custom components in edit/preview mode */
+  mockData?: Record<string, any>;
 }
 
 export type RenderMode = 'public' | 'preview' | 'edit';
