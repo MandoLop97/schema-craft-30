@@ -359,6 +359,9 @@ export function BuilderEditorShell({
             selectedNodeId={selectedNodeId}
             onSelectNode={(id) => setSelectedNodeId(id || null)}
             customComponents={customComponents}
+            templateType={activePageDef?.templateType}
+            canvasSize={activePageDef?.canvasSize}
+            mockData={activePageDef?.mockData}
           />
 
           {/* Right Sidebar */}
