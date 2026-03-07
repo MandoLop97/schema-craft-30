@@ -36,7 +36,7 @@ interface SortableNodeWrapperProps {
   onRepositionNode?: (nodeId: string, style: { top?: string; left?: string; right?: string; bottom?: string }) => void;
 }
 
-export function SortableNodeWrapper({ nodeId, children, isSelected, nodeType, onSelect, onCopy, onPaste, onDuplicate, onDelete, canPaste, onEditSection, onSaveAsTemplate, nodeStyle, onRepositionNode }: SortableNodeWrapperProps) {
+export function SortableNodeWrapper({ nodeId, children, isSelected, nodeType, onSelect, onCopy, onPaste, onDuplicate, onDelete, canPaste, onEditSection, onSaveAsTemplate, onCopyStyle, onPasteStyle, canPasteStyle, nodeStyle, onRepositionNode }: SortableNodeWrapperProps) {
   const [hovered, setHovered] = useState(false);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: nodeId,
