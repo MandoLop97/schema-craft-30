@@ -313,6 +313,21 @@ export function BuilderEditorShell({
                         return s;
                       });
                     }}
+                    onDuplicateNode={(nodeId) => {
+                      const prev = selectedNodeId;
+                      setSelectedNodeId(nodeId);
+                      // Use a micro-task to ensure selectedNodeId is set
+                      const parentNode = Object.values(schema.nodes).find((n) => n.children.includes(nodeId));
+                      if (!parentNode) return;
+                      updateSchema((s) => {
+                        const { newNodes, newRootId } = duplicateNodeTree(nodeId, s.nodes);
+                        Object.assign(s.nodes, newNodes);
+                        const idx = s.nodes[parentNode.id].children.indexOf(nodeId);
+                        s.nodes[parentNode.id].children.splice(idx + 1, 0, newRootId);
+                        return s;
+                      });
+                      toast.success('Node duplicated');
+                    }}
                   />
                 </TabsContent>
                 <TabsContent value="theme" className="mt-0">
