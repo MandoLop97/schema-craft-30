@@ -55,8 +55,9 @@ export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode, cu
           minHeight: resolvedHeight ?? (isCompact ? undefined : '100%'),
           transition: 'width 300ms ease, height 300ms ease, box-shadow 200ms ease',
           overflow: preset.scroll ? 'auto' : 'hidden',
+          containerType: 'inline-size',
         }}
-        className={`bg-background border ${isOver ? 'ring-2 ring-primary/20' : ''}`}
+        className={`bg-background border nxr-responsive-canvas ${isOver ? 'ring-2 ring-primary/20' : ''}`}
         onClick={(e) => e.stopPropagation()}
       >
         <PageRenderer

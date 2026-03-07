@@ -227,5 +227,5 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
     } as React.CSSProperties;
   }, [schema.themeTokens]);
 
-  return <div style={themeStyle}>{renderNode(schema.rootNodeId)}</div>;
+  return <div style={{ ...themeStyle, containerType: 'inline-size' as any }}>{renderNode(schema.rootNodeId)}</div>;
 }
