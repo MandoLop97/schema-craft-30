@@ -517,7 +517,7 @@ function StyleTab({ node, onUpdateStyle }: { node: SchemaNode; onUpdateStyle: (s
 
 /* ── Main Inspector ── */
 
-export function Inspector({ node, onUpdateProps, onUpdateStyle, onDelete }: InspectorProps) {
+export function Inspector({ node, onUpdateProps, onUpdateStyle, onDelete, onDuplicate }: InspectorProps) {
   const locale = t();
 
   return (
@@ -532,15 +532,28 @@ export function Inspector({ node, onUpdateProps, onUpdateStyle, onDelete }: Insp
           <p className="text-xs font-semibold">{node.type}</p>
           <p className="text-[10px] text-muted-foreground font-mono">{node.id.slice(0, 12)}…</p>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors duration-200"
-          onClick={onDelete}
-          title={locale.deleteNode}
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </Button>
+        <div className="flex items-center gap-0.5">
+          {onDuplicate && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors duration-200"
+              onClick={onDuplicate}
+              title="Duplicate"
+            >
+              <Copy className="h-3.5 w-3.5" />
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors duration-200"
+            onClick={onDelete}
+            title={locale.deleteNode}
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </Button>
+        </div>
       </div>
       <Tabs defaultValue="props" className="flex-1 overflow-hidden flex flex-col">
         <TabsList className="mx-3 mt-2 w-auto">
