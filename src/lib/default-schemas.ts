@@ -11,7 +11,7 @@ const defaultThemeTokens = (): Schema['themeTokens'] => ({
 
 function sharedNavbar(): Nodes {
   return {
-    navbar: { id: 'navbar', type: 'Navbar', props: { logoText: 'STORE', links: [{ text: 'Shop', href: '/products' }, { text: 'New Arrivals', href: '/products?sort=newest' }, { text: 'Sale', href: '/products?sale=true' }, { text: 'About', href: '/help' }] }, style: {}, children: [] },
+    navbar: { id: 'navbar', type: 'Navbar', props: { logoText: 'STORE', links: [{ text: 'Shop', href: '/products' }, { text: 'New Arrivals', href: '/products?sort=newest' }, { text: 'Sale', href: '/products?sale=true' }, { text: 'About', href: '/help' }], announcementText: 'Free shipping on orders over $100 — Shop now', announcementHref: '/products' }, style: {}, children: [] },
   };
 }
 
