@@ -9,6 +9,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from '@/components/ui/sonner';
 import { EDITOR_VERSION } from '@/lib/version';
 import { setLocaleByCode, BuilderLocale, setLocale } from '@/lib/i18n';
+import { CustomComponentMap } from '@/components/schema/NodeRegistry';
 
 export interface NexoraBuilderAppProps {
   /**
