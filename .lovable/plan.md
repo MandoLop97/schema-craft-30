@@ -79,3 +79,24 @@ Create a default `home` schema that produces a modern eCommerce landing page:
 ### Design Style
 Minimal, professional SaaS aesthetic — light background, clean typography, subtle borders, polished hover states.
 
+## ⚠️ REGLA FUNDAMENTAL: Alcance del proyecto
+
+**Este proyecto es un CONSTRUCTOR VISUAL (Builder) al 100%.** Su única responsabilidad es:
+1. Permitir diseñar y personalizar visualmente: **Header (Navbar)**, **Footer** y **Product Cards**
+2. Generar y guardar esquemas JSON en la base de datos
+3. Previsualizar el resultado en el canvas
+
+**NO es responsabilidad de este proyecto:**
+- Administrar productos (CRUD de productos) — eso lo hace la app consumidora (Template)
+- Gestionar inventario, pedidos o usuarios finales
+- Lógica de negocio, licencias o acceso al sitio final
+- Los productos y medios se **leen** de la base de datos para usarlos en el diseño, pero **no se crean ni editan** desde aquí
+
+**Los únicos componentes 100% editables/personalizables en el Builder son:**
+- **Navbar/Header**: logo, links, colores, estilos
+- **Footer**: logo, copyright, links, estilos  
+- **Product Cards**: layout, estilos, botones, imagen ratio, tipografía
+
+Las demás secciones del canvas (Hero, Sections, Grids, etc.) son bloques de contenido arrastrables y configurables pero NO tienen editores dedicados.
+
+---
