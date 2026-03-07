@@ -250,6 +250,10 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
       if (pseudo) rules.push(pseudo);
       const responsive = generateResponsiveCSS(node.id, node.style);
       if (responsive) rules.push(responsive);
+      // Custom CSS per widget
+      if (node.customCSS) {
+        rules.push(node.customCSS.replace(/selector/g, `[data-node-id="${node.id}"]`));
+      }
     }
     return rules.join('\n');
   }, [schema.nodes]);
