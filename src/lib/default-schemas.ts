@@ -27,10 +27,8 @@ export function createHomeSchema(): Schema {
     id: 'schema-home', version: 1, updatedAt: new Date().toISOString(),
     themeTokens: defaultThemeTokens(), rootNodeId: 'root',
     nodes: {
-      root: { id: 'root', type: 'Section', props: {}, style: { display: 'flex', flexDirection: 'column', minHeight: '100vh' }, children: ['announcement-bar', 'navbar', 'hero-section', 'trust-bar', 'products-section', 'testimonials-section', 'newsletter-section', 'footer'] },
-      'announcement-bar': { id: 'announcement-bar', type: 'Section', props: {}, style: { backgroundColor: '#111', color: '#fff', textAlign: 'center', padding: '0.5rem 1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.25rem' }, children: ['announcement-text', 'announcement-link'] },
-      'announcement-text': { id: 'announcement-text', type: 'Text', props: { text: 'Free shipping on orders over $100 —', level: 'span' }, style: { fontSize: '0.75rem', color: '#fff' }, children: [] },
-      'announcement-link': { id: 'announcement-link', type: 'Button', props: { text: 'Shop now', href: '/products' }, style: { fontSize: '0.75rem', color: '#fff', backgroundColor: 'transparent', padding: '0' }, children: [] },
+      root: { id: 'root', type: 'Section', props: {}, style: { display: 'flex', flexDirection: 'column', minHeight: '100vh' }, children: ['navbar', 'hero-section', 'trust-bar', 'products-section', 'testimonials-section', 'newsletter-section', 'footer'] },
+      ...sharedNavbar(),
       ...sharedNavbar(),
       'hero-section': { id: 'hero-section', type: 'Section', props: {}, style: { backgroundColor: 'hsl(210 40% 98%)', padding: '6rem 2rem 8rem' }, children: ['hero-inner'] },
       'hero-inner': { id: 'hero-inner', type: 'Container', props: {}, style: { maxWidth: '42rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }, children: ['hero-label', 'hero-title', 'hero-subtitle', 'hero-buttons'] },
