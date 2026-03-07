@@ -1,9 +1,9 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors, closestCenter } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { useSchemaHistory } from '@/hooks/use-schema-history';
 import { Schema, NodeType, SchemaNode, PageDefinition, ThemeTokens } from '@/types/schema';
-import { createNode, isContainerType } from '@/lib/node-factory';
+import { createNode, isContainerType, duplicateNodeTree } from '@/lib/node-factory';
 import { canDropInto } from '@/lib/block-registry';
 import { t } from '@/lib/i18n';
 import { TopBar } from '@/components/builder/TopBar';
@@ -61,6 +61,7 @@ export function BuilderEditorShell({
   const [publishMode, setPublishMode] = useState<'draft' | 'published'>('published');
   const [previewOpen, setPreviewOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
+  const clipboardRef = useRef<string | null>(null);
 
   const hasPages = pages && pages.length > 0;
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
@@ -201,9 +202,28 @@ export function BuilderEditorShell({
     setSelectedNodeId(null);
   }, [selectedNodeId, schema.rootNodeId, updateSchema]);
 
+  // Duplicate selected node (recursive)
+  const handleDuplicate = useCallback(() => {
+    if (!selectedNodeId || selectedNodeId === schema.rootNodeId) return;
+    const parentNode = Object.values(schema.nodes).find((n) => n.children.includes(selectedNodeId));
+    if (!parentNode) return;
+
+    updateSchema((s) => {
+      const { newNodes, newRootId } = duplicateNodeTree(selectedNodeId, s.nodes);
+      Object.assign(s.nodes, newNodes);
+      const idx = s.nodes[parentNode.id].children.indexOf(selectedNodeId);
+      s.nodes[parentNode.id].children.splice(idx + 1, 0, newRootId);
+      return s;
+    });
+
+    toast.success('Node duplicated');
+  }, [selectedNodeId, schema.rootNodeId, schema.nodes, updateSchema]);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      const isInput = document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA';
+
       if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
         e.preventDefault();
         if (e.shiftKey) redo(); else undo();
@@ -212,14 +232,40 @@ export function BuilderEditorShell({
         e.preventDefault();
         handleSave();
       }
+      if ((e.metaKey || e.ctrlKey) && e.key === 'c' && !isInput) {
+        if (selectedNodeId && selectedNodeId !== schema.rootNodeId) {
+          clipboardRef.current = selectedNodeId;
+          toast.success('Node copied');
+        }
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === 'v' && !isInput) {
+        if (clipboardRef.current && schema.nodes[clipboardRef.current]) {
+          const sourceId = clipboardRef.current;
+          const parentNode = Object.values(schema.nodes).find((n) => n.children.includes(sourceId));
+          if (!parentNode) return;
+
+          updateSchema((s) => {
+            const { newNodes, newRootId } = duplicateNodeTree(sourceId, s.nodes);
+            Object.assign(s.nodes, newNodes);
+            const idx = s.nodes[parentNode.id].children.indexOf(sourceId);
+            s.nodes[parentNode.id].children.splice(idx + 1, 0, newRootId);
+            return s;
+          });
+          toast.success('Node pasted');
+        }
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === 'd' && !isInput) {
+        e.preventDefault();
+        handleDuplicate();
+      }
       if (e.key === 'Delete' || e.key === 'Backspace') {
-        if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') return;
+        if (isInput) return;
         if (selectedNodeId && selectedNodeId !== schema.rootNodeId) handleDelete();
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [undo, redo, handleSave, handleDelete, selectedNodeId, schema.rootNodeId]);
+  }, [undo, redo, handleSave, handleDelete, handleDuplicate, selectedNodeId, schema.rootNodeId, schema.nodes, updateSchema]);
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
@@ -267,6 +313,21 @@ export function BuilderEditorShell({
                         return s;
                       });
                     }}
+                    onDuplicateNode={(nodeId) => {
+                      const prev = selectedNodeId;
+                      setSelectedNodeId(nodeId);
+                      // Use a micro-task to ensure selectedNodeId is set
+                      const parentNode = Object.values(schema.nodes).find((n) => n.children.includes(nodeId));
+                      if (!parentNode) return;
+                      updateSchema((s) => {
+                        const { newNodes, newRootId } = duplicateNodeTree(nodeId, s.nodes);
+                        Object.assign(s.nodes, newNodes);
+                        const idx = s.nodes[parentNode.id].children.indexOf(nodeId);
+                        s.nodes[parentNode.id].children.splice(idx + 1, 0, newRootId);
+                        return s;
+                      });
+                      toast.success('Node duplicated');
+                    }}
                   />
                 </TabsContent>
                 <TabsContent value="theme" className="mt-0">
@@ -308,6 +369,7 @@ export function BuilderEditorShell({
                   onUpdateProps={handleUpdateProps}
                   onUpdateStyle={handleUpdateStyle}
                   onDelete={handleDelete}
+                  onDuplicate={handleDuplicate}
                 />
               </ScrollArea>
             ) : (

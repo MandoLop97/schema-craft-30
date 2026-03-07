@@ -5,17 +5,19 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { t } from '@/lib/i18n';
+import { getBlockDef, InspectorFieldDef } from '@/lib/block-registry';
 
 interface InspectorProps {
   node: SchemaNode;
   onUpdateProps: (props: Partial<NodeProps>) => void;
   onUpdateStyle: (style: Partial<NodeStyle>) => void;
   onDelete: () => void;
+  onDuplicate?: () => void;
 }
 
 function PropField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
@@ -397,6 +399,38 @@ function PropsTab({ node, onUpdateProps }: { node: SchemaNode; onUpdateProps: (p
       {node.type === 'HeroSection' && <HeroSectionPropsEditor node={node} onUpdate={onUpdateProps} />}
       {(node.type === 'Accordion' || node.type === 'TabsBlock') && <PanelsPropsEditor node={node} onUpdate={onUpdateProps} />}
       {node.type === 'VideoEmbed' && <VideoEmbedPropsEditor node={node} onUpdate={onUpdateProps} />}
+      {/* Custom inspector fields for host-registered blocks */}
+      {(() => {
+        const def = getBlockDef(node.type);
+        if (def?.inspectorFields && def.inspectorFields.length > 0) {
+          return def.inspectorFields.map((field) => {
+            const val = (p as any)[field.key] ?? '';
+            if (field.type === 'color') {
+              return <ColorField key={field.key} label={field.label} value={String(val)} onChange={(v) => onUpdateProps({ [field.key]: v })} />;
+            }
+            if (field.type === 'select' && field.options) {
+              return (
+                <div key={field.key} className="grid gap-1">
+                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">{field.label}</Label>
+                  <Select value={String(val)} onValueChange={(v) => onUpdateProps({ [field.key]: v })}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {field.options.map((o) => (
+                        <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              );
+            }
+            if (field.type === 'number') {
+              return <PropField key={field.key} label={field.label} value={String(val)} onChange={(v) => onUpdateProps({ [field.key]: parseFloat(v) || 0 } as any)} />;
+            }
+            return <PropField key={field.key} label={field.label} value={String(val)} onChange={(v) => onUpdateProps({ [field.key]: v })} />;
+          });
+        }
+        return null;
+      })()}
     </div>
   );
 }
@@ -483,7 +517,7 @@ function StyleTab({ node, onUpdateStyle }: { node: SchemaNode; onUpdateStyle: (s
 
 /* ── Main Inspector ── */
 
-export function Inspector({ node, onUpdateProps, onUpdateStyle, onDelete }: InspectorProps) {
+export function Inspector({ node, onUpdateProps, onUpdateStyle, onDelete, onDuplicate }: InspectorProps) {
   const locale = t();
 
   return (
@@ -498,15 +532,28 @@ export function Inspector({ node, onUpdateProps, onUpdateStyle, onDelete }: Insp
           <p className="text-xs font-semibold">{node.type}</p>
           <p className="text-[10px] text-muted-foreground font-mono">{node.id.slice(0, 12)}…</p>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors duration-200"
-          onClick={onDelete}
-          title={locale.deleteNode}
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </Button>
+        <div className="flex items-center gap-0.5">
+          {onDuplicate && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors duration-200"
+              onClick={onDuplicate}
+              title="Duplicate"
+            >
+              <Copy className="h-3.5 w-3.5" />
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors duration-200"
+            onClick={onDelete}
+            title={locale.deleteNode}
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </Button>
+        </div>
       </div>
       <Tabs defaultValue="props" className="flex-1 overflow-hidden flex flex-col">
         <TabsList className="mx-3 mt-2 w-auto">

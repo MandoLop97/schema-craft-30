@@ -1,4 +1,4 @@
-import { ChevronDown, EyeOff, Lock, GripVertical } from 'lucide-react';
+import { ChevronDown, EyeOff, Lock, GripVertical, Copy } from 'lucide-react';
 import { useState, useCallback } from 'react';
 import { Schema, SchemaNode } from '@/types/schema';
 import {
@@ -24,6 +24,7 @@ interface LayersPanelProps {
   selectedNodeId: string | null;
   onSelectNode: (id: string) => void;
   onReorderChildren?: (parentId: string, newChildren: string[]) => void;
+  onDuplicateNode?: (nodeId: string) => void;
 }
 
 function SortableLayerItem({
@@ -33,6 +34,7 @@ function SortableLayerItem({
   selectedNodeId,
   onSelectNode,
   onReorderChildren,
+  onDuplicateNode,
 }: {
   node: SchemaNode;
   schema: Schema;
@@ -40,6 +42,7 @@ function SortableLayerItem({
   selectedNodeId: string | null;
   onSelectNode: (id: string) => void;
   onReorderChildren?: (parentId: string, newChildren: string[]) => void;
+  onDuplicateNode?: (nodeId: string) => void;
 }) {
   const [expanded, setExpanded] = useState(depth < 2);
   const hasChildren = node.children.length > 0;
@@ -131,6 +134,15 @@ function SortableLayerItem({
             "{node.props.text}"
           </span>
         )}
+        {onDuplicateNode && (
+          <button
+            className="p-0.5 opacity-0 group-hover:opacity-60 hover:!opacity-100 transition-opacity text-muted-foreground hover:text-primary"
+            onClick={(e) => { e.stopPropagation(); onDuplicateNode(node.id); }}
+            title="Duplicate"
+          >
+            <Copy className="h-3 w-3" />
+          </button>
+        )}
         {node.hidden && (
           <EyeOff className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
         )}
@@ -146,6 +158,7 @@ function SortableLayerItem({
           selectedNodeId={selectedNodeId}
           onSelectNode={onSelectNode}
           onReorderChildren={onReorderChildren}
+          onDuplicateNode={onDuplicateNode}
         />
       )}
     </div>
@@ -159,6 +172,7 @@ function SortableChildrenList({
   selectedNodeId,
   onSelectNode,
   onReorderChildren,
+  onDuplicateNode,
 }: {
   parentNode: SchemaNode;
   schema: Schema;
@@ -166,6 +180,7 @@ function SortableChildrenList({
   selectedNodeId: string | null;
   onSelectNode: (id: string) => void;
   onReorderChildren?: (parentId: string, newChildren: string[]) => void;
+  onDuplicateNode?: (nodeId: string) => void;
 }) {
   return (
     <SortableContext
@@ -184,6 +199,7 @@ function SortableChildrenList({
             selectedNodeId={selectedNodeId}
             onSelectNode={onSelectNode}
             onReorderChildren={onReorderChildren}
+            onDuplicateNode={onDuplicateNode}
           />
         );
       })}
@@ -196,6 +212,7 @@ export function LayersPanel({
   selectedNodeId,
   onSelectNode,
   onReorderChildren,
+  onDuplicateNode,
 }: LayersPanelProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -284,6 +301,7 @@ export function LayersPanel({
                 selectedNodeId={selectedNodeId}
                 onSelectNode={onSelectNode}
                 onReorderChildren={onReorderChildren}
+                onDuplicateNode={onDuplicateNode}
               />
             );
           })}
