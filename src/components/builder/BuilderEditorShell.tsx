@@ -333,6 +333,38 @@ export function BuilderEditorShell({
                       });
                       toast.success('Node duplicated');
                     }}
+                    onDeleteNode={(nodeId) => {
+                      if (nodeId === schema.rootNodeId) return;
+                      updateSchema((s) => {
+                        for (const node of Object.values(s.nodes)) {
+                          const idx = node.children.indexOf(nodeId);
+                          if (idx !== -1) { node.children.splice(idx, 1); break; }
+                        }
+                        const removeRecursive = (id: string) => {
+                          const n = s.nodes[id];
+                          if (n) { n.children.forEach(removeRecursive); delete s.nodes[id]; }
+                        };
+                        removeRecursive(nodeId);
+                        return s;
+                      });
+                      if (selectedNodeId === nodeId) setSelectedNodeId(null);
+                      toast.success('Node deleted');
+                    }}
+                    onMoveNode={(nodeId, newParentId, index) => {
+                      updateSchema((s) => {
+                        // Remove from old parent
+                        for (const node of Object.values(s.nodes)) {
+                          const idx = node.children.indexOf(nodeId);
+                          if (idx !== -1) { node.children.splice(idx, 1); break; }
+                        }
+                        // Insert into new parent
+                        if (s.nodes[newParentId]) {
+                          s.nodes[newParentId].children.splice(index, 0, nodeId);
+                        }
+                        return s;
+                      });
+                      toast.success('Node moved');
+                    }}
                   />
                 </TabsContent>
                 <TabsContent value="theme" className="mt-0">
