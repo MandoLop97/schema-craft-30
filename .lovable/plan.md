@@ -5,7 +5,7 @@
 1. `package.json` → campo `"version"`
 2. `src/components/builder/BuilderEditorShell.tsx` → texto de versión en el status bar
 
-Formato: semver (major.minor.patch). Incrementar el **patch** (+1) en cada cambio. Versión actual: **1.2.0**
+Formato: semver (major.minor.patch). Incrementar el **patch** (+1) en cada cambio. Versión actual: **1.2.1**
 
 ---
 
