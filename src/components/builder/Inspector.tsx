@@ -706,15 +706,9 @@ function PropsTab({ node, onUpdateProps, onUpdateStyle, onImageUpload }: { node:
         </>
       )}
       {node.type === 'ProductCard' && (
-        <>
-          <ImageUploadField label="Image URL" value={p.image || p.src || ''} onChange={(v) => onUpdateProps({ src: v, image: v })} />
-          <PropField label="Alt Text" value={p.alt || ''} onChange={(v) => onUpdateProps({ alt: v })} />
-          <PropField label="Name" value={p.name || p.text || ''} onChange={(v) => onUpdateProps({ text: v, name: v })} />
-          <PropField label="Price" value={p.price || ''} onChange={(v) => onUpdateProps({ price: v })} />
-          <PropField label="Original Price" value={p.originalPrice || ''} onChange={(v) => onUpdateProps({ originalPrice: v })} />
-          <PropField label="Badge" value={p.badge || ''} onChange={(v) => onUpdateProps({ badge: v })} />
-        </>
+        <ProductCardPropsEditor node={node} onUpdate={onUpdateProps} />
       )}
+
       {node.type === 'Card' && (
         <>
           {(p.items || []).map((item, i) => (
