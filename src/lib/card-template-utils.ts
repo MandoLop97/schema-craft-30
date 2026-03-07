@@ -74,7 +74,7 @@ export function hydrateCardTemplate(
       cloned.props.alt = product.name;
       cloned.style.width = '100%';
       cloned.style.height = 'auto';
-      cloned.style.objectFit = 'cover';
+      (cloned.style as any).objectFit = 'cover';
     } else if (cloned.type === 'Text') {
       if (cloned.props.level === 'h3') {
         // Product name
