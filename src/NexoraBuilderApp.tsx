@@ -172,6 +172,8 @@ export function NexoraBuilderApp({
         onBack={hasPages ? () => onPageChange?.('') : undefined}
         customStylesheets={customStylesheets}
         customCSS={customCSS}
+        onImageUpload={onImageUpload}
+        resolveAssetUrl={resolveAssetUrl}
       />
     </TooltipProvider>
   );
