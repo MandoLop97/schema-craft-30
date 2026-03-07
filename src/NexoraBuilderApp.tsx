@@ -107,7 +107,6 @@ export interface NexoraBuilderAppProps {
    */
   extraBlocks?: BlockDefinition[];
 }
-}
 
 export function NexoraBuilderApp({
   initialSchema,
