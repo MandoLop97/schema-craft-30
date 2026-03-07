@@ -187,6 +187,10 @@ export interface NodeProps {
   videoUrl?: string;
   autoplay?: boolean;
   muted?: boolean;
+  /** Scroll animation */
+  scrollAnimation?: 'fadeIn' | 'slideUp' | 'slideLeft' | 'slideRight' | 'scaleIn' | 'none';
+  scrollAnimationDelay?: string;
+  scrollAnimationDuration?: string;
   /** Allow arbitrary extra props from custom blocks */
   [key: string]: any;
 }
