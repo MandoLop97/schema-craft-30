@@ -324,7 +324,7 @@ function CardPreviewOverlay() {
   );
 }
 
-export function ThemeEditor({ themeTokens, onUpdate }: ThemeEditorProps) {
+export function ThemeEditor({ themeTokens, onUpdate, globalStyles, onUpdateGlobalStyles }: ThemeEditorProps) {
   const update = (path: string[], value: string | number) => {
     const next = JSON.parse(JSON.stringify(themeTokens)) as ThemeTokens;
     let obj: any = next;
