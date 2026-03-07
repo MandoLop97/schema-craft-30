@@ -33,6 +33,8 @@ export interface NexoraBuilderAppProps {
   customStylesheets?: string[];
   /** Raw CSS string to inject into the canvas */
   customCSS?: string;
+  /** URLs of external scripts to inject into the canvas (e.g. Tailwind CDN) */
+  customScripts?: string[];
   /** Callback for image uploads from inspector fields */
   onImageUpload?: (file: File) => Promise<string>;
   /** Resolve asset paths to full URLs */
