@@ -308,6 +308,19 @@ export function ThemeEditor({ themeTokens, onUpdate }: ThemeEditorProps) {
 
           <Separator className="my-3" />
 
+          {/* Gradient */}
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Gradiente Global</p>
+          <GradientEditor
+            value={themeTokens.gradient || ''}
+            onChange={(v) => {
+              const next = JSON.parse(JSON.stringify(themeTokens)) as ThemeTokens;
+              next.gradient = v || undefined;
+              onUpdate(next);
+            }}
+          />
+
+          <Separator className="my-3" />
+
           {/* Typography */}
           <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Tipografía</p>
           <div className="space-y-3">
