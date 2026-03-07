@@ -57,6 +57,8 @@ export function BuilderEditorShell({
   onBack,
   customStylesheets,
   customCSS,
+  onImageUpload,
+  resolveAssetUrl,
 }: BuilderEditorShellProps) {
   const locale = t();
   const { schema, setSchema, undo, redo, canUndo, canRedo } = useSchemaHistory(initialSchema);
