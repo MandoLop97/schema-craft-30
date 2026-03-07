@@ -35,6 +35,8 @@ export interface BuilderEditorShellProps {
   pageTitle?: string;
   customComponents?: CustomComponentMap;
   onBack?: () => void;
+  customStylesheets?: string[];
+  customCSS?: string;
 }
 
 export function BuilderEditorShell({
