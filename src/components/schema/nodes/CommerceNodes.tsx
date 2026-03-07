@@ -15,13 +15,19 @@ const s = (style: NodeStyle): React.CSSProperties => nodeStyleToCSS(style);
 type CardLayout = 'vertical' | 'horizontal' | 'minimal' | 'overlay';
 
 export function ProductCardNode({ node, mode, renderChildren }: NodeComponentProps) {
+  const themeTokens = useThemeTokens();
+  const layout: CardLayout = (node.props.cardLayout as CardLayout) || themeTokens?.defaultCardLayout || 'vertical';
+
   // ── Composite mode: if node has children, render them instead of monolithic HTML ──
   if (node.children && node.children.length > 0) {
+    const compositeStyle: React.CSSProperties = {
+      ...s(node.style),
+      ...(layout === 'horizontal' ? { display: 'flex', flexDirection: 'row' } : {}),
+    };
+
     return (
       <div
-        style={{
-          ...s(node.style),
-        }}
+        style={compositeStyle}
         data-node-id={node.id}
         className="group hover:shadow-lg hover:-translate-y-0.5"
       >
