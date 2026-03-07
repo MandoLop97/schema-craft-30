@@ -71,7 +71,7 @@ export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode, cu
         className={`bg-background border nxr-responsive-canvas ${isOver ? 'ring-2 ring-primary/20' : ''}`}
         onClick={(e) => e.stopPropagation()}
       >
-        <CustomStylesInjector stylesheets={customStylesheets} css={customCSS} />
+        <CustomStylesInjector stylesheets={customStylesheets} css={customCSS} scripts={customScripts} />
         <PageRenderer
           schema={schema}
           mode="edit"
