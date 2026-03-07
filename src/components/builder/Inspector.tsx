@@ -1160,7 +1160,7 @@ function StyleTab({ node, onUpdateStyle, onUpdateCustomCSS }: { node: SchemaNode
 
 /* ── Main Inspector ── */
 
-export function Inspector({ node, onUpdateProps, onUpdateStyle, onDelete, onDuplicate, onImageUpload }: InspectorProps) {
+export function Inspector({ node, onUpdateProps, onUpdateStyle, onDelete, onDuplicate, onImageUpload, onUpdateCustomCSS }: InspectorProps) {
   const locale = t();
 
   return (
