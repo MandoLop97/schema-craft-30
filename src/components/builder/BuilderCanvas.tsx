@@ -15,6 +15,7 @@ interface BuilderCanvasProps {
   mockData?: Record<string, any>;
   customStylesheets?: string[];
   customCSS?: string;
+  customScripts?: string[];
   onCopyNode?: (nodeId: string) => void;
   onPasteNode?: (nodeId: string) => void;
   onDuplicateNode?: (nodeId: string) => void;
