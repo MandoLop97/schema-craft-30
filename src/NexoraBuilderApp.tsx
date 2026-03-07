@@ -127,6 +127,13 @@ export function NexoraBuilderApp({
   customComponents,
   extraBlocks,
 }: NexoraBuilderAppProps) {
+  // Register extra blocks
+  useEffect(() => {
+    if (extraBlocks && extraBlocks.length > 0) {
+      registerBlocks(extraBlocks);
+    }
+  }, [extraBlocks]);
+
   // Apply locale
   useEffect(() => {
     if (!localeProp) return;

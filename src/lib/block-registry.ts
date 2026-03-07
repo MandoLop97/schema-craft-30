@@ -83,6 +83,27 @@ export function getBlockDef(type: NodeType): BlockDefinition | undefined {
   return registryMap.get(type);
 }
 
+/**
+ * Register a custom block definition at runtime.
+ * It will appear in the blocks palette and support drag-and-drop.
+ * If a block with the same type already exists it will be replaced.
+ */
+export function registerBlock(def: BlockDefinition): void {
+  const existing = registryMap.get(def.type);
+  if (existing) {
+    const idx = blockRegistry.indexOf(existing);
+    if (idx !== -1) blockRegistry.splice(idx, 1, def);
+  } else {
+    blockRegistry.push(def);
+  }
+  registryMap.set(def.type, def);
+}
+
+/** Register multiple custom blocks at once. */
+export function registerBlocks(defs: BlockDefinition[]): void {
+  defs.forEach(registerBlock);
+}
+
 export function getCategories(): string[] {
   return [...new Set(blockRegistry.map((b) => b.category))];
 }
