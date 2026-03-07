@@ -42,7 +42,7 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
             const childNode = schema.nodes[cid];
             if (!childNode || childNode.hidden) return null;
 
-            const ChildComponent = getNodeComponent(childNode.type);
+            const ChildComponent = getNodeComponent(childNode.type, customComponents);
             if (!ChildComponent) return null;
 
             const childBlockDef = getBlockDef(childNode.type);
@@ -86,7 +86,7 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
             const childNode = schema.nodes[cid];
             if (!childNode || childNode.hidden) return null;
 
-            const ChildComponent = getNodeComponent(childNode.type);
+            const ChildComponent = getNodeComponent(childNode.type, customComponents);
             if (!ChildComponent) return null;
 
             const childBlockDef = getBlockDef(childNode.type);

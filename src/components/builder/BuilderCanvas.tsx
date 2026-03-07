@@ -42,6 +42,7 @@ export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode, cu
           mode="edit"
           selectedNodeId={selectedNodeId}
           onSelectNode={onSelectNode}
+          customComponents={customComponents}
         />
       </div>
     </div>

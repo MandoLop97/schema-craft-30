@@ -222,6 +222,7 @@ export function NexoraBuilderApp({
         onPageChange={onPageChange}
         pageTitle={activePageTitle}
         onPublishSubmit={onPublishSubmit}
+        customComponents={customComponents}
       />
     </TooltipProvider>
   );

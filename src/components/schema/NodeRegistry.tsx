@@ -44,6 +44,6 @@ const registry: Record<NodeType, NodeComponent> = {
   VideoEmbed: VideoEmbedNode,
 };
 
-export function getNodeComponent(type: NodeType): NodeComponent | undefined {
-  return registry[type];
+export function getNodeComponent(type: NodeType, customComponents?: CustomComponentMap): NodeComponent | undefined {
+  return customComponents?.[type] ?? registry[type];
 }

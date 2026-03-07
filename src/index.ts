@@ -18,6 +18,9 @@ export type { Schema, SchemaNode, NodeType, NodeProps, NodeStyle, ThemeTokens, P
 // Renderer — for hosts that want to render schemas outside the builder
 export { PageRenderer } from './components/schema/PageRenderer';
 
+// Node registry types — for hosts that want to provide custom components
+export type { NodeComponentProps, NodeComponent, CustomComponentMap } from './components/schema/NodeRegistry';
+
 // Page Manager — for hosts that want to use the page list independently
 export { PageManager } from './components/builder/PageManager';
 export type { PageManagerProps } from './components/builder/PageManager';

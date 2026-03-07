@@ -296,6 +296,7 @@ export function BuilderEditorShell({
             device={device}
             selectedNodeId={selectedNodeId}
             onSelectNode={(id) => setSelectedNodeId(id || null)}
+            customComponents={customComponents}
           />
 
           {/* Right Sidebar */}
