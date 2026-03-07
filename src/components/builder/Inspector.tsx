@@ -150,7 +150,7 @@ function ButtonPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p:
 function ImagePropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: Partial<NodeProps>) => void }) {
   return (
     <>
-      <PropField label="Image URL" value={node.props.src || ''} onChange={(v) => onUpdate({ src: v })} />
+      <ImageUploadField label="Image URL" value={node.props.src || ''} onChange={(v) => onUpdate({ src: v })} />
       <PropField label="Alt Text" value={node.props.alt || ''} onChange={(v) => onUpdate({ alt: v })} />
     </>
   );
