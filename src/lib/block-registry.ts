@@ -8,6 +8,17 @@ import {
 import { NodeType, NodeProps, NodeStyle } from '@/types/schema';
 import React from 'react';
 
+export interface InspectorFieldDef {
+  /** Property key on NodeProps */
+  key: string;
+  /** Display label */
+  label: string;
+  /** Field type: text input, select dropdown, or color picker */
+  type: 'text' | 'select' | 'color' | 'number';
+  /** Options for 'select' type */
+  options?: { label: string; value: string }[];
+}
+
 export interface BlockDefinition {
   type: NodeType;
   label: string;
@@ -28,6 +39,12 @@ export interface BlockDefinition {
    * Only relevant for canHaveChildren=true blocks.
    */
   allowedChildren?: NodeType[];
+  /**
+   * Custom inspector fields for this block type.
+   * When defined, these fields are rendered in the Props tab of the inspector.
+   * Only relevant for custom/host-defined blocks.
+   */
+  inspectorFields?: InspectorFieldDef[];
 }
 
 // ── Category definitions for hierarchy ──
