@@ -45,6 +45,11 @@ export interface BlockDefinition {
    * Only relevant for custom/host-defined blocks.
    */
   inspectorFields?: InspectorFieldDef[];
+  /**
+   * Restrict this block to specific template types.
+   * If undefined or empty, the block appears in all template types.
+   */
+  allowedTemplateTypes?: TemplateType[];
 }
 
 // ── Category definitions for hierarchy ──
