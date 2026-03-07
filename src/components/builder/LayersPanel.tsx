@@ -212,6 +212,7 @@ export function LayersPanel({
   selectedNodeId,
   onSelectNode,
   onReorderChildren,
+  onDuplicateNode,
 }: LayersPanelProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
