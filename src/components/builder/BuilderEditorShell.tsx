@@ -37,6 +37,7 @@ export interface BuilderEditorShellProps {
   onBack?: () => void;
   customStylesheets?: string[];
   customCSS?: string;
+  customScripts?: string[];
   onImageUpload?: (file: File) => Promise<string>;
   resolveAssetUrl?: (path: string) => string;
 }
