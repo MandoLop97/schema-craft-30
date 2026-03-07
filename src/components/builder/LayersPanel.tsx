@@ -134,6 +134,15 @@ function SortableLayerItem({
             "{node.props.text}"
           </span>
         )}
+        {onDuplicateNode && (
+          <button
+            className="p-0.5 opacity-0 group-hover:opacity-60 hover:!opacity-100 transition-opacity text-muted-foreground hover:text-primary"
+            onClick={(e) => { e.stopPropagation(); onDuplicateNode(node.id); }}
+            title="Duplicate"
+          >
+            <Copy className="h-3 w-3" />
+          </button>
+        )}
         {node.hidden && (
           <EyeOff className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
         )}
