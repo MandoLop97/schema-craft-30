@@ -13,7 +13,23 @@ const s = (style: NodeStyle): React.CSSProperties => nodeStyleToCSS(style);
 /** Layout variants for ProductCard */
 type CardLayout = 'vertical' | 'horizontal' | 'minimal' | 'overlay';
 
-export function ProductCardNode({ node }: NodeComponentProps) {
+export function ProductCardNode({ node, mode, renderChildren }: NodeComponentProps) {
+  // ── Composite mode: if node has children, render them instead of monolithic HTML ──
+  if (node.children && node.children.length > 0) {
+    return (
+      <div
+        style={{
+          ...s(node.style),
+        }}
+        data-node-id={node.id}
+        className="group hover:shadow-lg hover:-translate-y-0.5"
+      >
+        {renderChildren(node.children)}
+      </div>
+    );
+  }
+
+  // ── Legacy monolithic rendering (for backwards compatibility) ──
   const productName = node.props.name || node.props.text || 'Product Name';
   const productImage = node.props.image || node.props.src || '/placeholder.svg';
   const layout: CardLayout = (node.props.cardLayout as CardLayout) || 'vertical';
