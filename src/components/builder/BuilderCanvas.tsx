@@ -24,6 +24,9 @@ interface BuilderCanvasProps {
   onEditSection?: (nodeType: string) => void;
   onSaveAsTemplate?: (nodeId: string) => void;
   onRepositionNode?: (nodeId: string, style: { top?: string; left?: string; right?: string; bottom?: string }) => void;
+  onCopyStyle?: (nodeId: string) => void;
+  onPasteStyle?: (nodeId: string) => void;
+  canPasteStyle?: boolean;
 }
 
 const DEVICE_WIDTHS = {
