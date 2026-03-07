@@ -25,6 +25,7 @@ interface InspectorProps {
   onDelete: () => void;
   onDuplicate?: () => void;
   onImageUpload?: (file: File) => Promise<string>;
+  onUpdateCustomCSS?: (css: string) => void;
 }
 
 /* ── Reusable field components ── */
