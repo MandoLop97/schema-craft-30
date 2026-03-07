@@ -13,7 +13,7 @@ export type { NexoraBuilderAppProps } from './NexoraBuilderApp';
 export type { PublishPayload } from './components/builder/PublishDialog';
 
 // Schema types
-export type { Schema, SchemaNode, NodeType, BuiltInNodeType, NodeProps, NodeStyle, ThemeTokens, Page, PageDefinition, RenderMode } from './types/schema';
+export type { Schema, SchemaNode, NodeType, BuiltInNodeType, NodeProps, NodeStyle, ThemeTokens, Page, PageDefinition, RenderMode, TemplateType } from './types/schema';
 
 // Renderer — for hosts that want to render schemas outside the builder
 export { PageRenderer } from './components/schema/PageRenderer';
