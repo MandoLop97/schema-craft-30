@@ -172,6 +172,7 @@ function SortableChildrenList({
   selectedNodeId,
   onSelectNode,
   onReorderChildren,
+  onDuplicateNode,
 }: {
   parentNode: SchemaNode;
   schema: Schema;
@@ -179,6 +180,7 @@ function SortableChildrenList({
   selectedNodeId: string | null;
   onSelectNode: (id: string) => void;
   onReorderChildren?: (parentId: string, newChildren: string[]) => void;
+  onDuplicateNode?: (nodeId: string) => void;
 }) {
   return (
     <SortableContext
@@ -197,6 +199,7 @@ function SortableChildrenList({
             selectedNodeId={selectedNodeId}
             onSelectNode={onSelectNode}
             onReorderChildren={onReorderChildren}
+            onDuplicateNode={onDuplicateNode}
           />
         );
       })}
