@@ -251,8 +251,28 @@ function HeroSectionPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate
       <PropField label="CTA Link" value={ctaLink} onChange={(v) => onUpdate({ ctaLink: v, ctaHref: v })} />
       <PropField label="Secondary CTA Text" value={node.props.secondaryCtaText || ''} onChange={(v) => onUpdate({ secondaryCtaText: v })} />
       <PropField label="Secondary CTA Link" value={node.props.secondaryCtaLink || ''} onChange={(v) => onUpdate({ secondaryCtaLink: v })} />
-      <PropField label="Background Image" value={bgImage} onChange={(v) => onUpdate({ src: v, image: v })} />
-      <PropField label="Overlay Opacity (0-1)" value={node.props.overlayOpacity || '0.55'} onChange={(v) => onUpdate({ overlayOpacity: v })} />
+      <Separator className="my-2" />
+      <ImageUploadField
+        label="Background Image"
+        value={bgImage}
+        onChange={(v) => onUpdate({ src: v, image: v })}
+      />
+      <div className="grid gap-1">
+        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Overlay Opacity</Label>
+        <div className="flex items-center gap-2">
+          <Slider
+            min={0}
+            max={1}
+            step={0.05}
+            value={[parseFloat(node.props.overlayOpacity || '0.55')]}
+            onValueChange={([v]) => onUpdate({ overlayOpacity: String(v) })}
+            className="flex-1"
+          />
+          <span className="text-[10px] font-mono text-muted-foreground w-8 text-right">
+            {parseFloat(node.props.overlayOpacity || '0.55').toFixed(2)}
+          </span>
+        </div>
+      </div>
     </>
   );
 }
