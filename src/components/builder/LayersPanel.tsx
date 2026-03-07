@@ -73,6 +73,7 @@ function SortableLayerItem({
   onDeleteNode,
   onMoveNode,
   onRenameNode,
+  onToggleVisibility,
   isOverTarget,
 }: {
   node: SchemaNode;
@@ -85,6 +86,7 @@ function SortableLayerItem({
   onDeleteNode?: (nodeId: string) => void;
   onMoveNode?: (nodeId: string, newParentId: string, index: number) => void;
   onRenameNode?: (nodeId: string, newName: string) => void;
+  onToggleVisibility?: (nodeId: string) => void;
   isOverTarget?: boolean;
 }) {
   const [expanded, setExpanded] = useState(depth < 2);
