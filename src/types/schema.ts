@@ -10,7 +10,8 @@ export type BuiltInNodeType =
   | 'AnnouncementBar' | 'FeatureBar' | 'TestimonialCard' | 'NewsletterSection'
   | 'HeroSection'
   | 'Accordion' | 'TabsBlock' | 'VideoEmbed'
-  | 'Spacer' | 'Icon' | 'SocialIcons';
+  | 'Spacer' | 'Icon' | 'SocialIcons'
+  | 'FormBlock';
 
 /** Extensible node type — accepts all built-in types plus any custom string. */
 export type NodeType = BuiltInNodeType | (string & {});
