@@ -11,7 +11,7 @@ import { createDefaultHomeSchema } from '@/lib/default-schema';
 function createHeaderSchema() {
   return {
     id: 'schema-header', version: 1, updatedAt: new Date().toISOString(),
-    themeTokens: createDefaultHomeSchema().themeTokens, rootNodeId: 'root',
+    themeTokens: createDefaultHomeSchema().schema.themeTokens, rootNodeId: 'root',
     nodes: {
       root: { id: 'root', type: 'Section' as const, props: {}, style: { display: 'flex', flexDirection: 'column' }, children: ['navbar'] },
       navbar: { id: 'navbar', type: 'Navbar' as const, props: { logoText: 'STORE', links: [{ text: 'Home', href: '#' }, { text: 'Shop', href: '#' }] }, style: {}, children: [] },
