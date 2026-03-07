@@ -35,8 +35,8 @@ function PageThumbnail({ page }: { page: PageDefinition }) {
 
   return (
     <div
-      className="rounded-lg border bg-background overflow-hidden shrink-0"
-      style={{ width: thumbWidth, height: thumbHeight }}
+      className="relative rounded-t-xl overflow-hidden shrink-0"
+      style={{ width: '100%', height: thumbHeight }}
     >
       <div
         style={{
@@ -50,6 +50,13 @@ function PageThumbnail({ page }: { page: PageDefinition }) {
       >
         <PageRenderer schema={page.schema} mode="preview" />
       </div>
+      {/* Gradient overlay for smooth transition to info area */}
+      <div
+        className="absolute inset-x-0 bottom-0 h-10 pointer-events-none"
+        style={{
+          background: 'linear-gradient(to top, hsl(var(--card)), transparent)',
+        }}
+      />
     </div>
   );
 }
@@ -72,57 +79,79 @@ export function PageManager({ pages, activePage, onSelectPage }: PageManagerProp
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Header */}
-      <div className="border-b px-6 py-5 flex items-center gap-3" style={{ backgroundColor: 'hsla(210, 60%, 50%, 0.08)' }}>
-        <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
+    <div className="min-h-screen flex flex-col nxr-canvas-grid" style={{ backgroundColor: 'hsl(var(--muted) / 0.15)' }}>
+      {/* Header with backdrop-blur and glow */}
+      <div
+        className="border-b px-6 py-5 flex items-center gap-3 backdrop-blur-md sticky top-0 z-10"
+        style={{
+          backgroundColor: 'hsl(var(--background) / 0.8)',
+          boxShadow: '0 1px 20px hsl(var(--primary) / 0.06), 0 1px 3px hsl(var(--border) / 0.4)',
+        }}
+      >
+        <div
+          className="h-9 w-9 rounded-lg flex items-center justify-center"
+          style={{
+            background: 'linear-gradient(135deg, hsl(var(--primary) / 0.15), hsl(var(--primary) / 0.05))',
+            boxShadow: '0 0 12px hsl(var(--primary) / 0.1)',
+          }}
+        >
           <Layers className="h-5 w-5 text-primary" />
         </div>
         <div>
           <h1 className="text-lg font-bold tracking-tight text-foreground">NEXORA</h1>
           <p className="text-[11px] text-muted-foreground">Select a page or template to edit</p>
         </div>
-        <span className="ml-auto text-[10px] text-muted-foreground font-mono">v{EDITOR_VERSION}</span>
+        <span className="ml-auto text-[10px] text-muted-foreground font-mono px-2 py-1 rounded-md bg-muted/50">
+          v{EDITOR_VERSION}
+        </span>
       </div>
 
       {/* Content */}
-      <div className="flex-1 px-6 py-6 max-w-4xl mx-auto w-full">
-        <div className="space-y-4">
+      <div className="flex-1 px-6 py-8 max-w-5xl mx-auto w-full">
+        <div className="space-y-6">
           {groups.map(([category, categoryPages]) => {
             const isOpen = !collapsed[category];
             const CategoryIcon = getCategoryIcon(category);
 
             return (
               <Collapsible key={category} open={isOpen} onOpenChange={() => toggleCategory(category)}>
-                <CollapsibleTrigger className="flex items-center gap-2 w-full px-3 py-2.5 rounded-lg hover:bg-muted/50 transition-colors">
+                <CollapsibleTrigger className="flex items-center gap-2.5 w-full px-4 py-3 rounded-xl hover:bg-muted/60 transition-all duration-200 group">
                   {isOpen ? (
-                    <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200" />
                   ) : (
-                    <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200" />
                   )}
-                  <CategoryIcon className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <CategoryIcon className="h-4 w-4 text-muted-foreground shrink-0 group-hover:text-primary transition-colors duration-200" />
                   <span className="text-sm font-semibold text-foreground">{category}</span>
-                  <span className="text-xs text-muted-foreground/60 ml-auto">{categoryPages.length}</span>
+                  <span
+                    className="text-[10px] font-medium text-muted-foreground ml-auto px-2 py-0.5 rounded-full"
+                    style={{ backgroundColor: 'hsl(var(--muted) / 0.8)' }}
+                  >
+                    {categoryPages.length}
+                  </span>
                 </CollapsibleTrigger>
 
                 <CollapsibleContent>
-                  <div className="grid gap-3 mt-2 ml-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                    {categoryPages.map((page) => {
+                  <div className="grid gap-4 mt-3 ml-1 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                    {categoryPages.map((page, i) => {
                       const isLive = page.status === 'published';
 
                       return (
                         <button
                           key={page.slug}
                           onClick={() => onSelectPage(page.slug)}
-                          className="group flex flex-col rounded-xl border bg-background overflow-hidden text-left w-full transition-all duration-150 ease-out hover:shadow-lg hover:border-primary/25 hover:scale-[1.02] active:scale-[0.99]"
+                          className="group flex flex-col rounded-xl overflow-hidden text-left w-full transition-all duration-200 ease-out hover:scale-[1.03] active:scale-[0.98] nxr-page-card"
+                          style={{
+                            animationDelay: `${i * 50}ms`,
+                          }}
                         >
                           {/* Live thumbnail */}
                           <PageThumbnail page={page} />
 
                           {/* Info */}
-                          <div className="px-3.5 py-3 flex items-center gap-2">
+                          <div className="px-4 py-3 flex items-center gap-2">
                             <div className="flex-1 min-w-0">
-                              <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors truncate block">
+                              <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors duration-200 truncate block">
                                 {page.title}
                               </span>
                               <div className="flex items-center gap-1.5 mt-0.5">
@@ -137,8 +166,26 @@ export function PageManager({ pages, activePage, onSelectPage }: PageManagerProp
                                 )}
                               </div>
                             </div>
-                            <span className={`inline-flex items-center gap-1 text-[10px] font-medium shrink-0 ${isLive ? 'text-green-600' : 'text-muted-foreground'}`}>
-                              <Circle className={`h-1.5 w-1.5 ${isLive ? 'fill-green-500 text-green-500' : 'fill-muted-foreground/40 text-muted-foreground/40'}`} />
+                            {/* Status pill */}
+                            <span
+                              className={`inline-flex items-center gap-1 text-[10px] font-medium shrink-0 px-2 py-0.5 rounded-full ${
+                                isLive
+                                  ? 'text-green-700 dark:text-green-400'
+                                  : 'text-muted-foreground'
+                              }`}
+                              style={{
+                                backgroundColor: isLive
+                                  ? 'hsl(142 71% 45% / 0.1)'
+                                  : 'hsl(var(--muted) / 0.6)',
+                              }}
+                            >
+                              <Circle
+                                className={`h-1.5 w-1.5 ${
+                                  isLive
+                                    ? 'fill-green-500 text-green-500'
+                                    : 'fill-muted-foreground/40 text-muted-foreground/40'
+                                }`}
+                              />
                               {isLive ? 'Live' : 'Draft'}
                             </span>
                           </div>
