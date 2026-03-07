@@ -376,6 +376,26 @@ export function BuilderEditorShell({
     }
   }, [schema.nodes, updateSchema]);
 
+  // Copy/Paste Style handlers
+  const handleCopyStyleById = useCallback((nodeId: string) => {
+    const node = schema.nodes[nodeId];
+    if (node) {
+      clipboardStyleRef.current = JSON.parse(JSON.stringify(node.style));
+      toast.success('Estilo copiado');
+    }
+  }, [schema.nodes]);
+
+  const handlePasteStyleById = useCallback((nodeId: string) => {
+    if (!clipboardStyleRef.current) return;
+    updateSchema((s) => {
+      if (s.nodes[nodeId]) {
+        s.nodes[nodeId].style = { ...s.nodes[nodeId].style, ...clipboardStyleRef.current! };
+      }
+      return s;
+    });
+    toast.success('Estilo pegado');
+  }, [updateSchema]);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
