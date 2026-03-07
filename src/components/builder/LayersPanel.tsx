@@ -158,6 +158,7 @@ function SortableLayerItem({
           selectedNodeId={selectedNodeId}
           onSelectNode={onSelectNode}
           onReorderChildren={onReorderChildren}
+          onDuplicateNode={onDuplicateNode}
         />
       )}
     </div>
