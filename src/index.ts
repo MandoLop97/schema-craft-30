@@ -19,6 +19,8 @@ export { ANIMATION_PRESETS } from './types/schema';
 // Renderer — for hosts that want to render schemas outside the builder
 export { PageRenderer } from './components/schema/PageRenderer';
 export { CustomStylesInjector } from './components/builder/CustomStylesInjector';
+export { MediaGallery } from './components/builder/MediaGallery';
+export { ProductPicker } from './components/builder/ProductPicker';
 
 // Node registry types — for hosts that want to provide custom components
 export type { NodeComponentProps, NodeComponent, CustomComponentMap } from './components/schema/NodeRegistry';
