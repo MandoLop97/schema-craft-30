@@ -147,6 +147,11 @@ export const blockRegistry: BlockDefinition[] = [
 
   // ── Commerce ──
   { type: 'ProductCard', label: 'Product Card', category: 'Commerce', icon: ShoppingBag, canHaveChildren: true, defaultProps: { text: 'Product Name', price: '$99', src: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop' }, defaultStyle: {}, compositeFactory: createProductCardComposite },
+  { type: 'ProductGrid', label: 'Product Grid', category: 'Commerce', icon: LayoutGrid, canHaveChildren: false, defaultProps: { columns: 4, limit: 8, category: '' }, defaultStyle: { padding: '2rem', gap: '1.5rem' }, inspectorFields: [
+    { key: 'columns', label: 'Columns', type: 'select', options: [{ label: '2', value: '2' }, { label: '3', value: '3' }, { label: '4', value: '4' }] },
+    { key: 'limit', label: 'Product Limit', type: 'number', min: 1, max: 50 },
+    { key: 'category', label: 'Category Filter', type: 'text', placeholder: 'Leave empty for all' },
+  ] },
 
   // ── Site ──
   { type: 'Navbar', label: 'Navbar', category: 'Site', icon: Navigation, canHaveChildren: false, defaultProps: { logoText: 'Brand', links: [{ text: 'Home', href: '#' }] }, defaultStyle: {}, allowedParents: ['Section'], allowedTemplateTypes: ['header'] },
