@@ -27,9 +27,11 @@ interface SortableNodeWrapperProps {
   canPaste?: boolean;
   onEditSection?: (nodeType: string) => void;
   onSaveAsTemplate?: (nodeId: string) => void;
+  /** Pass the node's position-related styles so the wrapper can inherit absolute/fixed positioning */
+  nodeStyle?: { position?: string; top?: string; left?: string; right?: string; bottom?: string; zIndex?: string };
 }
 
-export function SortableNodeWrapper({ nodeId, children, isSelected, nodeType, onSelect, onCopy, onPaste, onDuplicate, onDelete, canPaste, onEditSection, onSaveAsTemplate }: SortableNodeWrapperProps) {
+export function SortableNodeWrapper({ nodeId, children, isSelected, nodeType, onSelect, onCopy, onPaste, onDuplicate, onDelete, canPaste, onEditSection, onSaveAsTemplate, nodeStyle }: SortableNodeWrapperProps) {
   const [hovered, setHovered] = useState(false);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: nodeId,
@@ -39,12 +41,22 @@ export function SortableNodeWrapper({ nodeId, children, isSelected, nodeType, on
   const isEditableSection = EDITABLE_SECTION_TYPES.has(nodeType);
   const showEditButton = isEditableSection && !isDragging && (hovered || isSelected);
 
+  // If the node has absolute/fixed positioning, apply it to the wrapper so it positions correctly
+  const isAbsoluteOrFixed = nodeStyle?.position === 'absolute' || nodeStyle?.position === 'fixed';
+
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition: transition || 'box-shadow 250ms cubic-bezier(.4,0,.2,1), opacity 200ms ease, transform 200ms ease, outline 250ms cubic-bezier(.4,0,.2,1)',
     opacity: isDragging ? 0.45 : 1,
     cursor: isDragging ? 'grabbing' : 'grab',
-    position: 'relative',
+    position: isAbsoluteOrFixed ? nodeStyle!.position as any : 'relative',
+    ...(isAbsoluteOrFixed && {
+      top: nodeStyle?.top,
+      left: nodeStyle?.left,
+      right: nodeStyle?.right,
+      bottom: nodeStyle?.bottom,
+      zIndex: nodeStyle?.zIndex,
+    }),
     borderRadius: '4px',
     outline: isSelected
       ? '2px solid hsl(var(--primary) / 0.6)'
