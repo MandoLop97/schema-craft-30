@@ -30,7 +30,7 @@ export { blockRegistry, getBlockDef, getCategories, getBlocksByCategory, registe
 export type { BlockDefinition, InspectorFieldDef } from './lib/block-registry';
 
 // Node utilities — for hosts that want to create or inspect nodes programmatically
-export { createNode, isContainerType } from './lib/node-factory';
+export { createNode, isContainerType, duplicateNodeTree } from './lib/node-factory';
 
 // Schema utilities — for hosts that want to scaffold or validate schemas
 export { createDefaultHomeSchema } from './lib/default-schema';
