@@ -76,6 +76,11 @@ export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode, cu
           onSelectNode={onSelectNode}
           customComponents={customComponents}
           mockData={mockData}
+          onCopyNode={onCopyNode}
+          onPasteNode={onPasteNode}
+          onDuplicateNode={onDuplicateNode}
+          onDeleteNode={onDeleteNode}
+          canPaste={canPaste}
         />
       </div>
     </div>
