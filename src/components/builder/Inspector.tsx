@@ -16,6 +16,7 @@ import { t } from '@/lib/i18n';
 import { getBlockDef, InspectorFieldDef } from '@/lib/block-registry';
 import { ImageUploadField } from './ImageUploadField';
 import { GradientEditor } from './GradientEditor';
+import { ProductPicker } from './ProductPicker';
 
 interface InspectorProps {
   node: SchemaNode;
