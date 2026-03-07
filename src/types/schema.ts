@@ -145,6 +145,8 @@ export interface ThemeTokens {
     lg: string;
     xl: string;
   };
+  /** Global gradient applied as background */
+  gradient?: string;
 }
 
 export interface Schema {

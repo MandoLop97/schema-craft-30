@@ -9,8 +9,11 @@ import { Trash2, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { Slider } from '@/components/ui/slider';
 import { t } from '@/lib/i18n';
 import { getBlockDef, InspectorFieldDef } from '@/lib/block-registry';
+import { ImageUploadField } from './ImageUploadField';
+import { GradientEditor } from './GradientEditor';
 
 interface InspectorProps {
   node: SchemaNode;
@@ -147,7 +150,7 @@ function ButtonPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p:
 function ImagePropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: Partial<NodeProps>) => void }) {
   return (
     <>
-      <PropField label="Image URL" value={node.props.src || ''} onChange={(v) => onUpdate({ src: v })} />
+      <ImageUploadField label="Image URL" value={node.props.src || ''} onChange={(v) => onUpdate({ src: v })} />
       <PropField label="Alt Text" value={node.props.alt || ''} onChange={(v) => onUpdate({ alt: v })} />
     </>
   );
@@ -248,8 +251,28 @@ function HeroSectionPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate
       <PropField label="CTA Link" value={ctaLink} onChange={(v) => onUpdate({ ctaLink: v, ctaHref: v })} />
       <PropField label="Secondary CTA Text" value={node.props.secondaryCtaText || ''} onChange={(v) => onUpdate({ secondaryCtaText: v })} />
       <PropField label="Secondary CTA Link" value={node.props.secondaryCtaLink || ''} onChange={(v) => onUpdate({ secondaryCtaLink: v })} />
-      <PropField label="Background Image" value={bgImage} onChange={(v) => onUpdate({ src: v, image: v })} />
-      <PropField label="Overlay Opacity (0-1)" value={node.props.overlayOpacity || '0.55'} onChange={(v) => onUpdate({ overlayOpacity: v })} />
+      <Separator className="my-2" />
+      <ImageUploadField
+        label="Background Image"
+        value={bgImage}
+        onChange={(v) => onUpdate({ src: v, image: v })}
+      />
+      <div className="grid gap-1">
+        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Overlay Opacity</Label>
+        <div className="flex items-center gap-2">
+          <Slider
+            min={0}
+            max={1}
+            step={0.05}
+            value={[parseFloat(node.props.overlayOpacity || '0.55')]}
+            onValueChange={([v]) => onUpdate({ overlayOpacity: String(v) })}
+            className="flex-1"
+          />
+          <span className="text-[10px] font-mono text-muted-foreground w-8 text-right">
+            {parseFloat(node.props.overlayOpacity || '0.55').toFixed(2)}
+          </span>
+        </div>
+      </div>
     </>
   );
 }
@@ -464,7 +487,7 @@ function PropsTab({ node, onUpdateProps, onUpdateStyle }: { node: SchemaNode; on
       )}
       {node.type === 'ProductCard' && (
         <>
-          <PropField label="Image URL" value={p.image || p.src || ''} onChange={(v) => onUpdateProps({ src: v, image: v })} />
+          <ImageUploadField label="Image URL" value={p.image || p.src || ''} onChange={(v) => onUpdateProps({ src: v, image: v })} />
           <PropField label="Alt Text" value={p.alt || ''} onChange={(v) => onUpdateProps({ alt: v })} />
           <PropField label="Name" value={p.name || p.text || ''} onChange={(v) => onUpdateProps({ text: v, name: v })} />
           <PropField label="Price" value={p.price || ''} onChange={(v) => onUpdateProps({ price: v })} />
@@ -607,6 +630,50 @@ function StyleTab({ node, onUpdateStyle }: { node: SchemaNode; onUpdateStyle: (s
           </div>
         </div>
       ))}
+
+      {/* Background Image & Gradient section */}
+      <Separator className="my-3" />
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Fondo Avanzado</p>
+      <div className="space-y-2">
+        <ImageUploadField
+          label="Imagen de fondo"
+          value={node.style.backgroundImage?.replace(/^url\(["']?|["']?\)$/g, '') || ''}
+          onChange={(v) => onUpdateStyle({ backgroundImage: v ? `url(${v})` : undefined })}
+        />
+        <PropField
+          label="Background Size"
+          value={node.style.backgroundSize || ''}
+          onChange={(v) => onUpdateStyle({ backgroundSize: v || undefined })}
+        />
+        <PropField
+          label="Background Position"
+          value={node.style.backgroundPosition || ''}
+          onChange={(v) => onUpdateStyle({ backgroundPosition: v || undefined })}
+        />
+
+        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Gradiente</Label>
+        <GradientEditor
+          value={node.style.backgroundImage?.startsWith('linear-gradient') ? node.style.backgroundImage : ''}
+          onChange={(v) => onUpdateStyle({ backgroundImage: v || undefined })}
+        />
+
+        <div className="grid gap-1">
+          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Opacidad</Label>
+          <div className="flex items-center gap-2">
+            <Slider
+              min={0}
+              max={1}
+              step={0.05}
+              value={[parseFloat(node.style.opacity || '1')]}
+              onValueChange={([v]) => onUpdateStyle({ opacity: v < 1 ? String(v) : undefined })}
+              className="flex-1"
+            />
+            <span className="text-[10px] font-mono text-muted-foreground w-8 text-right">
+              {parseFloat(node.style.opacity || '1').toFixed(2)}
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

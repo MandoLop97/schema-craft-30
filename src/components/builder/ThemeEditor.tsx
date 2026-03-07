@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Slider } from '@/components/ui/slider';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Paintbrush } from 'lucide-react';
+import { GradientEditor } from './GradientEditor';
 
 interface ThemeEditorProps {
   themeTokens: ThemeTokens;
@@ -304,6 +305,19 @@ export function ThemeEditor({ themeTokens, onUpdate }: ThemeEditorProps) {
             <ThemeColorField label="Muted" value={themeTokens.colors.muted} onChange={(v) => update(['colors', 'muted'], v)} />
             <ThemeColorField label="Border" value={themeTokens.colors.border} onChange={(v) => update(['colors', 'border'], v)} />
           </div>
+
+          <Separator className="my-3" />
+
+          {/* Gradient */}
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Gradiente Global</p>
+          <GradientEditor
+            value={themeTokens.gradient || ''}
+            onChange={(v) => {
+              const next = JSON.parse(JSON.stringify(themeTokens)) as ThemeTokens;
+              next.gradient = v || undefined;
+              onUpdate(next);
+            }}
+          />
 
           <Separator className="my-3" />
 
