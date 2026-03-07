@@ -9,8 +9,11 @@ import { Trash2, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { Slider } from '@/components/ui/slider';
 import { t } from '@/lib/i18n';
 import { getBlockDef, InspectorFieldDef } from '@/lib/block-registry';
+import { ImageUploadField } from './ImageUploadField';
+import { GradientEditor } from './GradientEditor';
 
 interface InspectorProps {
   node: SchemaNode;
