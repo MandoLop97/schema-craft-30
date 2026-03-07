@@ -597,7 +597,7 @@ export function Inspector({ node, onUpdateProps, onUpdateStyle, onDelete, onDupl
         </TabsList>
         <div className="flex-1 overflow-y-auto">
           <TabsContent value="props" className="mt-0">
-            <PropsTab node={node} onUpdateProps={onUpdateProps} />
+            <PropsTab node={node} onUpdateProps={onUpdateProps} onUpdateStyle={onUpdateStyle} />
           </TabsContent>
           <TabsContent value="style" className="mt-0">
             <StyleTab node={node} onUpdateStyle={onUpdateStyle} />
