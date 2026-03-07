@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { SchemaNode, NodeProps, NodeStyle } from '@/types/schema';
+import { SchemaNode, NodeProps, NodeStyle, ANIMATION_PRESETS, AnimationPreset } from '@/types/schema';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -7,9 +7,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Trash2, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { t } from '@/lib/i18n';
 import { getBlockDef, InspectorFieldDef } from '@/lib/block-registry';
 import { ImageUploadField } from './ImageUploadField';
@@ -21,13 +23,17 @@ interface InspectorProps {
   onUpdateStyle: (style: Partial<NodeStyle>) => void;
   onDelete: () => void;
   onDuplicate?: () => void;
+  /** Callback for image uploads from 'image' inspector fields */
+  onImageUpload?: (file: File) => Promise<string>;
 }
 
-function PropField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+/* ── Reusable field components ── */
+
+function PropField({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
   return (
     <div className="grid gap-1">
       <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</Label>
-      <Input className="h-8 text-xs transition-shadow duration-200 focus:ring-2 focus:ring-primary/20" value={value} onChange={(e) => onChange(e.target.value)} />
+      <Input className="h-8 text-xs transition-shadow duration-200 focus:ring-2 focus:ring-primary/20" value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} />
     </div>
   );
 }
@@ -49,7 +55,6 @@ function ColorField({ label, value, onChange }: { label: string; value: string; 
     onChange(v);
   };
 
-  // Resolve display color — handle hsl(var(...)) gracefully
   const displayColor = localValue && !localValue.includes('var(') ? localValue : '#ffffff';
 
   return (
@@ -66,7 +71,6 @@ function ColorField({ label, value, onChange }: { label: string; value: string; 
           </PopoverTrigger>
           <PopoverContent className="w-auto p-3" side="left" align="start">
             <div className="space-y-3">
-              {/* Native color picker */}
               <div className="flex items-center gap-2">
                 <input
                   ref={inputRef}
@@ -77,7 +81,6 @@ function ColorField({ label, value, onChange }: { label: string; value: string; 
                 />
                 <span className="text-xs text-muted-foreground">Custom</span>
               </div>
-              {/* Preset swatches */}
               <div className="grid grid-cols-6 gap-1.5">
                 {PRESET_COLORS.map((c) => (
                   <button
@@ -106,6 +109,115 @@ function ColorField({ label, value, onChange }: { label: string; value: string; 
     </div>
   );
 }
+
+function ToggleField({ label, value, onChange }: { label: string; value: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <div className="flex items-center justify-between">
+      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</Label>
+      <Switch checked={value} onCheckedChange={onChange} />
+    </div>
+  );
+}
+
+function SliderField({ label, value, onChange, min = 0, max = 100, step = 1 }: { label: string; value: number; onChange: (v: number) => void; min?: number; max?: number; step?: number }) {
+  return (
+    <div className="grid gap-1">
+      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</Label>
+      <div className="flex items-center gap-2">
+        <Slider min={min} max={max} step={step} value={[value]} onValueChange={([v]) => onChange(v)} className="flex-1" />
+        <span className="text-[10px] font-mono text-muted-foreground w-10 text-right">{value}</span>
+      </div>
+    </div>
+  );
+}
+
+function TextareaField({ label, value, onChange, rows = 3, placeholder }: { label: string; value: string; onChange: (v: string) => void; rows?: number; placeholder?: string }) {
+  return (
+    <div className="grid gap-1">
+      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</Label>
+      <Textarea className="text-xs min-h-[60px] transition-shadow duration-200 focus:ring-2 focus:ring-primary/20" value={value} onChange={(e) => onChange(e.target.value)} rows={rows} placeholder={placeholder} />
+    </div>
+  );
+}
+
+function LinkField({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
+  const isValid = !value || /^(https?:\/\/|\/|#|mailto:)/.test(value);
+  return (
+    <div className="grid gap-1">
+      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</Label>
+      <Input
+        className={`h-8 text-xs font-mono transition-shadow duration-200 focus:ring-2 focus:ring-primary/20 ${!isValid ? 'border-destructive' : ''}`}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder || 'https://...'}
+      />
+      {!isValid && <p className="text-[9px] text-destructive">URL inválida</p>}
+    </div>
+  );
+}
+
+/* ── Custom inspector field renderer ── */
+
+function InspectorFieldRenderer({ field, value, onChange, onImageUpload }: {
+  field: InspectorFieldDef;
+  value: any;
+  onChange: (v: any) => void;
+  onImageUpload?: (file: File) => Promise<string>;
+}) {
+  switch (field.type) {
+    case 'color':
+      return <ColorField label={field.label} value={String(value ?? '')} onChange={onChange} />;
+    case 'select':
+      return (
+        <div className="grid gap-1">
+          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">{field.label}</Label>
+          <Select value={String(value ?? '')} onValueChange={onChange}>
+            <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {field.options?.map((o) => (
+                <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      );
+    case 'number':
+      return <PropField label={field.label} value={String(value ?? '')} onChange={(v) => onChange(parseFloat(v) || 0)} />;
+    case 'image':
+      return <ImageUploadField label={field.label} value={String(value ?? '')} onChange={onChange} />;
+    case 'toggle':
+      return <ToggleField label={field.label} value={Boolean(value)} onChange={onChange} />;
+    case 'slider':
+      return <SliderField label={field.label} value={Number(value ?? field.min ?? 0)} onChange={onChange} min={field.min} max={field.max} step={field.step} />;
+    case 'textarea':
+      return <TextareaField label={field.label} value={String(value ?? '')} onChange={onChange} rows={field.rows} placeholder={field.placeholder} />;
+    case 'link':
+      return <LinkField label={field.label} value={String(value ?? '')} onChange={onChange} placeholder={field.placeholder} />;
+    case 'group':
+      return (
+        <Collapsible defaultOpen>
+          <CollapsibleTrigger className="flex items-center gap-1 w-full text-[10px] font-semibold uppercase tracking-wider text-muted-foreground py-1 hover:text-foreground transition-colors">
+            <span>▸</span> {field.label}
+          </CollapsibleTrigger>
+          <CollapsibleContent className="pl-2 space-y-2 border-l border-border ml-1">
+            {field.children?.map((child) => (
+              <InspectorFieldRenderer
+                key={child.key}
+                field={child}
+                value={(value as any)?.[child.key] ?? ''}
+                onChange={(v) => onChange({ ...(value || {}), [child.key]: v })}
+                onImageUpload={onImageUpload}
+              />
+            ))}
+          </CollapsibleContent>
+        </Collapsible>
+      );
+    default:
+      return <PropField label={field.label} value={String(value ?? '')} onChange={onChange} placeholder={field.placeholder} />;
+  }
+}
+
+/* ── Built-in prop editors ── */
 
 function TextPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: Partial<NodeProps>) => void }) {
   return (
@@ -252,25 +364,12 @@ function HeroSectionPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate
       <PropField label="Secondary CTA Text" value={node.props.secondaryCtaText || ''} onChange={(v) => onUpdate({ secondaryCtaText: v })} />
       <PropField label="Secondary CTA Link" value={node.props.secondaryCtaLink || ''} onChange={(v) => onUpdate({ secondaryCtaLink: v })} />
       <Separator className="my-2" />
-      <ImageUploadField
-        label="Background Image"
-        value={bgImage}
-        onChange={(v) => onUpdate({ src: v, image: v })}
-      />
+      <ImageUploadField label="Background Image" value={bgImage} onChange={(v) => onUpdate({ src: v, image: v })} />
       <div className="grid gap-1">
         <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Overlay Opacity</Label>
         <div className="flex items-center gap-2">
-          <Slider
-            min={0}
-            max={1}
-            step={0.05}
-            value={[parseFloat(node.props.overlayOpacity || '0.55')]}
-            onValueChange={([v]) => onUpdate({ overlayOpacity: String(v) })}
-            className="flex-1"
-          />
-          <span className="text-[10px] font-mono text-muted-foreground w-8 text-right">
-            {parseFloat(node.props.overlayOpacity || '0.55').toFixed(2)}
-          </span>
+          <Slider min={0} max={1} step={0.05} value={[parseFloat(node.props.overlayOpacity || '0.55')]} onValueChange={([v]) => onUpdate({ overlayOpacity: String(v) })} className="flex-1" />
+          <span className="text-[10px] font-mono text-muted-foreground w-8 text-right">{parseFloat(node.props.overlayOpacity || '0.55').toFixed(2)}</span>
         </div>
       </div>
     </>
@@ -336,7 +435,9 @@ function VideoEmbedPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate:
   );
 }
 
-function PropsTab({ node, onUpdateProps, onUpdateStyle }: { node: SchemaNode; onUpdateProps: (p: Partial<NodeProps>) => void; onUpdateStyle: (s: Partial<NodeStyle>) => void }) {
+/* ── Props Tab ── */
+
+function PropsTab({ node, onUpdateProps, onUpdateStyle, onImageUpload }: { node: SchemaNode; onUpdateProps: (p: Partial<NodeProps>) => void; onUpdateStyle: (s: Partial<NodeStyle>) => void; onImageUpload?: (file: File) => Promise<string> }) {
   const p = node.props;
   return (
     <div className="space-y-3 p-3">
@@ -352,9 +453,7 @@ function PropsTab({ node, onUpdateProps, onUpdateStyle }: { node: SchemaNode; on
             <Select value={node.style.display || 'block'} onValueChange={(v) => onUpdateStyle({ display: v as any })}>
               <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>
-                {['block', 'flex', 'grid'].map((v) => (
-                  <SelectItem key={v} value={v}>{v}</SelectItem>
-                ))}
+                {['block', 'flex', 'grid'].map((v) => (<SelectItem key={v} value={v}>{v}</SelectItem>))}
               </SelectContent>
             </Select>
           </div>
@@ -363,9 +462,7 @@ function PropsTab({ node, onUpdateProps, onUpdateStyle }: { node: SchemaNode; on
             <Select value={node.style.flexDirection || 'column'} onValueChange={(v) => onUpdateStyle?.({ flexDirection: v as any })}>
               <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>
-                {['column', 'row', 'column-reverse', 'row-reverse'].map((v) => (
-                  <SelectItem key={v} value={v}>{v}</SelectItem>
-                ))}
+                {['column', 'row', 'column-reverse', 'row-reverse'].map((v) => (<SelectItem key={v} value={v}>{v}</SelectItem>))}
               </SelectContent>
             </Select>
           </div>
@@ -374,9 +471,7 @@ function PropsTab({ node, onUpdateProps, onUpdateStyle }: { node: SchemaNode; on
             <Select value={node.style.alignItems || 'stretch'} onValueChange={(v) => onUpdateStyle?.({ alignItems: v as any })}>
               <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>
-                {['stretch', 'flex-start', 'center', 'flex-end'].map((v) => (
-                  <SelectItem key={v} value={v}>{v}</SelectItem>
-                ))}
+                {['stretch', 'flex-start', 'center', 'flex-end'].map((v) => (<SelectItem key={v} value={v}>{v}</SelectItem>))}
               </SelectContent>
             </Select>
           </div>
@@ -385,9 +480,7 @@ function PropsTab({ node, onUpdateProps, onUpdateStyle }: { node: SchemaNode; on
             <Select value={node.style.justifyContent || 'flex-start'} onValueChange={(v) => onUpdateStyle?.({ justifyContent: v as any })}>
               <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>
-                {['flex-start', 'center', 'flex-end', 'space-between', 'space-around', 'space-evenly'].map((v) => (
-                  <SelectItem key={v} value={v}>{v}</SelectItem>
-                ))}
+                {['flex-start', 'center', 'flex-end', 'space-between', 'space-around', 'space-evenly'].map((v) => (<SelectItem key={v} value={v}>{v}</SelectItem>))}
               </SelectContent>
             </Select>
           </div>
@@ -401,9 +494,7 @@ function PropsTab({ node, onUpdateProps, onUpdateStyle }: { node: SchemaNode; on
             <Select value={node.style.display || 'block'} onValueChange={(v) => onUpdateStyle?.({ display: v as any })}>
               <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>
-                {['block', 'flex', 'grid'].map((v) => (
-                  <SelectItem key={v} value={v}>{v}</SelectItem>
-                ))}
+                {['block', 'flex', 'grid'].map((v) => (<SelectItem key={v} value={v}>{v}</SelectItem>))}
               </SelectContent>
             </Select>
           </div>
@@ -414,9 +505,7 @@ function PropsTab({ node, onUpdateProps, onUpdateStyle }: { node: SchemaNode; on
                 <Select value={node.style.flexDirection || 'column'} onValueChange={(v) => onUpdateStyle?.({ flexDirection: v as any })}>
                   <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {['column', 'row', 'column-reverse', 'row-reverse'].map((v) => (
-                      <SelectItem key={v} value={v}>{v}</SelectItem>
-                    ))}
+                    {['column', 'row', 'column-reverse', 'row-reverse'].map((v) => (<SelectItem key={v} value={v}>{v}</SelectItem>))}
                   </SelectContent>
                 </Select>
               </div>
@@ -425,9 +514,7 @@ function PropsTab({ node, onUpdateProps, onUpdateStyle }: { node: SchemaNode; on
                 <Select value={node.style.alignItems || 'stretch'} onValueChange={(v) => onUpdateStyle?.({ alignItems: v as any })}>
                   <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {['stretch', 'flex-start', 'center', 'flex-end'].map((v) => (
-                      <SelectItem key={v} value={v}>{v}</SelectItem>
-                    ))}
+                    {['stretch', 'flex-start', 'center', 'flex-end'].map((v) => (<SelectItem key={v} value={v}>{v}</SelectItem>))}
                   </SelectContent>
                 </Select>
               </div>
@@ -436,9 +523,7 @@ function PropsTab({ node, onUpdateProps, onUpdateStyle }: { node: SchemaNode; on
                 <Select value={node.style.justifyContent || 'flex-start'} onValueChange={(v) => onUpdateStyle?.({ justifyContent: v as any })}>
                   <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {['flex-start', 'center', 'flex-end', 'space-between', 'space-around', 'space-evenly'].map((v) => (
-                      <SelectItem key={v} value={v}>{v}</SelectItem>
-                    ))}
+                    {['flex-start', 'center', 'flex-end', 'space-between', 'space-around', 'space-evenly'].map((v) => (<SelectItem key={v} value={v}>{v}</SelectItem>))}
                   </SelectContent>
                 </Select>
               </div>
@@ -446,9 +531,7 @@ function PropsTab({ node, onUpdateProps, onUpdateStyle }: { node: SchemaNode; on
           )}
         </>
       )}
-      {node.type === 'Grid' && (
-        <PropField label="Columns" value={String(p.columns || 3)} onChange={(v) => onUpdateProps({ columns: parseInt(v) || 3 })} />
-      )}
+      {node.type === 'Grid' && <PropField label="Columns" value={String(p.columns || 3)} onChange={(v) => onUpdateProps({ columns: parseInt(v) || 3 })} />}
       {node.type === 'Stack' && (
         <>
           <div className="grid gap-1">
@@ -466,9 +549,7 @@ function PropsTab({ node, onUpdateProps, onUpdateStyle }: { node: SchemaNode; on
             <Select value={node.style.alignItems || 'stretch'} onValueChange={(v) => onUpdateStyle?.({ alignItems: v as any })}>
               <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>
-                {['stretch', 'flex-start', 'center', 'flex-end'].map((v) => (
-                  <SelectItem key={v} value={v}>{v}</SelectItem>
-                ))}
+                {['stretch', 'flex-start', 'center', 'flex-end'].map((v) => (<SelectItem key={v} value={v}>{v}</SelectItem>))}
               </SelectContent>
             </Select>
           </div>
@@ -477,9 +558,7 @@ function PropsTab({ node, onUpdateProps, onUpdateStyle }: { node: SchemaNode; on
             <Select value={node.style.justifyContent || 'flex-start'} onValueChange={(v) => onUpdateStyle?.({ justifyContent: v as any })}>
               <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>
-                {['flex-start', 'center', 'flex-end', 'space-between', 'space-around', 'space-evenly'].map((v) => (
-                  <SelectItem key={v} value={v}>{v}</SelectItem>
-                ))}
+                {['flex-start', 'center', 'flex-end', 'space-between', 'space-around', 'space-evenly'].map((v) => (<SelectItem key={v} value={v}>{v}</SelectItem>))}
               </SelectContent>
             </Select>
           </div>
@@ -522,31 +601,15 @@ function PropsTab({ node, onUpdateProps, onUpdateStyle }: { node: SchemaNode; on
       {(() => {
         const def = getBlockDef(node.type);
         if (def?.inspectorFields && def.inspectorFields.length > 0) {
-          return def.inspectorFields.map((field) => {
-            const val = (p as any)[field.key] ?? '';
-            if (field.type === 'color') {
-              return <ColorField key={field.key} label={field.label} value={String(val)} onChange={(v) => onUpdateProps({ [field.key]: v })} />;
-            }
-            if (field.type === 'select' && field.options) {
-              return (
-                <div key={field.key} className="grid gap-1">
-                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">{field.label}</Label>
-                  <Select value={String(val)} onValueChange={(v) => onUpdateProps({ [field.key]: v })}>
-                    <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {field.options.map((o) => (
-                        <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              );
-            }
-            if (field.type === 'number') {
-              return <PropField key={field.key} label={field.label} value={String(val)} onChange={(v) => onUpdateProps({ [field.key]: parseFloat(v) || 0 } as any)} />;
-            }
-            return <PropField key={field.key} label={field.label} value={String(val)} onChange={(v) => onUpdateProps({ [field.key]: v })} />;
-          });
+          return def.inspectorFields.map((field) => (
+            <InspectorFieldRenderer
+              key={field.key}
+              field={field}
+              value={(p as any)[field.key] ?? field.defaultValue ?? ''}
+              onChange={(v) => onUpdateProps({ [field.key]: v })}
+              onImageUpload={onImageUpload}
+            />
+          ));
         }
         return null;
       })()}
@@ -554,133 +617,220 @@ function PropsTab({ node, onUpdateProps, onUpdateStyle }: { node: SchemaNode; on
   );
 }
 
-/* ── Style tab ── */
+/* ── Style Tab ── */
 
-const COLOR_KEYS: (keyof NodeStyle)[] = ['color', 'backgroundColor', 'borderColor'];
+const COLOR_KEYS: (keyof NodeStyle)[] = ['color', 'backgroundColor', 'borderColor', 'outlineColor'];
+
+function CollapsibleStyleGroup({ title, children, defaultOpen = true }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
+  return (
+    <Collapsible defaultOpen={defaultOpen}>
+      <CollapsibleTrigger className="flex items-center justify-between w-full py-1.5 group">
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground group-hover:text-foreground transition-colors">{title}</p>
+        <span className="text-[10px] text-muted-foreground">▾</span>
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <div className="space-y-2 pb-2">{children}</div>
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
 
 function StyleTab({ node, onUpdateStyle }: { node: SchemaNode; onUpdateStyle: (s: Partial<NodeStyle>) => void }) {
   const locale = t();
+  const st = node.style;
 
-  const STYLE_GROUPS: { title: string; fields: { label: string; key: keyof NodeStyle }[] }[] = [
-    {
-      title: locale.spacing,
-      fields: [
-        { label: 'Padding', key: 'padding' },
-        { label: 'Margin', key: 'margin' },
-        { label: 'Gap', key: 'gap' },
-      ],
-    },
-    {
-      title: locale.size,
-      fields: [
-        { label: 'Width', key: 'width' },
-        { label: 'Height', key: 'height' },
-        { label: 'Min Height', key: 'minHeight' },
-        { label: 'Max Width', key: 'maxWidth' },
-      ],
-    },
-    {
-      title: locale.typography,
-      fields: [
-        { label: 'Font Size', key: 'fontSize' },
-        { label: 'Font Weight', key: 'fontWeight' },
-        { label: 'Line Height', key: 'lineHeight' },
-        { label: 'Letter Spacing', key: 'letterSpacing' },
-        { label: 'Text Align', key: 'textAlign' },
-        { label: 'Color', key: 'color' },
-      ],
-    },
-    {
-      title: locale.appearance,
-      fields: [
-        { label: 'Background', key: 'backgroundColor' },
-        { label: 'Border Color', key: 'borderColor' },
-        { label: 'Border Width', key: 'borderWidth' },
-        { label: 'Border Radius', key: 'borderRadius' },
-        { label: 'Box Shadow', key: 'boxShadow' },
-        { label: 'Opacity', key: 'opacity' },
-      ],
-    },
-  ];
+  const renderField = (label: string, key: keyof NodeStyle, placeholder?: string) => {
+    if (COLOR_KEYS.includes(key)) {
+      return <ColorField key={key} label={label} value={(st as any)[key] || ''} onChange={(v) => onUpdateStyle({ [key]: v || undefined })} />;
+    }
+    return <PropField key={key} label={label} value={(st as any)[key] || ''} onChange={(v) => onUpdateStyle({ [key]: v || undefined })} placeholder={placeholder} />;
+  };
+
+  const renderSelect = (label: string, key: keyof NodeStyle, options: string[]) => (
+    <div key={key} className="grid gap-1">
+      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</Label>
+      <Select value={(st as any)[key] || ''} onValueChange={(v) => onUpdateStyle({ [key]: v || undefined })}>
+        <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="—" /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value="">—</SelectItem>
+          {options.map((o) => (<SelectItem key={o} value={o}>{o}</SelectItem>))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
 
   return (
     <div className="p-3 space-y-1">
-      {STYLE_GROUPS.map((group, gi) => (
-        <div key={group.title}>
-          {gi > 0 && <Separator className="my-3" />}
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">{group.title}</p>
-          <div className="space-y-2">
-            {group.fields.map((f) =>
-              COLOR_KEYS.includes(f.key) ? (
-                <ColorField
-                  key={f.key}
-                  label={f.label}
-                  value={(node.style as any)[f.key] || ''}
-                  onChange={(v) => onUpdateStyle({ [f.key]: v || undefined })}
-                />
-              ) : (
-                <PropField
-                  key={f.key}
-                  label={f.label}
-                  value={(node.style as any)[f.key] || ''}
-                  onChange={(v) => onUpdateStyle({ [f.key]: v || undefined })}
-                />
-              )
-            )}
+      {/* Spacing */}
+      <CollapsibleStyleGroup title={locale.spacing}>
+        {renderField('Padding', 'padding', '1rem')}
+        {renderField('Margin', 'margin', '0 auto')}
+        {renderField('Gap', 'gap', '1rem')}
+      </CollapsibleStyleGroup>
+      <Separator className="my-1" />
+
+      {/* Size */}
+      <CollapsibleStyleGroup title={locale.size}>
+        {renderField('Width', 'width')}
+        {renderField('Height', 'height')}
+        {renderField('Min Height', 'minHeight')}
+        {renderField('Min Width', 'minWidth')}
+        {renderField('Max Width', 'maxWidth')}
+        {renderField('Max Height', 'maxHeight')}
+      </CollapsibleStyleGroup>
+      <Separator className="my-1" />
+
+      {/* Typography */}
+      <CollapsibleStyleGroup title={locale.typography}>
+        {renderField('Font Size', 'fontSize', '1rem')}
+        {renderField('Font Weight', 'fontWeight', '400')}
+        {renderField('Font Family', 'fontFamily', 'inherit')}
+        {renderSelect('Font Style', 'fontStyle', ['normal', 'italic', 'oblique'])}
+        {renderField('Line Height', 'lineHeight', '1.5')}
+        {renderField('Letter Spacing', 'letterSpacing', '0')}
+        {renderSelect('Text Align', 'textAlign', ['left', 'center', 'right', 'justify'])}
+        {renderSelect('Text Transform', 'textTransform', ['none', 'uppercase', 'lowercase', 'capitalize'])}
+        {renderSelect('Text Decoration', 'textDecoration', ['none', 'underline', 'line-through', 'overline'])}
+        {renderField('Text Shadow', 'textShadow', '0 2px 4px rgba(0,0,0,0.3)')}
+        {renderSelect('White Space', 'whiteSpace', ['normal', 'nowrap', 'pre', 'pre-line', 'pre-wrap'])}
+        {renderField('Word Spacing', 'wordSpacing')}
+        {renderField('Color', 'color')}
+      </CollapsibleStyleGroup>
+      <Separator className="my-1" />
+
+      {/* Appearance */}
+      <CollapsibleStyleGroup title={locale.appearance}>
+        {renderField('Background', 'backgroundColor')}
+        {renderField('Border Color', 'borderColor')}
+        {renderField('Border Width', 'borderWidth', '1px')}
+        {renderField('Border Radius', 'borderRadius', '0.5rem')}
+        {renderSelect('Border Style', 'borderStyle', ['none', 'solid', 'dashed', 'dotted', 'double'])}
+        {renderField('Box Shadow', 'boxShadow', '0 4px 6px rgba(0,0,0,0.1)')}
+        {renderField('Outline', 'outline')}
+        {renderField('Outline Offset', 'outlineOffset')}
+        <div className="grid gap-1">
+          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Opacity</Label>
+          <div className="flex items-center gap-2">
+            <Slider min={0} max={1} step={0.05} value={[parseFloat(st.opacity || '1')]} onValueChange={([v]) => onUpdateStyle({ opacity: v < 1 ? String(v) : undefined })} className="flex-1" />
+            <span className="text-[10px] font-mono text-muted-foreground w-8 text-right">{parseFloat(st.opacity || '1').toFixed(2)}</span>
           </div>
         </div>
-      ))}
+        {renderSelect('Cursor', 'cursor', ['auto', 'pointer', 'default', 'move', 'text', 'not-allowed', 'grab'])}
+      </CollapsibleStyleGroup>
+      <Separator className="my-1" />
 
-      {/* Background Image & Gradient section */}
-      <Separator className="my-3" />
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Fondo Avanzado</p>
-      <div className="space-y-2">
+      {/* Background Advanced */}
+      <CollapsibleStyleGroup title="Fondo Avanzado" defaultOpen={false}>
         <ImageUploadField
           label="Imagen de fondo"
-          value={node.style.backgroundImage?.replace(/^url\(["']?|["']?\)$/g, '') || ''}
+          value={st.backgroundImage?.replace(/^url\(["']?|["']?\)$/g, '') || ''}
           onChange={(v) => onUpdateStyle({ backgroundImage: v ? `url(${v})` : undefined })}
         />
-        <PropField
-          label="Background Size"
-          value={node.style.backgroundSize || ''}
-          onChange={(v) => onUpdateStyle({ backgroundSize: v || undefined })}
-        />
-        <PropField
-          label="Background Position"
-          value={node.style.backgroundPosition || ''}
-          onChange={(v) => onUpdateStyle({ backgroundPosition: v || undefined })}
-        />
-
+        {renderSelect('Background Size', 'backgroundSize', ['cover', 'contain', 'auto', '100%'])}
+        {renderSelect('Background Position', 'backgroundPosition', ['center', 'top', 'bottom', 'left', 'right', 'top center', 'bottom center'])}
+        {renderSelect('Background Repeat', 'backgroundRepeat', ['no-repeat', 'repeat', 'repeat-x', 'repeat-y'])}
+        {renderSelect('Background Attachment', 'backgroundAttachment', ['scroll', 'fixed', 'local'])}
+        {renderSelect('Background Blend Mode', 'backgroundBlendMode', ['normal', 'multiply', 'screen', 'overlay', 'darken', 'lighten', 'color-dodge', 'color-burn'])}
         <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Gradiente</Label>
         <GradientEditor
-          value={node.style.backgroundImage?.startsWith('linear-gradient') ? node.style.backgroundImage : ''}
-          onChange={(v) => onUpdateStyle({ backgroundImage: v || undefined })}
+          value={st.backgroundGradient || (st.backgroundImage?.startsWith('linear-gradient') ? st.backgroundImage : '')}
+          onChange={(v) => onUpdateStyle({ backgroundGradient: v || undefined })}
         />
+      </CollapsibleStyleGroup>
+      <Separator className="my-1" />
 
+      {/* Filters & Effects */}
+      <CollapsibleStyleGroup title="Filtros y Efectos" defaultOpen={false}>
+        {renderField('Filter', 'filter', 'blur(4px)')}
+        {renderField('Backdrop Filter', 'backdropFilter', 'blur(10px)')}
+        {renderSelect('Mix Blend Mode', 'mixBlendMode', ['normal', 'multiply', 'screen', 'overlay', 'darken', 'lighten', 'color-dodge', 'color-burn', 'hard-light', 'soft-light', 'difference', 'exclusion'])}
+        {renderField('Clip Path', 'clipPath', 'circle(50%)')}
+      </CollapsibleStyleGroup>
+      <Separator className="my-1" />
+
+      {/* Transforms */}
+      <CollapsibleStyleGroup title="Transformaciones" defaultOpen={false}>
+        {renderField('Transform', 'transform', 'translateY(-10px) scale(1.02)')}
+        {renderField('Transform Origin', 'transformOrigin', 'center center')}
+        {renderField('Perspective', 'perspective', '1000px')}
+      </CollapsibleStyleGroup>
+      <Separator className="my-1" />
+
+      {/* Transitions */}
+      <CollapsibleStyleGroup title="Transiciones" defaultOpen={false}>
+        {renderField('Transition', 'transition', 'all 0.3s ease')}
+        {renderField('Property', 'transitionProperty', 'all')}
+        {renderField('Duration', 'transitionDuration', '0.3s')}
+        {renderSelect('Timing', 'transitionTimingFunction', ['ease', 'ease-in', 'ease-out', 'ease-in-out', 'linear', 'cubic-bezier(0.4, 0, 0.2, 1)'])}
+        {renderField('Delay', 'transitionDelay', '0s')}
+      </CollapsibleStyleGroup>
+      <Separator className="my-1" />
+
+      {/* Animations */}
+      <CollapsibleStyleGroup title="Animaciones" defaultOpen={false}>
         <div className="grid gap-1">
-          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Opacidad</Label>
-          <div className="flex items-center gap-2">
-            <Slider
-              min={0}
-              max={1}
-              step={0.05}
-              value={[parseFloat(node.style.opacity || '1')]}
-              onValueChange={([v]) => onUpdateStyle({ opacity: v < 1 ? String(v) : undefined })}
-              className="flex-1"
-            />
-            <span className="text-[10px] font-mono text-muted-foreground w-8 text-right">
-              {parseFloat(node.style.opacity || '1').toFixed(2)}
-            </span>
-          </div>
+          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Preset</Label>
+          <Select
+            value={(() => {
+              const anim = st.animation || '';
+              const match = Object.entries(ANIMATION_PRESETS).find(([, v]) => v && anim.includes(v.split(' ')[0]));
+              return match ? match[0] : 'none';
+            })()}
+            onValueChange={(v) => {
+              const preset = ANIMATION_PRESETS[v as AnimationPreset];
+              onUpdateStyle({ animation: preset || undefined });
+            }}
+          >
+            <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {Object.keys(ANIMATION_PRESETS).map((key) => (
+                <SelectItem key={key} value={key}>{key}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-      </div>
+        {renderField('Custom Animation', 'animation', 'fadeIn 0.5s ease-out')}
+        {renderField('Duration', 'animationDuration', '0.5s')}
+        {renderField('Delay', 'animationDelay', '0s')}
+        {renderSelect('Timing', 'animationTimingFunction', ['ease', 'ease-in', 'ease-out', 'ease-in-out', 'linear'])}
+        {renderSelect('Iteration Count', 'animationIterationCount', ['1', '2', '3', 'infinite'])}
+        {renderSelect('Fill Mode', 'animationFillMode', ['none', 'forwards', 'backwards', 'both'])}
+        {renderSelect('Direction', 'animationDirection', ['normal', 'reverse', 'alternate', 'alternate-reverse'])}
+        {renderSelect('Play State', 'animationPlayState', ['running', 'paused'])}
+      </CollapsibleStyleGroup>
+      <Separator className="my-1" />
+
+      {/* Hover state */}
+      <CollapsibleStyleGroup title="Estado: Hover" defaultOpen={false}>
+        <p className="text-[9px] text-muted-foreground mb-1">Estilos aplicados al pasar el mouse</p>
+        <ColorField label="Background" value={(st.hover?.backgroundColor) || ''} onChange={(v) => onUpdateStyle({ hover: { ...st.hover, backgroundColor: v || undefined } })} />
+        <ColorField label="Color" value={(st.hover?.color) || ''} onChange={(v) => onUpdateStyle({ hover: { ...st.hover, color: v || undefined } })} />
+        <PropField label="Transform" value={(st.hover?.transform) || ''} onChange={(v) => onUpdateStyle({ hover: { ...st.hover, transform: v || undefined } })} />
+        <PropField label="Box Shadow" value={(st.hover?.boxShadow) || ''} onChange={(v) => onUpdateStyle({ hover: { ...st.hover, boxShadow: v || undefined } })} />
+        <PropField label="Opacity" value={(st.hover?.opacity) || ''} onChange={(v) => onUpdateStyle({ hover: { ...st.hover, opacity: v || undefined } })} />
+        <PropField label="Border Color" value={(st.hover?.borderColor) || ''} onChange={(v) => onUpdateStyle({ hover: { ...st.hover, borderColor: v || undefined } })} />
+        <PropField label="Filter" value={(st.hover?.filter) || ''} onChange={(v) => onUpdateStyle({ hover: { ...st.hover, filter: v || undefined } })} />
+      </CollapsibleStyleGroup>
+
+      {/* Layout position */}
+      <Separator className="my-1" />
+      <CollapsibleStyleGroup title="Posición" defaultOpen={false}>
+        {renderSelect('Position', 'position', ['static', 'relative', 'absolute', 'fixed', 'sticky'])}
+        {renderField('Top', 'top')}
+        {renderField('Right', 'right')}
+        {renderField('Bottom', 'bottom')}
+        {renderField('Left', 'left')}
+        {renderField('Z-Index', 'zIndex')}
+        {renderSelect('Overflow', 'overflow', ['visible', 'hidden', 'scroll', 'auto'])}
+        {renderSelect('Display', 'display', ['block', 'flex', 'grid', 'inline', 'inline-block', 'inline-flex', 'none'])}
+      </CollapsibleStyleGroup>
     </div>
   );
 }
 
 /* ── Main Inspector ── */
 
-export function Inspector({ node, onUpdateProps, onUpdateStyle, onDelete, onDuplicate }: InspectorProps) {
+export function Inspector({ node, onUpdateProps, onUpdateStyle, onDelete, onDuplicate, onImageUpload }: InspectorProps) {
   const locale = t();
 
   return (
@@ -725,7 +875,7 @@ export function Inspector({ node, onUpdateProps, onUpdateStyle, onDelete, onDupl
         </TabsList>
         <div className="flex-1 overflow-y-auto">
           <TabsContent value="props" className="mt-0">
-            <PropsTab node={node} onUpdateProps={onUpdateProps} onUpdateStyle={onUpdateStyle} />
+            <PropsTab node={node} onUpdateProps={onUpdateProps} onUpdateStyle={onUpdateStyle} onImageUpload={onImageUpload} />
           </TabsContent>
           <TabsContent value="style" className="mt-0">
             <StyleTab node={node} onUpdateStyle={onUpdateStyle} />
