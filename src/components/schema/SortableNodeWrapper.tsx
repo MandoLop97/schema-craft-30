@@ -26,6 +26,7 @@ interface SortableNodeWrapperProps {
   onDelete?: (id: string) => void;
   canPaste?: boolean;
   onEditSection?: (nodeType: string) => void;
+  onSaveAsTemplate?: (nodeId: string) => void;
 }
 
 export function SortableNodeWrapper({ nodeId, children, isSelected, nodeType, onSelect, onCopy, onPaste, onDuplicate, onDelete, canPaste, onEditSection }: SortableNodeWrapperProps) {
