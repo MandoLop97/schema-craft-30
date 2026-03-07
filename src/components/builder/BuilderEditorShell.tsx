@@ -435,6 +435,15 @@ export function BuilderEditorShell({
         e.preventDefault();
         handleDuplicate();
       }
+      // Copy/Paste Style: Ctrl+Alt+C / Ctrl+Alt+V
+      if ((e.metaKey || e.ctrlKey) && e.altKey && e.key === 'c' && !isInput) {
+        e.preventDefault();
+        if (selectedNodeId) handleCopyStyleById(selectedNodeId);
+      }
+      if ((e.metaKey || e.ctrlKey) && e.altKey && e.key === 'v' && !isInput) {
+        e.preventDefault();
+        if (selectedNodeId) handlePasteStyleById(selectedNodeId);
+      }
       if (e.key === 'Delete' || e.key === 'Backspace') {
         if (isInput) return;
         if (selectedNodeId && selectedNodeId !== schema.rootNodeId) handleDelete();
@@ -442,7 +451,7 @@ export function BuilderEditorShell({
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [undo, redo, handleSave, handleDelete, handleDuplicate, selectedNodeId, schema.rootNodeId, schema.nodes, updateSchema]);
+  }, [undo, redo, handleSave, handleDelete, handleDuplicate, selectedNodeId, schema.rootNodeId, schema.nodes, updateSchema, handleCopyStyleById, handlePasteStyleById]);
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
