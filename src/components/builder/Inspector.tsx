@@ -841,6 +841,59 @@ function PropsTab({ node, onUpdateProps, onUpdateStyle, onImageUpload }: { node:
       {node.type === 'HeroSection' && <HeroSectionPropsEditor node={node} onUpdate={onUpdateProps} />}
       {(node.type === 'Accordion' || node.type === 'TabsBlock') && <PanelsPropsEditor node={node} onUpdate={onUpdateProps} />}
       {node.type === 'VideoEmbed' && <VideoEmbedPropsEditor node={node} onUpdate={onUpdateProps} />}
+      {node.type === 'Spacer' && (
+        <PropField label="Altura" value={p.height || '2rem'} onChange={(v) => onUpdateProps({ height: v })} placeholder="2rem" />
+      )}
+      {node.type === 'Icon' && (
+        <>
+          <PropField label="Nombre del ícono (Lucide)" value={p.iconName || 'Star'} onChange={(v) => onUpdateProps({ iconName: v })} placeholder="Star, Heart, ShoppingBag..." />
+          <PropField label="Tamaño (px)" value={p.iconSize || '24'} onChange={(v) => onUpdateProps({ iconSize: v })} />
+          <ColorField label="Color" value={p.iconColor || 'currentColor'} onChange={(v) => onUpdateProps({ iconColor: v })} />
+        </>
+      )}
+      {node.type === 'SocialIcons' && (
+        <>
+          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Redes Sociales</Label>
+          {(p.socialItems || []).map((item: any, i: number) => (
+            <div key={i} className="flex gap-1 items-start">
+              <div className="grid grid-cols-2 gap-1 flex-1">
+                <Select value={item.platform} onValueChange={(v) => {
+                  const updated = [...(p.socialItems || [])]; updated[i] = { ...item, platform: v }; onUpdateProps({ socialItems: updated });
+                }}>
+                  <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {['facebook', 'instagram', 'twitter', 'youtube', 'linkedin', 'github', 'tiktok'].map((pl) => (
+                      <SelectItem key={pl} value={pl}>{pl}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Input className="h-7 text-xs" placeholder="URL" value={item.url || ''} onChange={(e) => {
+                  const updated = [...(p.socialItems || [])]; updated[i] = { ...item, url: e.target.value }; onUpdateProps({ socialItems: updated });
+                }} />
+              </div>
+              <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive" onClick={() => {
+                onUpdateProps({ socialItems: (p.socialItems || []).filter((_: any, idx: number) => idx !== i) });
+              }}>
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            </div>
+          ))}
+          <Button variant="outline" size="sm" className="text-xs w-full" onClick={() => onUpdateProps({ socialItems: [...(p.socialItems || []), { platform: 'facebook', url: '' }] })}>+ Agregar Red</Button>
+          <Separator className="my-2" />
+          <PropField label="Tamaño ícono (px)" value={p.socialIconSize || '20'} onChange={(v) => onUpdateProps({ socialIconSize: v })} />
+          <div className="grid gap-1">
+            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Estilo</Label>
+            <Select value={p.socialStyle || 'default'} onValueChange={(v) => onUpdateProps({ socialStyle: v })}>
+              <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="default">Simple</SelectItem>
+                <SelectItem value="colored">Color de marca</SelectItem>
+                <SelectItem value="rounded">Redondeado + Color</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </>
+      )}
       {/* Custom inspector fields */}
       {(() => {
         const def = getBlockDef(node.type);
