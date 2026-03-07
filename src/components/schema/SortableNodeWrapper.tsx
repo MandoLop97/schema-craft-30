@@ -81,7 +81,14 @@ export function SortableNodeWrapper({ nodeId, children, isSelected, nodeType, on
       {showEditButton && (
         <button
           className="nxr-edit-section-btn"
-          onClick={(e) => { e.stopPropagation(); onSelect(nodeId); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onEditSection) {
+              onEditSection(nodeType);
+            } else {
+              onSelect(nodeId);
+            }
+          }}
           title={`Editar ${nodeType}`}
         >
           <Pencil size={13} />
