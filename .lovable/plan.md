@@ -1,102 +1,35 @@
 
-## Instrucción permanente: Versionado automático
 
-**IMPORTANTE**: Cada vez que se haga un cambio en el proyecto, incrementar la versión en:
-1. `package.json` → campo `"version"`
-2. `src/components/builder/BuilderEditorShell.tsx` → texto de versión en el status bar
+## Plan: Corregir el diseño heredado del ProductGrid para que respete el template
 
-Formato: semver (major.minor.patch). Incrementar el **patch** (+1) en cada cambio. Versión actual: **1.4.0**
+### Problema
+El template de Product Card se diseña a pantalla completa en el editor (image-72), pero cuando se renderiza dentro del ProductGrid (image-71), los estilos no se adaptan correctamente: las cards no tienen gap entre sí, la imagen no mantiene proporción, y el layout general se rompe porque los nodos clonados conservan estilos absolutos del template (ej. `width: 100%` del editor) sin adaptarse al contexto de celda del grid.
 
----
+### Causa raíz
+1. **Sin gap en el grid** — el `gridTemplateColumns` se aplica pero no hay `gap` definido
+2. **Nodo raíz del template hereda estilos de editor** — el `ProductCard` root puede tener `width` o `maxWidth` fijos del editor single-card que no aplican en grid
+3. **`hydrateCardTemplate` no normaliza estilos del root** — clona todo literalmente, incluyendo dimensiones que solo tenían sentido en el editor de template aislado
 
-## Phase 1: Schema-First Foundation + eCommerce Home
+### Cambios propuestos
 
-### Overview
-Build the core schema system, page renderer, storage layer, and a clean eCommerce Home page — all driven by JSON schema. This foundation makes Phase 2 (Builder UI) straightforward to add.
+#### 1. `src/components/schema/nodes/CommerceNodes.tsx` — ProductGridNode
+- Agregar `gap: '1.5rem'` al grid container (edit, preview y public)
+- En el wrapper de cada card, forzar `width: '100%'`, `minWidth: 0` y `overflow: 'hidden'` para que cada card respete su celda del grid
+- Usar `auto-fill` con `minmax` en vez de `repeat(N, 1fr)` fijo para responsividad automática: `gridTemplateColumns: repeat(auto-fill, minmax(250px, 1fr))`
 
----
+#### 2. `src/lib/card-template-utils.ts` — hydrateCardTemplate
+- Al clonar el nodo raíz (rootNodeId), normalizar sus estilos para contexto de grid:
+  - Eliminar `width`, `maxWidth`, `minWidth` fijos del root (el grid cell controla el ancho)
+  - Forzar `width: '100%'` y `height: 'auto'` en el root clonado
+  - Asegurar que `overflow: 'hidden'` esté presente para contener la imagen
+- En nodos `Image`, asegurar `width: '100%'`, `height: 'auto'`, `objectFit: 'cover'`
 
-### 1. Schema Types & Data Model
-Define TypeScript types for the entire schema system:
-- **Page** (id, slug, name, schemaId)
-- **Schema** (id, version, updatedAt, themeTokens, rootNodeId, nodes map)
-- **Node** (id, type, props, style, children, locked, hidden)
-- **ThemeTokens** (colors, typography, radius, spacing)
-- Support all node types: Section, Container, Grid, Stack, Text, Image, Button, Card, Badge, Divider, Input, ProductCard, Navbar, Footer
+#### 3. Gap configurable desde Inspector
+- En `src/lib/block-registry.ts`, agregar campo `gap` al bloque ProductGrid (select: `1rem`, `1.5rem`, `2rem`)
+- En el render, leer `node.props.gap` y aplicarlo al grid container
 
-### 2. Schema Store (LocalStorage)
-Create an abstraction layer (`SchemaStore`) with clean API:
-- `getPages()`, `getPageBySlug()`, `getSchema()`, `saveSchema()`
-- `createPage()`, `duplicatePage()`, `deletePage()`, `renamePage()`
-- All backed by LocalStorage, designed so swapping to a database later only changes the store internals
+### Archivos afectados
+- `src/components/schema/nodes/CommerceNodes.tsx` — grid styles + card wrapper normalization
+- `src/lib/card-template-utils.ts` — normalize root node styles for grid context
+- `src/lib/block-registry.ts` — add gap inspector field
 
-### 3. Node Registry & Components
-Build a component for each node type, all receiving props/style from schema:
-- **Layout**: Section, Container, Grid, Stack
-- **Content**: Text, Image, Divider, Badge
-- **UI**: Button, Card, Input
-- **Commerce**: ProductCard (mock with image, title, price, CTA)
-- **Site**: Navbar, Footer
-
-### 4. PageRenderer
-Core rendering engine:
-- Takes a schema + mode (`public` | `preview` | `edit`)
-- Recursively renders nodes from the tree using the Node Registry
-- In `public`/`preview` mode: clean output, no editing UI
-- In `edit` mode: adds selection outlines and drop zones (prepared for Phase 2)
-- Applies ThemeTokens as CSS variables
-
-### 5. eCommerce Home Page (Schema-based)
-Create a default `home` schema that produces a modern eCommerce landing page:
-- **Navbar** with logo and navigation links
-- **Hero section** with headline, subtext, and CTA button
-- **Featured products grid** with 3-4 ProductCard mocks
-- **Value propositions** section (icons + text)
-- **Footer** with links and copyright
-- Clean, minimal design inspired by modern eCommerce (think Stripe/Linear aesthetics)
-
-### 6. Route Setup
-- `/` → Renders Home from schema via PageRenderer (public mode)
-- `/preview?page=home` → Same but in preview mode
-- `/admin/export?page=home` → Shows raw JSON schema with copy button
-- `/license-blocked` → Placeholder lock screen
-
-### 7. License Gate (Mock)
-- `license_status` stored in LocalStorage (active/inactive/exceeded)
-- Admin routes check license; public site always works
-- `/license-blocked` shows status, reason, and placeholder "Enter License" button
-
----
-
-### What's NOT in Phase 1 (saved for Phase 2)
-- Full Builder UI (drag & drop canvas, left/right sidebars, inspector)
-- Undo/Redo history
-- AI Edit feature
-- Templates management (`/admin/templates`)
-- Theme editor (`/admin/theme`)
-- Device toggle & responsive overrides
-
-### Design Style
-Minimal, professional SaaS aesthetic — light background, clean typography, subtle borders, polished hover states.
-
-## ⚠️ REGLA FUNDAMENTAL: Alcance del proyecto
-
-**Este proyecto es un CONSTRUCTOR VISUAL (Builder) al 100%.** Su única responsabilidad es:
-1. Permitir diseñar y personalizar visualmente: **Header (Navbar)**, **Footer** y **Product Cards**
-2. Generar y guardar esquemas JSON en la base de datos
-3. Previsualizar el resultado en el canvas
-
-**NO es responsabilidad de este proyecto:**
-- Administrar productos (CRUD de productos) — eso lo hace la app consumidora (Template)
-- Gestionar inventario, pedidos o usuarios finales
-- Lógica de negocio, licencias o acceso al sitio final
-- Los productos y medios se **leen** de la base de datos para usarlos en el diseño, pero **no se crean ni editan** desde aquí
-
-**Los únicos componentes 100% editables/personalizables en el Builder son:**
-- **Navbar/Header**: logo, links, colores, estilos
-- **Footer**: logo, copyright, links, estilos  
-- **Product Cards**: layout, estilos, botones, imagen ratio, tipografía
-
-Las demás secciones del canvas (Hero, Sections, Grids, etc.) son bloques de contenido arrastrables y configurables pero NO tienen editores dedicados.
-
----
