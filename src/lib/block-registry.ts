@@ -89,7 +89,7 @@ export const blockRegistry: BlockDefinition[] = [
   { type: 'FormBlock', label: 'Form', category: 'Interactive', icon: FileText, canHaveChildren: false, defaultProps: { formTitle: 'Contáctanos', formFields: [{ type: 'text', label: 'Nombre', placeholder: 'Tu nombre', required: true }, { type: 'email', label: 'Email', placeholder: 'tu@email.com', required: true }, { type: 'tel', label: 'Teléfono', placeholder: '+1 234 567 890', required: false }, { type: 'textarea', label: 'Mensaje', placeholder: 'Escribe tu mensaje...', required: false }], formBtnText: 'Enviar', formBtnVariant: 'filled' }, defaultStyle: { padding: '1.5rem' } },
 
   // ── Commerce ──
-  { type: 'ProductCard', label: 'Product Card', category: 'Commerce', icon: ShoppingBag, canHaveChildren: false, defaultProps: { text: 'Product Name', price: '$99', src: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop' }, defaultStyle: {} },
+  { type: 'ProductCard', label: 'Product Card', category: 'Commerce', icon: ShoppingBag, canHaveChildren: true, defaultProps: { text: 'Product Name', price: '$99', src: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop' }, defaultStyle: {}, compositeFactory: createProductCardComposite },
 
   // ── Site ──
   { type: 'Navbar', label: 'Navbar', category: 'Site', icon: Navigation, canHaveChildren: false, defaultProps: { logoText: 'Brand', links: [{ text: 'Home', href: '#' }] }, defaultStyle: {}, allowedParents: ['Section'], allowedTemplateTypes: ['header'] },
