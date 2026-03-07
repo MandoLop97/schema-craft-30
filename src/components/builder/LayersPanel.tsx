@@ -1,5 +1,5 @@
 import {
-  ChevronDown, EyeOff, Lock, GripVertical, Copy, Trash2,
+  ChevronDown, Eye, EyeOff, Lock, GripVertical, Copy, Trash2,
   Square, Type, ImageIcon, Navigation, PanelBottom, Layers,
 } from 'lucide-react';
 import { useState, useCallback } from 'react';
