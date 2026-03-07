@@ -65,12 +65,19 @@ export function BuilderEditorShell({
   const clipboardRef = useRef<string | null>(null);
 
   // Scroll to selected node on canvas when selection changes (e.g. from Layers panel)
+  // and trigger a brief flash highlight to help locate it visually
   useEffect(() => {
     if (!selectedNodeId) return;
     const timer = setTimeout(() => {
-      const el = document.querySelector(`[data-node-id="${selectedNodeId}"]`);
+      const el = document.querySelector(`[data-node-id="${selectedNodeId}"]`) as HTMLElement | null;
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+        el.classList.remove('nxr-flash-highlight');
+        // Force reflow to restart animation
+        void el.offsetWidth;
+        el.classList.add('nxr-flash-highlight');
+        const cleanup = () => el.classList.remove('nxr-flash-highlight');
+        el.addEventListener('animationend', cleanup, { once: true });
       }
     }, 50);
     return () => clearTimeout(timer);
