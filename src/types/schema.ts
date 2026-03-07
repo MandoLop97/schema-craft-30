@@ -238,6 +238,11 @@ export interface ThemeTokens {
   defaultCardLayout?: 'vertical' | 'horizontal' | 'minimal' | 'overlay';
 }
 
+export interface GlobalStyleDef {
+  label: string;
+  style: Partial<NodeStyle>;
+}
+
 export interface Schema {
   id: string;
   version: number;
@@ -245,6 +250,8 @@ export interface Schema {
   themeTokens: ThemeTokens;
   rootNodeId: string;
   nodes: Record<string, SchemaNode>;
+  /** Reusable global style classes */
+  globalStyles?: Record<string, GlobalStyleDef>;
 }
 
 export interface Page {
