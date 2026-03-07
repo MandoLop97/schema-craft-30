@@ -171,10 +171,27 @@ export default function Builder() {
   }, []);
 
   const handlePublishSubmit = async (payload: PublishPayload) => {
+    // Bundle ALL page schemas for publishing
+    const { data: allPages } = await supabase
+      .from('page_schemas')
+      .select('slug, title, schema_json, template_type, category')
+      .order('created_at', { ascending: true });
+
+    const bundledContent = {
+      pages: (allPages || []).map((row: any) => ({
+        slug: row.slug,
+        title: row.title,
+        schema: row.schema_json,
+        templateType: row.template_type,
+        category: row.category,
+      })),
+      publishedAt: new Date().toISOString(),
+    };
+
     const { error } = await supabase
       .from('published_pages')
       .upsert(
-        { domain: payload.domain, content_json: payload.schema as any, status: payload.mode },
+        { domain: payload.domain, content_json: bundledContent as any, status: payload.mode },
         { onConflict: 'domain' }
       );
     if (error) throw error;
