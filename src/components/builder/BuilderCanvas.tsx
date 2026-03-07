@@ -41,6 +41,12 @@ const TEMPLATE_CANVAS: Record<TemplateType, { width?: string; height?: string; s
   single: { scroll: true, checkerboard: false },
 };
 
+const DEVICE_LABELS: Record<string, string> = {
+  desktop: 'Desktop',
+  tablet: 'Tablet',
+  mobile: 'Mobile',
+};
+
 export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode, customComponents, templateType = 'page', canvasSize, mockData, customStylesheets, customCSS, customScripts, onCopyNode, onPasteNode, onDuplicateNode, onDeleteNode, canPaste, onEditSection, onSaveAsTemplate, onRepositionNode }: BuilderCanvasProps) {
   const { setNodeRef, isOver } = useDroppable({ id: schema.rootNodeId });
 
@@ -54,10 +60,30 @@ export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode, cu
 
   return (
     <div
-      className={`flex-1 overflow-auto flex justify-center ${isCompact ? 'items-center' : ''} p-6 ${preset.checkerboard ? 'nxr-checkerboard' : 'nxr-canvas-grid'}`}
+      className={`flex-1 overflow-auto flex flex-col items-center ${isCompact ? 'justify-center' : ''} p-6 ${preset.checkerboard ? 'nxr-checkerboard' : 'nxr-canvas-grid'}`}
       style={{ backgroundColor: preset.checkerboard ? undefined : 'hsl(var(--muted) / 0.3)' }}
       onClick={() => onSelectNode('')}
     >
+      {/* Responsive Preview Ruler */}
+      <div
+        className="flex items-center gap-2 mb-2 px-3 py-1 rounded-full shrink-0"
+        style={{
+          backgroundColor: 'hsl(var(--background) / 0.85)',
+          border: '1px solid hsl(var(--border) / 0.5)',
+          backdropFilter: 'blur(6px)',
+          fontSize: '0.65rem',
+          fontWeight: 500,
+          color: 'hsl(var(--muted-foreground))',
+          letterSpacing: '0.03em',
+        }}
+        title={`${DEVICE_LABELS[device]} — ${resolvedWidth}`}
+      >
+        <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: 'hsl(var(--primary) / 0.5)' }} />
+        <span>{DEVICE_LABELS[device]}</span>
+        <span style={{ opacity: 0.4 }}>•</span>
+        <span className="font-mono">{resolvedWidth}</span>
+      </div>
+
       <div
         ref={setNodeRef}
         style={{

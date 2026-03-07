@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Pencil, Copy, Trash2, CopyPlus, ClipboardPaste, Save, Move } from 'lucide-react';
+import { Pencil, Copy, Trash2, CopyPlus, ClipboardPaste, Save, Move, Paintbrush, ClipboardCheck } from 'lucide-react';
 import {
   ContextMenu,
   ContextMenuContent,
