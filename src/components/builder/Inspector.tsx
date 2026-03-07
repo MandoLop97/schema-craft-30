@@ -943,7 +943,7 @@ function CollapsibleStyleGroup({ title, children, defaultOpen = true }: { title:
   );
 }
 
-function StyleTab({ node, onUpdateStyle }: { node: SchemaNode; onUpdateStyle: (s: Partial<NodeStyle>) => void }) {
+function StyleTab({ node, onUpdateStyle, onUpdateCustomCSS }: { node: SchemaNode; onUpdateStyle: (s: Partial<NodeStyle>) => void; onUpdateCustomCSS?: (css: string) => void }) {
   const locale = t();
   const st = node.style;
 
