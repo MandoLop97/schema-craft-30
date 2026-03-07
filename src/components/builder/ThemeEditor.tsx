@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Slider } from '@/components/ui/slider';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Paintbrush } from 'lucide-react';
+import { GradientEditor } from './GradientEditor';
 
 interface ThemeEditorProps {
   themeTokens: ThemeTokens;
