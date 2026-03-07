@@ -1,102 +1,102 @@
 
-## Instrucción permanente: Versionado automático
 
-**IMPORTANTE**: Cada vez que se haga un cambio en el proyecto, incrementar la versión en:
-1. `package.json` → campo `"version"`
-2. `src/components/builder/BuilderEditorShell.tsx` → texto de versión en el status bar
+## Investigación: Features faltantes vs Elementor Pro
 
-Formato: semver (major.minor.patch). Incrementar el **patch** (+1) en cada cambio. Versión actual: **1.1.1**
+Después de revisar el código completo del builder, aquí está el análisis de lo que **ya tienes** vs lo que **le falta** para acercarse a Elementor Pro.
 
----
+### Lo que YA tienes (bien cubierto)
+- Drag & drop con nested containers (Elementor-style)
+- Block palette con categorías (Layout, Content, UI, Interactive, Commerce, Site, Template)
+- Inspector con tabs (Props / Style)
+- Theme Editor (colores, tipografía, radius, spacing, gradientes)
+- Undo/Redo con historial
+- Device toggle (Desktop/Tablet/Mobile)
+- Layers panel (árbol de nodos)
+- Pseudo-states (hover/focus/active) en estilos
+- Responsive overrides por breakpoint (sm/md/lg/xl)
+- Animaciones predefinidas (fadeIn, slideUp, bounceIn, etc.)
+- Export/Import JSON schema
+- Publish dialog
+- Navbar responsivo con hamburguesa configurable (sidebar/dropdown)
+- Extensibilidad (custom components, extra blocks, inspector fields)
 
-## Phase 1: Schema-First Foundation + eCommerce Home
+### Lo que FALTA (ordenado por impacto)
 
-### Overview
-Build the core schema system, page renderer, storage layer, and a clean eCommerce Home page — all driven by JSON schema. This foundation makes Phase 2 (Builder UI) straightforward to add.
+**1. Copy/Paste de bloques (Ctrl+C / Ctrl+V)**
+- Elementor permite copiar cualquier widget/sección y pegarlo en otro lugar
+- Tu builder tiene "Duplicate" pero no copy/paste entre secciones o páginas
 
----
+**2. Right-click Context Menu**
+- Elementor tiene menú contextual al hacer click derecho: Copy, Paste, Duplicate, Delete, Save as Template, Edit, Reset Style
+- Actualmente solo hay botones en el Inspector y en el SortableNodeWrapper
 
-### 1. Schema Types & Data Model
-Define TypeScript types for the entire schema system:
-- **Page** (id, slug, name, schemaId)
-- **Schema** (id, version, updatedAt, themeTokens, rootNodeId, nodes map)
-- **Node** (id, type, props, style, children, locked, hidden)
-- **ThemeTokens** (colors, typography, radius, spacing)
-- Support all node types: Section, Container, Grid, Stack, Text, Image, Button, Card, Badge, Divider, Input, ProductCard, Navbar, Footer
+**3. Global Styles / Clases reutilizables**
+- Elementor permite guardar "Global Colors" y "Global Fonts" que se aplican a múltiples widgets
+- Tu Theme Editor aplica tokens globales pero no hay "clases" reutilizables por bloque
 
-### 2. Schema Store (LocalStorage)
-Create an abstraction layer (`SchemaStore`) with clean API:
-- `getPages()`, `getPageBySlug()`, `getSchema()`, `saveSchema()`
-- `createPage()`, `duplicatePage()`, `deletePage()`, `renamePage()`
-- All backed by LocalStorage, designed so swapping to a database later only changes the store internals
+**4. Spacer / Divider widget mejorado**
+- Elementor tiene un widget Spacer dedicado (solo espacio vertical configurable)
+- Tu Divider es una línea HR; falta un bloque de espacio puro
 
-### 3. Node Registry & Components
-Build a component for each node type, all receiving props/style from schema:
-- **Layout**: Section, Container, Grid, Stack
-- **Content**: Text, Image, Divider, Badge
-- **UI**: Button, Card, Input
-- **Commerce**: ProductCard (mock with image, title, price, CTA)
-- **Site**: Navbar, Footer
+**5. Icon widget**
+- Elementor tiene un widget de iconos con librería integrada (Font Awesome, etc.)
+- Tu builder no tiene un bloque dedicado para iconos
 
-### 4. PageRenderer
-Core rendering engine:
-- Takes a schema + mode (`public` | `preview` | `edit`)
-- Recursively renders nodes from the tree using the Node Registry
-- In `public`/`preview` mode: clean output, no editing UI
-- In `edit` mode: adds selection outlines and drop zones (prepared for Phase 2)
-- Applies ThemeTokens as CSS variables
+**6. Social Icons widget**
+- Widget dedicado para íconos de redes sociales con estilos predefinidos
+- Útil especialmente en el Footer
 
-### 5. eCommerce Home Page (Schema-based)
-Create a default `home` schema that produces a modern eCommerce landing page:
-- **Navbar** with logo and navigation links
-- **Hero section** with headline, subtext, and CTA button
-- **Featured products grid** with 3-4 ProductCard mocks
-- **Value propositions** section (icons + text)
-- **Footer** with links and copyright
-- Clean, minimal design inspired by modern eCommerce (think Stripe/Linear aesthetics)
+**7. Icon List (lista con iconos)**
+- Lista de items con icono + texto, muy usado en features y beneficios
 
-### 6. Route Setup
-- `/` → Renders Home from schema via PageRenderer (public mode)
-- `/preview?page=home` → Same but in preview mode
-- `/admin/export?page=home` → Shows raw JSON schema with copy button
-- `/license-blocked` → Placeholder lock screen
+**8. Star Rating widget**
+- Widget dedicado para calificaciones con estrellas
+- Tu TestimonialCard tiene `stars` pero no hay un widget independiente
 
-### 7. License Gate (Mock)
-- `license_status` stored in LocalStorage (active/inactive/exceeded)
-- Admin routes check license; public site always works
-- `/license-blocked` shows status, reason, and placeholder "Enter License" button
+**9. Progress Bar / Counter**
+- Widgets de progreso y contadores animados
+- Comunes en landing pages
 
----
+**10. Google Maps embed**
+- Widget para embeber mapas
+- Común en páginas de contacto
 
-### What's NOT in Phase 1 (saved for Phase 2)
-- Full Builder UI (drag & drop canvas, left/right sidebars, inspector)
-- Undo/Redo history
-- AI Edit feature
-- Templates management (`/admin/templates`)
-- Theme editor (`/admin/theme`)
-- Device toggle & responsive overrides
+**11. Form widget avanzado**
+- Elementor Pro tiene formularios multi-campo (nombre, email, teléfono, textarea, select)
+- Tu Input es solo un campo individual
 
-### Design Style
-Minimal, professional SaaS aesthetic — light background, clean typography, subtle borders, polished hover states.
+**12. Saved Templates / Sections**
+- Elementor permite guardar secciones como templates reutilizables
+- Tu builder tiene PageDefinitions pero no "saved sections" individuales
 
-## ⚠️ REGLA FUNDAMENTAL: Alcance del proyecto
+**13. Motion Effects (Parallax, Scrolling)**
+- Parallax en backgrounds, scroll-triggered animations
+- Tienes animaciones CSS pero no parallax ni scroll-based triggers
 
-**Este proyecto es un CONSTRUCTOR VISUAL (Builder) al 100%.** Su única responsabilidad es:
-1. Permitir diseñar y personalizar visualmente: **Header (Navbar)**, **Footer** y **Product Cards**
-2. Generar y guardar esquemas JSON en la base de datos
-3. Previsualizar el resultado en el canvas
+**14. Custom CSS per widget**
+- Elementor Pro permite escribir CSS personalizado por widget
+- Tu Inspector tiene campos de estilo pero no un campo de CSS raw
 
-**NO es responsabilidad de este proyecto:**
-- Administrar productos (CRUD de productos) — eso lo hace la app consumidora (Template)
-- Gestionar inventario, pedidos o usuarios finales
-- Lógica de negocio, licencias o acceso al sitio final
-- Los productos y medios se **leen** de la base de datos para usarlos en el diseño, pero **no se crean ni editan** desde aquí
-
-**Los únicos componentes 100% editables/personalizables en el Builder son:**
-- **Navbar/Header**: logo, links, colores, estilos
-- **Footer**: logo, copyright, links, estilos  
-- **Product Cards**: layout, estilos, botones, imagen ratio, tipografía
-
-Las demás secciones del canvas (Hero, Sections, Grids, etc.) son bloques de contenido arrastrables y configurables pero NO tienen editores dedicados.
+**15. Sticky positioning**
+- Elementor permite fijar secciones como sticky al scroll
+- Tu NodeStyle tiene `position` pero no hay UI dedicada para sticky
 
 ---
+
+### Recomendación de prioridad para implementar
+
+Si quieres el mayor impacto con menor esfuerzo, sugiero este orden:
+
+| Prioridad | Feature | Esfuerzo |
+|-----------|---------|----------|
+| 1 | Right-click Context Menu (Copy, Paste, Delete, Duplicate) | Medio |
+| 2 | Spacer widget | Bajo |
+| 3 | Icon widget con librería Lucide | Medio |
+| 4 | Social Icons widget | Bajo |
+| 5 | Custom CSS field per widget | Bajo |
+| 6 | Saved Sections/Templates | Alto |
+| 7 | Form widget multi-campo | Medio |
+| 8 | Motion Effects (parallax básico) | Alto |
+
+Las primeras 5 se podrían implementar relativamente rápido y darían una experiencia mucho más cercana a Elementor Pro.
+
