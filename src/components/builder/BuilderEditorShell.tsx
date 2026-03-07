@@ -506,6 +506,13 @@ export function BuilderEditorShell({
                   onDelete={handleDelete}
                   onDuplicate={handleDuplicate}
                   onImageUpload={onImageUpload}
+                  onUpdateCustomCSS={(css) => {
+                    if (!selectedNodeId) return;
+                    updateSchema((s) => {
+                      s.nodes[selectedNodeId].customCSS = css || undefined;
+                      return s;
+                    });
+                  }}
                 />
               </ScrollArea>
             ) : (
