@@ -58,6 +58,7 @@ export function BuilderEditorShell({
   onBack,
   customStylesheets,
   customCSS,
+  customScripts,
   onImageUpload,
   resolveAssetUrl,
 }: BuilderEditorShellProps) {
