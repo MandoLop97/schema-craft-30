@@ -285,6 +285,7 @@ function SortableLayerItem({
           onDeleteNode={onDeleteNode}
           onMoveNode={onMoveNode}
           onRenameNode={onRenameNode}
+          onToggleVisibility={onToggleVisibility}
         />
       )}
     </div>
