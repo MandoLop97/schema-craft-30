@@ -392,6 +392,14 @@ export function BuilderEditorShell({
                         return s;
                       });
                     }}
+                    onToggleVisibility={(nodeId) => {
+                      updateSchema((s) => {
+                        if (s.nodes[nodeId]) {
+                          s.nodes[nodeId].hidden = !s.nodes[nodeId].hidden;
+                        }
+                        return s;
+                      });
+                    }}
                   />
                 </TabsContent>
                 <TabsContent value="theme" className="mt-0">
