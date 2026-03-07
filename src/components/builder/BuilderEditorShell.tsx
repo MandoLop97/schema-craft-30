@@ -20,6 +20,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 
+import { CustomComponentMap } from '@/components/schema/NodeRegistry';
+
 export interface BuilderEditorShellProps {
   initialSchema: Schema;
   onSave: (schema: Schema) => void;
@@ -32,6 +34,7 @@ export interface BuilderEditorShellProps {
   activePage?: string;
   onPageChange?: (slug: string) => void;
   pageTitle?: string;
+  customComponents?: CustomComponentMap;
 }
 
 export function BuilderEditorShell({
@@ -46,6 +49,7 @@ export function BuilderEditorShell({
   activePage,
   onPageChange,
   pageTitle,
+  customComponents,
 }: BuilderEditorShellProps) {
   const locale = t();
   const { schema, setSchema, undo, redo, canUndo, canRedo } = useSchemaHistory(initialSchema);
@@ -292,6 +296,7 @@ export function BuilderEditorShell({
             device={device}
             selectedNodeId={selectedNodeId}
             onSelectNode={(id) => setSelectedNodeId(id || null)}
+            customComponents={customComponents}
           />
 
           {/* Right Sidebar */}

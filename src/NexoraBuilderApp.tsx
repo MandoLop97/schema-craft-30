@@ -9,6 +9,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from '@/components/ui/sonner';
 import { EDITOR_VERSION } from '@/lib/version';
 import { setLocaleByCode, BuilderLocale, setLocale } from '@/lib/i18n';
+import { CustomComponentMap } from '@/components/schema/NodeRegistry';
 
 export interface NexoraBuilderAppProps {
   /**
@@ -90,6 +91,13 @@ export interface NexoraBuilderAppProps {
    * Defaults to 'es' (Spanish).
    */
   locale?: 'es' | 'en' | BuilderLocale;
+
+  /**
+   * Map of custom React components that override built-in node renderers.
+   * Keys are NodeType strings (e.g. 'HeroSection', 'Footer').
+   * Components receive { node, mode, renderChildren } props.
+   */
+  customComponents?: CustomComponentMap;
 }
 
 export function NexoraBuilderApp({
@@ -107,6 +115,7 @@ export function NexoraBuilderApp({
   onSaveWithSlug,
   onPublishSubmit,
   locale: localeProp,
+  customComponents,
 }: NexoraBuilderAppProps) {
   // Apply locale
   useEffect(() => {
@@ -213,6 +222,7 @@ export function NexoraBuilderApp({
         onPageChange={onPageChange}
         pageTitle={activePageTitle}
         onPublishSubmit={onPublishSubmit}
+        customComponents={customComponents}
       />
     </TooltipProvider>
   );

@@ -1,12 +1,14 @@
 import { useDroppable } from '@dnd-kit/core';
 import { PageRenderer } from '@/components/schema/PageRenderer';
 import { Schema } from '@/types/schema';
+import { CustomComponentMap } from '@/components/schema/NodeRegistry';
 
 interface BuilderCanvasProps {
   schema: Schema;
   device: 'desktop' | 'tablet' | 'mobile';
   selectedNodeId: string | null;
   onSelectNode: (id: string) => void;
+  customComponents?: CustomComponentMap;
 }
 
 const DEVICE_WIDTHS = {
@@ -15,7 +17,7 @@ const DEVICE_WIDTHS = {
   mobile: '375px',
 };
 
-export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode }: BuilderCanvasProps) {
+export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode, customComponents }: BuilderCanvasProps) {
   const { setNodeRef, isOver } = useDroppable({ id: schema.rootNodeId });
 
   return (
@@ -40,6 +42,7 @@ export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode }: 
           mode="edit"
           selectedNodeId={selectedNodeId}
           onSelectNode={onSelectNode}
+          customComponents={customComponents}
         />
       </div>
     </div>

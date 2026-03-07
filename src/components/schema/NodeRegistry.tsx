@@ -14,7 +14,10 @@ export interface NodeComponentProps {
   renderChildren: (childIds: string[]) => React.ReactNode;
 }
 
-type NodeComponent = React.FC<NodeComponentProps>;
+export type NodeComponent = React.FC<NodeComponentProps>;
+
+/** Map of NodeType → custom React component provided by the host */
+export type CustomComponentMap = Partial<Record<NodeType, NodeComponent>>;
 
 const registry: Record<NodeType, NodeComponent> = {
   Section: SectionNode,
@@ -41,6 +44,6 @@ const registry: Record<NodeType, NodeComponent> = {
   VideoEmbed: VideoEmbedNode,
 };
 
-export function getNodeComponent(type: NodeType): NodeComponent | undefined {
-  return registry[type];
+export function getNodeComponent(type: NodeType, customComponents?: CustomComponentMap): NodeComponent | undefined {
+  return customComponents?.[type] ?? registry[type];
 }
