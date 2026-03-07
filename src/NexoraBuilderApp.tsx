@@ -52,6 +52,8 @@ export function NexoraBuilderApp({
   locale: localeProp,
   customComponents,
   extraBlocks,
+  customStylesheets,
+  customCSS,
 }: NexoraBuilderAppProps) {
   // Register extra blocks
   useEffect(() => {
