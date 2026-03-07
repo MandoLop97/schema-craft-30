@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Trash2, Copy, ChevronUp, ChevronDown, ShoppingBag } from 'lucide-react';
+import { Trash2, Copy, ChevronUp, ChevronDown, ShoppingBag, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Slider } from '@/components/ui/slider';
@@ -17,6 +17,7 @@ import { getBlockDef, InspectorFieldDef } from '@/lib/block-registry';
 import { ImageUploadField } from './ImageUploadField';
 import { GradientEditor } from './GradientEditor';
 import { ProductPicker } from './ProductPicker';
+import { useThemeTokens } from '@/components/schema/ThemeContext';
 
 interface InspectorProps {
   node: SchemaNode;
@@ -659,6 +660,48 @@ function FormBlockPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: 
   );
 }
 
+/** Card layout selector with inherited vs custom indicator */
+function CardLayoutField({ value, onChange }: { value?: string; onChange: (v: string | undefined) => void }) {
+  const themeTokens = useThemeTokens();
+  const themeDefault = themeTokens?.defaultCardLayout || 'vertical';
+  const isCustom = !!value;
+  const effectiveValue = value || themeDefault;
+
+  return (
+    <div className="grid gap-1">
+      <div className="flex items-center justify-between">
+        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Layout</Label>
+        {isCustom ? (
+          <button
+            onClick={() => onChange(undefined)}
+            className="flex items-center gap-1 text-[9px] text-primary hover:underline cursor-pointer"
+            title="Volver al diseño del tema"
+          >
+            <RotateCcw className="h-2.5 w-2.5" />
+            Heredado
+          </button>
+        ) : (
+          <span className="text-[9px] text-muted-foreground italic">Heredado del tema</span>
+        )}
+      </div>
+      <Select
+        value={effectiveValue}
+        onValueChange={(v) => onChange(v)}
+      >
+        <SelectTrigger className={`h-8 text-xs ${!isCustom ? 'border-dashed' : ''}`}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="vertical">Vertical</SelectItem>
+          <SelectItem value="horizontal">Horizontal</SelectItem>
+          <SelectItem value="minimal">Minimal</SelectItem>
+          <SelectItem value="overlay">Overlay</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
 function ProductCardPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: Partial<NodeProps>) => void }) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const p = node.props;
@@ -693,18 +736,10 @@ function ProductCardPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate
       <Separator className="my-1" />
 
       {/* Layout */}
-      <div className="grid gap-1">
-        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Layout</Label>
-        <Select value={p.cardLayout || 'vertical'} onValueChange={(v) => onUpdate({ cardLayout: v })}>
-          <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="vertical">Vertical</SelectItem>
-            <SelectItem value="horizontal">Horizontal</SelectItem>
-            <SelectItem value="minimal">Minimal</SelectItem>
-            <SelectItem value="overlay">Overlay</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      <CardLayoutField
+        value={p.cardLayout}
+        onChange={(v) => onUpdate({ cardLayout: v })}
+      />
 
       {/* Image ratio */}
       <div className="grid gap-1">
