@@ -27,6 +27,9 @@ interface SortableNodeWrapperProps {
   canPaste?: boolean;
   onEditSection?: (nodeType: string) => void;
   onSaveAsTemplate?: (nodeId: string) => void;
+  onCopyStyle?: (nodeId: string) => void;
+  onPasteStyle?: (nodeId: string) => void;
+  canPasteStyle?: boolean;
   /** Pass the node's position-related styles so the wrapper can inherit absolute/fixed positioning */
   nodeStyle?: { position?: string; top?: string; left?: string; right?: string; bottom?: string; zIndex?: string };
   /** Callback to update node position when dragging absolute/fixed elements */
