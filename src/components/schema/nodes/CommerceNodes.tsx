@@ -1,5 +1,6 @@
 import React from 'react';
 import { SchemaNode, RenderMode, NodeStyle } from '@/types/schema';
+import { nodeStyleToCSS } from '@/lib/style-utils';
 
 interface NodeComponentProps {
   node: SchemaNode;
@@ -7,7 +8,7 @@ interface NodeComponentProps {
   renderChildren: (childIds: string[]) => React.ReactNode;
 }
 
-const s = (style: NodeStyle): React.CSSProperties => style as unknown as React.CSSProperties;
+const s = (style: NodeStyle): React.CSSProperties => nodeStyleToCSS(style);
 
 export function ProductCardNode({ node }: NodeComponentProps) {
   const productName = node.props.name || node.props.text || 'Product Name';

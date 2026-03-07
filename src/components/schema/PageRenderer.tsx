@@ -5,6 +5,7 @@ import { EditableDropZone } from './EditableDropZone';
 import { SortableNodeWrapper } from './SortableNodeWrapper';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { getBlockDef } from '@/lib/block-registry';
+import { generatePseudoStateCSS, generateResponsiveCSS } from '@/lib/style-utils';
 
 /** Given an HSL string like "222 84% 4.9%", returns a contrasting foreground HSL */
 function computeContrastForeground(hsl: string): string {
@@ -227,5 +228,22 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
     } as React.CSSProperties;
   }, [schema.themeTokens]);
 
-  return <div style={{ ...themeStyle, containerType: 'inline-size' as any }}>{renderNode(schema.rootNodeId)}</div>;
+  // Generate dynamic CSS for pseudo-states and responsive overrides
+  const dynamicCSS = useMemo(() => {
+    const rules: string[] = [];
+    for (const node of Object.values(schema.nodes)) {
+      const pseudo = generatePseudoStateCSS(node.id, node.style);
+      if (pseudo) rules.push(pseudo);
+      const responsive = generateResponsiveCSS(node.id, node.style);
+      if (responsive) rules.push(responsive);
+    }
+    return rules.join('\n');
+  }, [schema.nodes]);
+
+  return (
+    <div style={{ ...themeStyle, containerType: 'inline-size' as any }}>
+      {dynamicCSS && <style dangerouslySetInnerHTML={{ __html: dynamicCSS }} />}
+      {renderNode(schema.rootNodeId)}
+    </div>
+  );
 }

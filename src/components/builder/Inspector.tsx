@@ -1,11 +1,11 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { SchemaNode, NodeProps, NodeStyle, ANIMATION_PRESETS, AnimationPreset } from '@/types/schema';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Trash2, Copy } from 'lucide-react';
+import { Trash2, Copy, ChevronUp, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Slider } from '@/components/ui/slider';
@@ -23,7 +23,6 @@ interface InspectorProps {
   onUpdateStyle: (style: Partial<NodeStyle>) => void;
   onDelete: () => void;
   onDuplicate?: () => void;
-  /** Callback for image uploads from 'image' inspector fields */
   onImageUpload?: (file: File) => Promise<string>;
 }
 
@@ -34,6 +33,147 @@ function PropField({ label, value, onChange, placeholder }: { label: string; val
     <div className="grid gap-1">
       <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</Label>
       <Input className="h-8 text-xs transition-shadow duration-200 focus:ring-2 focus:ring-primary/20" value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} />
+    </div>
+  );
+}
+
+/* ── Numeric Style Field with stepper +/- buttons and slider ── */
+
+/** Parse a CSS value like "1.5rem", "16px", "0.5", "auto" into { num, unit } */
+function parseCssValue(raw: string): { num: number; unit: string } | null {
+  if (!raw) return null;
+  const match = raw.trim().match(/^(-?[\d.]+)\s*(px|rem|em|%|vh|vw|vmin|vmax|ch|ex|s|ms|deg)?$/i);
+  if (!match) return null;
+  return { num: parseFloat(match[1]), unit: match[2] || '' };
+}
+
+const UNIT_STEPS: Record<string, number> = {
+  px: 1,
+  rem: 0.125,
+  em: 0.125,
+  '%': 1,
+  vh: 1,
+  vw: 1,
+  s: 0.05,
+  ms: 50,
+  deg: 5,
+  '': 0.1,
+};
+
+const UNIT_RANGES: Record<string, { min: number; max: number }> = {
+  px: { min: 0, max: 200 },
+  rem: { min: 0, max: 20 },
+  em: { min: 0, max: 20 },
+  '%': { min: 0, max: 100 },
+  vh: { min: 0, max: 100 },
+  vw: { min: 0, max: 100 },
+  s: { min: 0, max: 5 },
+  ms: { min: 0, max: 5000 },
+  deg: { min: 0, max: 360 },
+  '': { min: 0, max: 10 },
+};
+
+function NumericStyleField({ label, value, onChange, placeholder, allowNegative = false }: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  allowNegative?: boolean;
+}) {
+  const [localValue, setLocalValue] = useState(value);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => { setLocalValue(value); }, [value]);
+
+  const parsed = parseCssValue(localValue);
+  const step = parsed ? (UNIT_STEPS[parsed.unit] ?? 1) : 1;
+  const range = parsed ? (UNIT_RANGES[parsed.unit] ?? { min: 0, max: 100 }) : { min: 0, max: 100 };
+  const effectiveMin = allowNegative ? -range.max : range.min;
+
+  const increment = useCallback((delta: number) => {
+    const p = parseCssValue(localValue);
+    if (!p) return;
+    const newNum = Math.round((p.num + delta * step) * 1000) / 1000;
+    const clamped = Math.max(effectiveMin, Math.min(range.max, newNum));
+    const newVal = `${clamped}${p.unit}`;
+    setLocalValue(newVal);
+    onChange(newVal);
+  }, [localValue, step, range, effectiveMin, onChange]);
+
+  const startHold = (delta: number) => {
+    increment(delta);
+    intervalRef.current = setInterval(() => increment(delta), 120);
+  };
+
+  const stopHold = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  };
+
+  const handleSliderChange = ([v]: number[]) => {
+    const p = parseCssValue(localValue);
+    const unit = p?.unit || 'px';
+    const rounded = Math.round(v * 1000) / 1000;
+    const newVal = `${rounded}${unit}`;
+    setLocalValue(newVal);
+    onChange(newVal);
+  };
+
+  const handleInputCommit = () => {
+    onChange(localValue);
+  };
+
+  return (
+    <div className="grid gap-1">
+      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</Label>
+      <div className="flex items-center gap-1">
+        <Input
+          className="h-8 text-xs flex-1 font-mono transition-shadow duration-200 focus:ring-2 focus:ring-primary/20"
+          value={localValue}
+          onChange={(e) => setLocalValue(e.target.value)}
+          onBlur={handleInputCommit}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') handleInputCommit();
+            if (e.key === 'ArrowUp') { e.preventDefault(); increment(1); }
+            if (e.key === 'ArrowDown') { e.preventDefault(); increment(-1); }
+          }}
+          placeholder={placeholder}
+        />
+        <div className="flex flex-col">
+          <button
+            className="h-4 w-5 flex items-center justify-center rounded-t border border-border bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            onMouseDown={() => startHold(1)}
+            onMouseUp={stopHold}
+            onMouseLeave={stopHold}
+            title="Increment"
+            type="button"
+          >
+            <ChevronUp className="h-2.5 w-2.5" />
+          </button>
+          <button
+            className="h-4 w-5 flex items-center justify-center rounded-b border border-t-0 border-border bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            onMouseDown={() => startHold(-1)}
+            onMouseUp={stopHold}
+            onMouseLeave={stopHold}
+            title="Decrement"
+            type="button"
+          >
+            <ChevronDown className="h-2.5 w-2.5" />
+          </button>
+        </div>
+      </div>
+      {parsed && (
+        <Slider
+          min={effectiveMin}
+          max={range.max}
+          step={step}
+          value={[parsed.num]}
+          onValueChange={handleSliderChange}
+          className="mt-0.5"
+        />
+      )}
     </div>
   );
 }
@@ -597,7 +737,7 @@ function PropsTab({ node, onUpdateProps, onUpdateStyle, onImageUpload }: { node:
       {node.type === 'HeroSection' && <HeroSectionPropsEditor node={node} onUpdate={onUpdateProps} />}
       {(node.type === 'Accordion' || node.type === 'TabsBlock') && <PanelsPropsEditor node={node} onUpdate={onUpdateProps} />}
       {node.type === 'VideoEmbed' && <VideoEmbedPropsEditor node={node} onUpdate={onUpdateProps} />}
-      {/* Custom inspector fields for host-registered blocks */}
+      {/* Custom inspector fields */}
       {(() => {
         const def = getBlockDef(node.type);
         if (def?.inspectorFields && def.inspectorFields.length > 0) {
@@ -621,6 +761,16 @@ function PropsTab({ node, onUpdateProps, onUpdateStyle, onImageUpload }: { node:
 
 const COLOR_KEYS: (keyof NodeStyle)[] = ['color', 'backgroundColor', 'borderColor', 'outlineColor'];
 
+/** Keys that should use the NumericStyleField with stepper +/- and slider */
+const NUMERIC_KEYS: (keyof NodeStyle)[] = [
+  'padding', 'margin', 'gap', 'width', 'height', 'minHeight', 'minWidth', 'maxWidth', 'maxHeight',
+  'fontSize', 'lineHeight', 'letterSpacing', 'wordSpacing', 'borderWidth', 'borderRadius',
+  'outlineOffset', 'outlineWidth', 'top', 'right', 'bottom', 'left',
+  'borderTopLeftRadius', 'borderTopRightRadius', 'borderBottomLeftRadius', 'borderBottomRightRadius',
+  'perspective',
+  'transitionDuration', 'transitionDelay', 'animationDuration', 'animationDelay',
+];
+
 function CollapsibleStyleGroup({ title, children, defaultOpen = true }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
   return (
     <Collapsible defaultOpen={defaultOpen}>
@@ -642,6 +792,9 @@ function StyleTab({ node, onUpdateStyle }: { node: SchemaNode; onUpdateStyle: (s
   const renderField = (label: string, key: keyof NodeStyle, placeholder?: string) => {
     if (COLOR_KEYS.includes(key)) {
       return <ColorField key={key} label={label} value={(st as any)[key] || ''} onChange={(v) => onUpdateStyle({ [key]: v || undefined })} />;
+    }
+    if (NUMERIC_KEYS.includes(key)) {
+      return <NumericStyleField key={key} label={label} value={(st as any)[key] || ''} onChange={(v) => onUpdateStyle({ [key]: v || undefined })} placeholder={placeholder} allowNegative={['margin', 'top', 'right', 'bottom', 'left', 'letterSpacing'].includes(key)} />;
     }
     return <PropField key={key} label={label} value={(st as any)[key] || ''} onChange={(v) => onUpdateStyle({ [key]: v || undefined })} placeholder={placeholder} />;
   };
@@ -683,15 +836,15 @@ function StyleTab({ node, onUpdateStyle }: { node: SchemaNode; onUpdateStyle: (s
       {/* Typography */}
       <CollapsibleStyleGroup title={locale.typography}>
         {renderField('Font Size', 'fontSize', '1rem')}
-        {renderField('Font Weight', 'fontWeight', '400')}
-        {renderField('Font Family', 'fontFamily', 'inherit')}
+        <NumericStyleField label="Font Weight" value={st.fontWeight || ''} onChange={(v) => onUpdateStyle({ fontWeight: v || undefined })} placeholder="400" />
+        {renderField('Font Family', 'fontFamily')}
         {renderSelect('Font Style', 'fontStyle', ['normal', 'italic', 'oblique'])}
         {renderField('Line Height', 'lineHeight', '1.5')}
         {renderField('Letter Spacing', 'letterSpacing', '0')}
         {renderSelect('Text Align', 'textAlign', ['left', 'center', 'right', 'justify'])}
         {renderSelect('Text Transform', 'textTransform', ['none', 'uppercase', 'lowercase', 'capitalize'])}
         {renderSelect('Text Decoration', 'textDecoration', ['none', 'underline', 'line-through', 'overline'])}
-        {renderField('Text Shadow', 'textShadow', '0 2px 4px rgba(0,0,0,0.3)')}
+        {renderField('Text Shadow', 'textShadow')}
         {renderSelect('White Space', 'whiteSpace', ['normal', 'nowrap', 'pre', 'pre-line', 'pre-wrap'])}
         {renderField('Word Spacing', 'wordSpacing')}
         {renderField('Color', 'color')}
@@ -705,13 +858,13 @@ function StyleTab({ node, onUpdateStyle }: { node: SchemaNode; onUpdateStyle: (s
         {renderField('Border Width', 'borderWidth', '1px')}
         {renderField('Border Radius', 'borderRadius', '0.5rem')}
         {renderSelect('Border Style', 'borderStyle', ['none', 'solid', 'dashed', 'dotted', 'double'])}
-        {renderField('Box Shadow', 'boxShadow', '0 4px 6px rgba(0,0,0,0.1)')}
-        {renderField('Outline', 'outline')}
+        <PropField label="Box Shadow" value={st.boxShadow || ''} onChange={(v) => onUpdateStyle({ boxShadow: v || undefined })} placeholder="0 4px 6px rgba(0,0,0,0.1)" />
+        <PropField label="Outline" value={st.outline || ''} onChange={(v) => onUpdateStyle({ outline: v || undefined })} />
         {renderField('Outline Offset', 'outlineOffset')}
         <div className="grid gap-1">
           <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Opacity</Label>
           <div className="flex items-center gap-2">
-            <Slider min={0} max={1} step={0.05} value={[parseFloat(st.opacity || '1')]} onValueChange={([v]) => onUpdateStyle({ opacity: v < 1 ? String(v) : undefined })} className="flex-1" />
+            <Slider min={0} max={1} step={0.01} value={[parseFloat(st.opacity || '1')]} onValueChange={([v]) => onUpdateStyle({ opacity: v < 1 ? String(v) : undefined })} className="flex-1" />
             <span className="text-[10px] font-mono text-muted-foreground w-8 text-right">{parseFloat(st.opacity || '1').toFixed(2)}</span>
           </div>
         </div>
@@ -741,25 +894,25 @@ function StyleTab({ node, onUpdateStyle }: { node: SchemaNode; onUpdateStyle: (s
 
       {/* Filters & Effects */}
       <CollapsibleStyleGroup title="Filtros y Efectos" defaultOpen={false}>
-        {renderField('Filter', 'filter', 'blur(4px)')}
-        {renderField('Backdrop Filter', 'backdropFilter', 'blur(10px)')}
+        <PropField label="Filter" value={st.filter || ''} onChange={(v) => onUpdateStyle({ filter: v || undefined })} placeholder="blur(4px)" />
+        <PropField label="Backdrop Filter" value={st.backdropFilter || ''} onChange={(v) => onUpdateStyle({ backdropFilter: v || undefined })} placeholder="blur(10px)" />
         {renderSelect('Mix Blend Mode', 'mixBlendMode', ['normal', 'multiply', 'screen', 'overlay', 'darken', 'lighten', 'color-dodge', 'color-burn', 'hard-light', 'soft-light', 'difference', 'exclusion'])}
-        {renderField('Clip Path', 'clipPath', 'circle(50%)')}
+        <PropField label="Clip Path" value={st.clipPath || ''} onChange={(v) => onUpdateStyle({ clipPath: v || undefined })} placeholder="circle(50%)" />
       </CollapsibleStyleGroup>
       <Separator className="my-1" />
 
       {/* Transforms */}
       <CollapsibleStyleGroup title="Transformaciones" defaultOpen={false}>
-        {renderField('Transform', 'transform', 'translateY(-10px) scale(1.02)')}
-        {renderField('Transform Origin', 'transformOrigin', 'center center')}
+        <PropField label="Transform" value={st.transform || ''} onChange={(v) => onUpdateStyle({ transform: v || undefined })} placeholder="translateY(-10px) scale(1.02)" />
+        <PropField label="Transform Origin" value={st.transformOrigin || ''} onChange={(v) => onUpdateStyle({ transformOrigin: v || undefined })} placeholder="center center" />
         {renderField('Perspective', 'perspective', '1000px')}
       </CollapsibleStyleGroup>
       <Separator className="my-1" />
 
       {/* Transitions */}
       <CollapsibleStyleGroup title="Transiciones" defaultOpen={false}>
-        {renderField('Transition', 'transition', 'all 0.3s ease')}
-        {renderField('Property', 'transitionProperty', 'all')}
+        <PropField label="Transition" value={st.transition || ''} onChange={(v) => onUpdateStyle({ transition: v || undefined })} placeholder="all 0.3s ease" />
+        <PropField label="Property" value={st.transitionProperty || ''} onChange={(v) => onUpdateStyle({ transitionProperty: v || undefined })} placeholder="all" />
         {renderField('Duration', 'transitionDuration', '0.3s')}
         {renderSelect('Timing', 'transitionTimingFunction', ['ease', 'ease-in', 'ease-out', 'ease-in-out', 'linear', 'cubic-bezier(0.4, 0, 0.2, 1)'])}
         {renderField('Delay', 'transitionDelay', '0s')}
@@ -789,7 +942,7 @@ function StyleTab({ node, onUpdateStyle }: { node: SchemaNode; onUpdateStyle: (s
             </SelectContent>
           </Select>
         </div>
-        {renderField('Custom Animation', 'animation', 'fadeIn 0.5s ease-out')}
+        <PropField label="Custom Animation" value={st.animation || ''} onChange={(v) => onUpdateStyle({ animation: v || undefined })} placeholder="fadeIn 0.5s ease-out" />
         {renderField('Duration', 'animationDuration', '0.5s')}
         {renderField('Delay', 'animationDelay', '0s')}
         {renderSelect('Timing', 'animationTimingFunction', ['ease', 'ease-in', 'ease-out', 'ease-in-out', 'linear'])}
@@ -807,8 +960,14 @@ function StyleTab({ node, onUpdateStyle }: { node: SchemaNode; onUpdateStyle: (s
         <ColorField label="Color" value={(st.hover?.color) || ''} onChange={(v) => onUpdateStyle({ hover: { ...st.hover, color: v || undefined } })} />
         <PropField label="Transform" value={(st.hover?.transform) || ''} onChange={(v) => onUpdateStyle({ hover: { ...st.hover, transform: v || undefined } })} />
         <PropField label="Box Shadow" value={(st.hover?.boxShadow) || ''} onChange={(v) => onUpdateStyle({ hover: { ...st.hover, boxShadow: v || undefined } })} />
-        <PropField label="Opacity" value={(st.hover?.opacity) || ''} onChange={(v) => onUpdateStyle({ hover: { ...st.hover, opacity: v || undefined } })} />
-        <PropField label="Border Color" value={(st.hover?.borderColor) || ''} onChange={(v) => onUpdateStyle({ hover: { ...st.hover, borderColor: v || undefined } })} />
+        <div className="grid gap-1">
+          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Opacity</Label>
+          <div className="flex items-center gap-2">
+            <Slider min={0} max={1} step={0.01} value={[parseFloat(st.hover?.opacity || '1')]} onValueChange={([v]) => onUpdateStyle({ hover: { ...st.hover, opacity: v < 1 ? String(v) : undefined } })} className="flex-1" />
+            <span className="text-[10px] font-mono text-muted-foreground w-8 text-right">{parseFloat(st.hover?.opacity || '1').toFixed(2)}</span>
+          </div>
+        </div>
+        <ColorField label="Border Color" value={(st.hover?.borderColor) || ''} onChange={(v) => onUpdateStyle({ hover: { ...st.hover, borderColor: v || undefined } })} />
         <PropField label="Filter" value={(st.hover?.filter) || ''} onChange={(v) => onUpdateStyle({ hover: { ...st.hover, filter: v || undefined } })} />
       </CollapsibleStyleGroup>
 
@@ -820,7 +979,7 @@ function StyleTab({ node, onUpdateStyle }: { node: SchemaNode; onUpdateStyle: (s
         {renderField('Right', 'right')}
         {renderField('Bottom', 'bottom')}
         {renderField('Left', 'left')}
-        {renderField('Z-Index', 'zIndex')}
+        <NumericStyleField label="Z-Index" value={st.zIndex || ''} onChange={(v) => onUpdateStyle({ zIndex: v || undefined })} placeholder="0" />
         {renderSelect('Overflow', 'overflow', ['visible', 'hidden', 'scroll', 'auto'])}
         {renderSelect('Display', 'display', ['block', 'flex', 'grid', 'inline', 'inline-block', 'inline-flex', 'none'])}
       </CollapsibleStyleGroup>
