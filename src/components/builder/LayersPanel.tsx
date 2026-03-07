@@ -34,6 +34,7 @@ interface LayersPanelProps {
   onDeleteNode?: (nodeId: string) => void;
   onMoveNode?: (nodeId: string, newParentId: string, index: number) => void;
   onRenameNode?: (nodeId: string, newName: string) => void;
+  onToggleVisibility?: (nodeId: string) => void;
 }
 
 /** Depth-based accent colors for tree lines */
