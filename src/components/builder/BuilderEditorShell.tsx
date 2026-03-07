@@ -64,6 +64,7 @@ export function BuilderEditorShell({
   const clipboardRef = useRef<string | null>(null);
 
   const hasPages = pages && pages.length > 0;
+  const activePageDef = hasPages ? pages!.find((p) => p.slug === activePage) : undefined;
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   const updateSchema = useCallback((updater: (s: Schema) => Schema) => {
