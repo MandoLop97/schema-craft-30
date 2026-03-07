@@ -20,6 +20,7 @@ interface BuilderCanvasProps {
   onDuplicateNode?: (nodeId: string) => void;
   onDeleteNode?: (nodeId: string) => void;
   canPaste?: boolean;
+  onEditSection?: (nodeType: string) => void;
 }
 
 const DEVICE_WIDTHS = {
