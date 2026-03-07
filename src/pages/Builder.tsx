@@ -59,7 +59,7 @@ const DEMO_PAGES: PageDefinition[] = [
 
 export default function Builder() {
   const navigate = useNavigate();
-  const [activePage, setActivePage] = useState('home');
+  const [activePage, setActivePage] = useState('');
 
   const handlePublishSubmit = async (payload: PublishPayload) => {
     const { error } = await supabase

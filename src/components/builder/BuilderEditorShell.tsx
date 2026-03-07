@@ -15,7 +15,6 @@ import { PublishDialog, PublishPayload } from '@/components/builder/PublishDialo
 import { PreviewDialog } from '@/components/builder/PreviewDialog';
 import { ExportDialog } from '@/components/builder/ExportDialog';
 import { BuilderCanvas } from '@/components/builder/BuilderCanvas';
-import { PageManager } from '@/components/builder/PageManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
@@ -35,6 +34,7 @@ export interface BuilderEditorShellProps {
   onPageChange?: (slug: string) => void;
   pageTitle?: string;
   customComponents?: CustomComponentMap;
+  onBack?: () => void;
 }
 
 export function BuilderEditorShell({
@@ -50,6 +50,7 @@ export function BuilderEditorShell({
   onPageChange,
   pageTitle,
   customComponents,
+  onBack,
 }: BuilderEditorShellProps) {
   const locale = t();
   const { schema, setSchema, undo, redo, canUndo, canRedo } = useSchemaHistory(initialSchema);
@@ -285,6 +286,7 @@ export function BuilderEditorShell({
           onPublish={() => { onPublish ? onPublish(schema) : (setPublishMode('published'), setPublishOpen(true)); }}
           onSaveDraft={() => { setPublishMode('draft'); setPublishOpen(true); }}
           pageTitle={pageTitle}
+          onBack={onBack}
         />
 
         <div className="flex flex-1 overflow-hidden">
@@ -295,7 +297,6 @@ export function BuilderEditorShell({
                 <TabsTrigger value="blocks" className="text-xs">{locale.blocks}</TabsTrigger>
                 <TabsTrigger value="layers" className="text-xs">{locale.layers}</TabsTrigger>
                 <TabsTrigger value="theme" className="text-xs">{locale.theme}</TabsTrigger>
-                {hasPages && <TabsTrigger value="pages" className="text-xs">{locale.pages}</TabsTrigger>}
               </TabsList>
               <ScrollArea className="flex-1">
                 <TabsContent value="blocks" className="mt-0">
@@ -315,9 +316,6 @@ export function BuilderEditorShell({
                       });
                     }}
                     onDuplicateNode={(nodeId) => {
-                      const prev = selectedNodeId;
-                      setSelectedNodeId(nodeId);
-                      // Use a micro-task to ensure selectedNodeId is set
                       const parentNode = Object.values(schema.nodes).find((n) => n.children.includes(nodeId));
                       if (!parentNode) return;
                       updateSchema((s) => {
@@ -339,15 +337,6 @@ export function BuilderEditorShell({
                     }}
                   />
                 </TabsContent>
-                {hasPages && (
-                  <TabsContent value="pages" className="mt-0">
-                    <PageManager
-                      pages={pages!}
-                      activePage={activePage}
-                      onSelectPage={(slug) => onPageChange?.(slug)}
-                    />
-                  </TabsContent>
-                )}
               </ScrollArea>
             </Tabs>
           </div>
