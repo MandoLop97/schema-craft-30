@@ -17,6 +17,7 @@ export type { Schema, SchemaNode, NodeType, BuiltInNodeType, NodeProps, NodeStyl
 
 // Renderer — for hosts that want to render schemas outside the builder
 export { PageRenderer } from './components/schema/PageRenderer';
+export { CustomStylesInjector } from './components/builder/CustomStylesInjector';
 
 // Node registry types — for hosts that want to provide custom components
 export type { NodeComponentProps, NodeComponent, CustomComponentMap } from './components/schema/NodeRegistry';

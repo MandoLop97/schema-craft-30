@@ -35,6 +35,8 @@ export interface BuilderEditorShellProps {
   pageTitle?: string;
   customComponents?: CustomComponentMap;
   onBack?: () => void;
+  customStylesheets?: string[];
+  customCSS?: string;
 }
 
 export function BuilderEditorShell({
@@ -51,6 +53,8 @@ export function BuilderEditorShell({
   pageTitle,
   customComponents,
   onBack,
+  customStylesheets,
+  customCSS,
 }: BuilderEditorShellProps) {
   const locale = t();
   const { schema, setSchema, undo, redo, canUndo, canRedo } = useSchemaHistory(initialSchema);
@@ -424,6 +428,8 @@ export function BuilderEditorShell({
             templateType={activePageDef?.templateType}
             canvasSize={activePageDef?.canvasSize}
             mockData={activePageDef?.mockData}
+            customStylesheets={customStylesheets}
+            customCSS={customCSS}
           />
 
           {/* Right Sidebar */}

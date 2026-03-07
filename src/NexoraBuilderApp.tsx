@@ -29,6 +29,10 @@ export interface NexoraBuilderAppProps {
   locale?: 'es' | 'en' | BuilderLocale;
   customComponents?: CustomComponentMap;
   extraBlocks?: BlockDefinition[];
+  /** URLs of external CSS stylesheets to inject into the canvas */
+  customStylesheets?: string[];
+  /** Raw CSS string to inject into the canvas */
+  customCSS?: string;
 }
 
 export function NexoraBuilderApp({
@@ -48,6 +52,8 @@ export function NexoraBuilderApp({
   locale: localeProp,
   customComponents,
   extraBlocks,
+  customStylesheets,
+  customCSS,
 }: NexoraBuilderAppProps) {
   // Register extra blocks
   useEffect(() => {
@@ -158,6 +164,8 @@ export function NexoraBuilderApp({
         onPublishSubmit={onPublishSubmit}
         customComponents={customComponents}
         onBack={hasPages ? () => onPageChange?.('') : undefined}
+        customStylesheets={customStylesheets}
+        customCSS={customCSS}
       />
     </TooltipProvider>
   );
