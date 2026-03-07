@@ -1,6 +1,7 @@
 import React from 'react';
 import { SchemaNode, RenderMode, NodeStyle } from '@/types/schema';
 import { nodeStyleToCSS } from '@/lib/style-utils';
+import { useThemeTokens } from '@/components/schema/ThemeContext';
 
 interface NodeComponentProps {
   node: SchemaNode;
