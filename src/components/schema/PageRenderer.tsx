@@ -174,5 +174,45 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
     );
   };
 
-  return <div style={{ fontFamily: schema.themeTokens.typography.fontFamily }}>{renderNode(schema.rootNodeId)}</div>;
+  /** Convert themeTokens into inline CSS custom properties so that
+   *  all descendant elements (which use hsl(var(--...)) tokens) reflect
+   *  the theme editor values in real-time. */
+  const themeStyle = useMemo<React.CSSProperties>(() => {
+    const t = schema.themeTokens;
+    return {
+      // Colors (HSL values without the hsl() wrapper — matching the CSS var format)
+      '--primary': t.colors.primary,
+      '--secondary': t.colors.secondary,
+      '--background': t.colors.background,
+      '--foreground': t.colors.text,
+      '--muted': t.colors.muted,
+      '--border': t.colors.border,
+      '--accent': t.colors.accent || t.colors.secondary,
+      // Foreground variants derived from the base tokens
+      '--card': t.colors.background,
+      '--card-foreground': t.colors.text,
+      '--popover': t.colors.background,
+      '--popover-foreground': t.colors.text,
+      '--input': t.colors.border,
+      // Typography
+      fontFamily: t.typography.fontFamily,
+      fontSize: t.typography.baseSize,
+      '--nxr-heading-scale': String(t.typography.headingScale),
+      // Radius
+      '--radius': t.radius.md,
+      '--nxr-radius-sm': t.radius.sm,
+      '--nxr-radius-lg': t.radius.lg,
+      // Spacing as custom properties for templates to consume
+      '--nxr-space-xs': t.spacing.xs,
+      '--nxr-space-sm': t.spacing.sm,
+      '--nxr-space-md': t.spacing.md,
+      '--nxr-space-lg': t.spacing.lg,
+      '--nxr-space-xl': t.spacing.xl,
+      // Ensure text color follows theme
+      color: `hsl(${t.colors.text})`,
+      backgroundColor: `hsl(${t.colors.background})`,
+    } as React.CSSProperties;
+  }, [schema.themeTokens]);
+
+  return <div style={themeStyle}>{renderNode(schema.rootNodeId)}</div>;
 }
