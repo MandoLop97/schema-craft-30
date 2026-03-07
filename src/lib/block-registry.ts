@@ -36,6 +36,11 @@ export interface InspectorFieldDef {
   defaultValue?: any;
 }
 
+export interface CompositeNodeTree {
+  rootId: string;
+  nodes: Record<string, import('@/types/schema').SchemaNode>;
+}
+
 export interface BlockDefinition {
   type: NodeType;
   label: string;
@@ -48,6 +53,8 @@ export interface BlockDefinition {
   allowedChildren?: NodeType[];
   inspectorFields?: InspectorFieldDef[];
   allowedTemplateTypes?: TemplateType[];
+  /** Factory that generates a composite tree of child nodes when this block is created */
+  compositeFactory?: () => CompositeNodeTree;
 }
 
 // ── Category definitions for hierarchy ──
