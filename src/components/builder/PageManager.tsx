@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { PageDefinition } from '@/types/schema';
+import { PageRenderer } from '@/components/schema/PageRenderer';
 import { FileText, Circle, ChevronDown, ChevronRight, Globe, Puzzle, Package, Layers } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { EDITOR_VERSION } from '@/lib/version';
@@ -22,6 +23,35 @@ const CATEGORY_ICONS: Record<string, React.ElementType> = {
 
 function getCategoryIcon(category: string): React.ElementType {
   return CATEGORY_ICONS[category] ?? FileText;
+}
+
+/** Scaled-down live mini-render of a page schema */
+function PageThumbnail({ page }: { page: PageDefinition }) {
+  const innerWidth = 1280;
+  const thumbWidth = 220;
+  const scale = thumbWidth / innerWidth;
+  const thumbHeight = 140;
+  const innerHeight = thumbHeight / scale;
+
+  return (
+    <div
+      className="rounded-lg border bg-background overflow-hidden shrink-0"
+      style={{ width: thumbWidth, height: thumbHeight }}
+    >
+      <div
+        style={{
+          width: innerWidth,
+          height: innerHeight,
+          transform: `scale(${scale})`,
+          transformOrigin: 'top left',
+          pointerEvents: 'none',
+          overflow: 'hidden',
+        }}
+      >
+        <PageRenderer schema={page.schema} mode="preview" />
+      </div>
+    </div>
+  );
 }
 
 export function PageManager({ pages, activePage, onSelectPage }: PageManagerProps) {
@@ -56,7 +86,7 @@ export function PageManager({ pages, activePage, onSelectPage }: PageManagerProp
       </div>
 
       {/* Content */}
-      <div className="flex-1 px-6 py-6 max-w-3xl mx-auto w-full">
+      <div className="flex-1 px-6 py-6 max-w-4xl mx-auto w-full">
         <div className="space-y-4">
           {groups.map(([category, categoryPages]) => {
             const isOpen = !collapsed[category];
@@ -76,42 +106,42 @@ export function PageManager({ pages, activePage, onSelectPage }: PageManagerProp
                 </CollapsibleTrigger>
 
                 <CollapsibleContent>
-                  <div className="grid gap-2 mt-1 ml-2">
+                  <div className="grid gap-3 mt-2 ml-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                     {categoryPages.map((page) => {
                       const isLive = page.status === 'published';
-                      const PageIcon = page.icon || FileText;
 
                       return (
                         <button
                           key={page.slug}
                           onClick={() => onSelectPage(page.slug)}
-                          className="group relative flex items-center gap-3 rounded-xl border bg-background px-4 py-3.5 text-left w-full transition-all duration-150 ease-out hover:shadow-md hover:border-primary/20 hover:scale-[1.01] active:scale-[0.99]"
+                          className="group flex flex-col rounded-xl border bg-background overflow-hidden text-left w-full transition-all duration-150 ease-out hover:shadow-lg hover:border-primary/25 hover:scale-[1.02] active:scale-[0.99]"
                         >
-                          <div className="h-10 w-10 rounded-lg bg-muted/70 flex items-center justify-center shrink-0 transition-colors group-hover:bg-primary/10 group-hover:text-primary">
-                            <PageIcon className="h-5 w-5" />
-                          </div>
+                          {/* Live thumbnail */}
+                          <PageThumbnail page={page} />
 
-                          <div className="flex-1 min-w-0">
-                            <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
-                              {page.title}
-                            </span>
-                            <div className="flex items-center gap-2 mt-0.5">
-                              <span className="text-[11px] text-muted-foreground font-mono truncate">
-                                {page.slug}
+                          {/* Info */}
+                          <div className="px-3.5 py-3 flex items-center gap-2">
+                            <div className="flex-1 min-w-0">
+                              <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors truncate block">
+                                {page.title}
                               </span>
-                              {page.templateType && page.templateType !== 'page' && (
-                                <>
-                                  <span className="text-muted-foreground/30">·</span>
-                                  <span className="text-[11px] text-muted-foreground/70 capitalize">{page.templateType}</span>
-                                </>
-                              )}
+                              <div className="flex items-center gap-1.5 mt-0.5">
+                                <span className="text-[10px] text-muted-foreground font-mono truncate">
+                                  {page.slug}
+                                </span>
+                                {page.templateType && page.templateType !== 'page' && (
+                                  <>
+                                    <span className="text-muted-foreground/30">·</span>
+                                    <span className="text-[10px] text-muted-foreground/70 capitalize">{page.templateType}</span>
+                                  </>
+                                )}
+                              </div>
                             </div>
+                            <span className={`inline-flex items-center gap-1 text-[10px] font-medium shrink-0 ${isLive ? 'text-green-600' : 'text-muted-foreground'}`}>
+                              <Circle className={`h-1.5 w-1.5 ${isLive ? 'fill-green-500 text-green-500' : 'fill-muted-foreground/40 text-muted-foreground/40'}`} />
+                              {isLive ? 'Live' : 'Draft'}
+                            </span>
                           </div>
-
-                          <span className={`inline-flex items-center gap-1.5 text-[11px] font-medium shrink-0 ${isLive ? 'text-green-600' : 'text-muted-foreground'}`}>
-                            <Circle className={`h-2 w-2 ${isLive ? 'fill-green-500 text-green-500' : 'fill-muted-foreground/40 text-muted-foreground/40'}`} />
-                            {isLive ? 'Live' : 'Draft'}
-                          </span>
                         </button>
                       );
                     })}
