@@ -74,6 +74,11 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
                 isSelected={selectedNodeId === cid}
                 nodeType={childNode.type}
                 onSelect={(id) => onSelectNode?.(id)}
+                onCopy={onCopyNode}
+                onPaste={onPasteNode}
+                onDuplicate={onDuplicateNode}
+                onDelete={onDeleteNode}
+                canPaste={canPaste}
               >
                 {wrappedChild}
               </SortableNodeWrapper>
