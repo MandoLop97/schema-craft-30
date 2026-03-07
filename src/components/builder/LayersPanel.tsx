@@ -336,6 +336,7 @@ export function LayersPanel({
   onDuplicateNode,
   onDeleteNode,
   onMoveNode,
+  onRenameNode,
 }: LayersPanelProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
