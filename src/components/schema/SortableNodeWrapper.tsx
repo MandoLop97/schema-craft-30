@@ -119,6 +119,10 @@ export function SortableNodeWrapper({ nodeId, children, isSelected, nodeType, on
           <CopyPlus className="h-3.5 w-3.5" /> Duplicar
         </ContextMenuItem>
         <ContextMenuSeparator />
+        <ContextMenuItem onClick={() => onSaveAsTemplate?.(nodeId)} className="gap-2 text-xs">
+          <Save className="h-3.5 w-3.5" /> Guardar como Template
+        </ContextMenuItem>
+        <ContextMenuSeparator />
         <ContextMenuItem onClick={() => onDelete?.(nodeId)} className="gap-2 text-xs text-destructive focus:text-destructive">
           <Trash2 className="h-3.5 w-3.5" /> Eliminar
         </ContextMenuItem>
