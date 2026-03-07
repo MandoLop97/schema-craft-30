@@ -644,6 +644,15 @@ export function BuilderEditorShell({
                   onDelete={handleDelete}
                   onDuplicate={handleDuplicate}
                   onImageUpload={onImageUpload}
+                  device={device}
+                  globalStyles={schema.globalStyles}
+                  onUpdateAppliedGlobalStyles={(ids) => {
+                    if (!selectedNodeId) return;
+                    updateSchema((s) => {
+                      s.nodes[selectedNodeId].appliedGlobalStyles = ids.length > 0 ? ids : undefined;
+                      return s;
+                    });
+                  }}
                   onUpdateCustomCSS={(css) => {
                     if (!selectedNodeId) return;
                     updateSchema((s) => {
