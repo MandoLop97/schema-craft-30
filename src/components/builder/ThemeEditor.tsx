@@ -1,9 +1,9 @@
-import { useState } from 'react';
 import { ThemeTokens } from '@/types/schema';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Slider } from '@/components/ui/slider';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Paintbrush } from 'lucide-react';
 
@@ -61,6 +61,19 @@ function hexToHsl(hex: string): string {
   }
 }
 
+/** Parse HSL string "H S% L%" into [h, s, l] numbers */
+function parseHsl(hsl: string): [number, number, number] {
+  const parts = hsl.replace(/%/g, '').trim().split(/\s+/).map(Number);
+  return [parts[0] || 0, parts[1] || 0, parts[2] || 50];
+}
+
+/** Parse a CSS rem/px value to a number */
+function parseUnit(value: string): { num: number; unit: string } {
+  const match = value.match(/^([\d.]+)\s*(rem|px|em|%)$/);
+  if (match) return { num: parseFloat(match[1]), unit: match[2] };
+  return { num: parseFloat(value) || 0, unit: 'rem' };
+}
+
 function ThemeColorField({
   label,
   value,
@@ -71,45 +84,94 @@ function ThemeColorField({
   onChange: (v: string) => void;
 }) {
   const hexColor = hslStringToHex(value);
+  const [h, s, l] = parseHsl(value);
+
+  const updateHsl = (newH: number, newS: number, newL: number) => {
+    onChange(`${Math.round(newH)} ${Math.round(newS)}% ${Math.round(newL)}%`);
+  };
 
   return (
-    <div className="flex items-center gap-2">
-      <Popover>
-        <PopoverTrigger asChild>
-          <button
-            className="h-7 w-7 rounded-md border border-border shrink-0 cursor-pointer transition-shadow hover:ring-2 hover:ring-primary/20"
-            style={{ backgroundColor: hexColor }}
-          />
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-3" side="left" align="start">
-          <div className="space-y-2">
-            <input
-              type="color"
-              value={hexColor}
-              onChange={(e) => onChange(hexToHsl(e.target.value))}
-              className="h-8 w-8 rounded cursor-pointer border-0 p-0 bg-transparent"
+    <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        <Popover>
+          <PopoverTrigger asChild>
+            <button
+              className="h-7 w-7 rounded-md border border-border shrink-0 cursor-pointer transition-shadow hover:ring-2 hover:ring-primary/20"
+              style={{ backgroundColor: hexColor }}
             />
-            <div className="grid grid-cols-6 gap-1">
-              {PRESET_COLORS.map((c) => (
-                <button
-                  key={c}
-                  className="h-5 w-5 rounded border border-border cursor-pointer transition-transform hover:scale-110"
-                  style={{ backgroundColor: c }}
-                  onClick={() => onChange(hexToHsl(c))}
-                />
-              ))}
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-3" side="left" align="start">
+            <div className="space-y-2">
+              <input
+                type="color"
+                value={hexColor}
+                onChange={(e) => onChange(hexToHsl(e.target.value))}
+                className="h-8 w-8 rounded cursor-pointer border-0 p-0 bg-transparent"
+              />
+              <div className="grid grid-cols-6 gap-1">
+                {PRESET_COLORS.map((c) => (
+                  <button
+                    key={c}
+                    className="h-5 w-5 rounded border border-border cursor-pointer transition-transform hover:scale-110"
+                    style={{ backgroundColor: c }}
+                    onClick={() => onChange(hexToHsl(c))}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-        </PopoverContent>
-      </Popover>
-      <div className="flex-1 min-w-0">
-        <Label className="text-[9px] uppercase tracking-wider text-muted-foreground">{label}</Label>
-        <Input
-          className="h-6 text-[11px] font-mono"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-        />
+          </PopoverContent>
+        </Popover>
+        <div className="flex-1 min-w-0">
+          <Label className="text-[9px] uppercase tracking-wider text-muted-foreground">{label}</Label>
+          <Input
+            className="h-6 text-[11px] font-mono"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+          />
+        </div>
       </div>
+      {/* HSL Sliders */}
+      <div className="pl-9 space-y-1.5">
+        <SliderRow label="H" value={h} min={0} max={360} onChange={(v) => updateHsl(v, s, l)} />
+        <SliderRow label="S" value={s} min={0} max={100} suffix="%" onChange={(v) => updateHsl(h, v, l)} />
+        <SliderRow label="L" value={l} min={0} max={100} suffix="%" onChange={(v) => updateHsl(h, s, v)} />
+      </div>
+    </div>
+  );
+}
+
+/** Compact slider row with label, slider, and value */
+function SliderRow({
+  label,
+  value,
+  min,
+  max,
+  step = 1,
+  suffix = '',
+  onChange,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  step?: number;
+  suffix?: string;
+  onChange: (v: number) => void;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-[9px] font-mono text-muted-foreground w-3 shrink-0">{label}</span>
+      <Slider
+        min={min}
+        max={max}
+        step={step}
+        value={[value]}
+        onValueChange={([v]) => onChange(v)}
+        className="flex-1"
+      />
+      <span className="text-[10px] font-mono text-muted-foreground w-10 text-right shrink-0">
+        {step < 1 ? value.toFixed(2) : Math.round(value)}{suffix}
+      </span>
     </div>
   );
 }
@@ -127,6 +189,84 @@ function ThemeTextField({
     <div className="grid gap-0.5">
       <Label className="text-[9px] uppercase tracking-wider text-muted-foreground">{label}</Label>
       <Input className="h-7 text-[11px]" value={value} onChange={(e) => onChange(e.target.value)} />
+    </div>
+  );
+}
+
+/** Text field + slider for rem/px values */
+function ThemeUnitField({
+  label,
+  value,
+  onChange,
+  min = 0,
+  max = 4,
+  step = 0.05,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  min?: number;
+  max?: number;
+  step?: number;
+}) {
+  const { num, unit } = parseUnit(value);
+
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center gap-2">
+        <div className="flex-1 min-w-0">
+          <Label className="text-[9px] uppercase tracking-wider text-muted-foreground">{label}</Label>
+          <Input className="h-7 text-[11px]" value={value} onChange={(e) => onChange(e.target.value)} />
+        </div>
+      </div>
+      <Slider
+        min={min}
+        max={max}
+        step={step}
+        value={[num]}
+        onValueChange={([v]) => onChange(`${v}${unit}`)}
+      />
+    </div>
+  );
+}
+
+/** Number field + slider for plain numbers */
+function ThemeNumberField({
+  label,
+  value,
+  onChange,
+  min = 0,
+  max = 5,
+  step = 0.05,
+}: {
+  label: string;
+  value: number;
+  onChange: (v: number) => void;
+  min?: number;
+  max?: number;
+  step?: number;
+}) {
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center gap-2">
+        <div className="flex-1 min-w-0">
+          <Label className="text-[9px] uppercase tracking-wider text-muted-foreground">{label}</Label>
+          <Input
+            className="h-7 text-[11px]"
+            type="number"
+            step={step}
+            value={value}
+            onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+          />
+        </div>
+      </div>
+      <Slider
+        min={min}
+        max={max}
+        step={step}
+        value={[value]}
+        onValueChange={([v]) => onChange(v)}
+      />
     </div>
   );
 }
@@ -156,7 +296,7 @@ export function ThemeEditor({ themeTokens, onUpdate }: ThemeEditorProps) {
         <div className="p-3 space-y-1">
           {/* Colors */}
           <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Colores</p>
-          <div className="space-y-2">
+          <div className="space-y-3">
             <ThemeColorField label="Primary" value={themeTokens.colors.primary} onChange={(v) => update(['colors', 'primary'], v)} />
             <ThemeColorField label="Secondary" value={themeTokens.colors.secondary} onChange={(v) => update(['colors', 'secondary'], v)} />
             <ThemeColorField label="Background" value={themeTokens.colors.background} onChange={(v) => update(['colors', 'background'], v)} />
@@ -169,32 +309,46 @@ export function ThemeEditor({ themeTokens, onUpdate }: ThemeEditorProps) {
 
           {/* Typography */}
           <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Tipografía</p>
-          <div className="space-y-2">
+          <div className="space-y-3">
             <ThemeTextField label="Font Family" value={themeTokens.typography.fontFamily} onChange={(v) => update(['typography', 'fontFamily'], v)} />
-            <ThemeTextField label="Base Size" value={themeTokens.typography.baseSize} onChange={(v) => update(['typography', 'baseSize'], v)} />
-            <ThemeTextField label="Heading Scale" value={String(themeTokens.typography.headingScale)} onChange={(v) => update(['typography', 'headingScale'], parseFloat(v) || 1.25)} />
+            <ThemeUnitField
+              label="Base Size"
+              value={themeTokens.typography.baseSize}
+              onChange={(v) => update(['typography', 'baseSize'], v)}
+              min={8}
+              max={32}
+              step={1}
+            />
+            <ThemeNumberField
+              label="Heading Scale"
+              value={themeTokens.typography.headingScale}
+              onChange={(v) => update(['typography', 'headingScale'], v)}
+              min={1}
+              max={2}
+              step={0.05}
+            />
           </div>
 
           <Separator className="my-3" />
 
           {/* Radius */}
           <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Bordes</p>
-          <div className="space-y-2">
-            <ThemeTextField label="SM" value={themeTokens.radius.sm} onChange={(v) => update(['radius', 'sm'], v)} />
-            <ThemeTextField label="MD" value={themeTokens.radius.md} onChange={(v) => update(['radius', 'md'], v)} />
-            <ThemeTextField label="LG" value={themeTokens.radius.lg} onChange={(v) => update(['radius', 'lg'], v)} />
+          <div className="space-y-3">
+            <ThemeUnitField label="SM" value={themeTokens.radius.sm} onChange={(v) => update(['radius', 'sm'], v)} min={0} max={2} step={0.05} />
+            <ThemeUnitField label="MD" value={themeTokens.radius.md} onChange={(v) => update(['radius', 'md'], v)} min={0} max={3} step={0.05} />
+            <ThemeUnitField label="LG" value={themeTokens.radius.lg} onChange={(v) => update(['radius', 'lg'], v)} min={0} max={4} step={0.05} />
           </div>
 
           <Separator className="my-3" />
 
           {/* Spacing */}
           <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Espaciado</p>
-          <div className="space-y-2">
-            <ThemeTextField label="XS" value={themeTokens.spacing.xs} onChange={(v) => update(['spacing', 'xs'], v)} />
-            <ThemeTextField label="SM" value={themeTokens.spacing.sm} onChange={(v) => update(['spacing', 'sm'], v)} />
-            <ThemeTextField label="MD" value={themeTokens.spacing.md} onChange={(v) => update(['spacing', 'md'], v)} />
-            <ThemeTextField label="LG" value={themeTokens.spacing.lg} onChange={(v) => update(['spacing', 'lg'], v)} />
-            <ThemeTextField label="XL" value={themeTokens.spacing.xl} onChange={(v) => update(['spacing', 'xl'], v)} />
+          <div className="space-y-3">
+            <ThemeUnitField label="XS" value={themeTokens.spacing.xs} onChange={(v) => update(['spacing', 'xs'], v)} min={0} max={2} step={0.05} />
+            <ThemeUnitField label="SM" value={themeTokens.spacing.sm} onChange={(v) => update(['spacing', 'sm'], v)} min={0} max={3} step={0.05} />
+            <ThemeUnitField label="MD" value={themeTokens.spacing.md} onChange={(v) => update(['spacing', 'md'], v)} min={0} max={4} step={0.05} />
+            <ThemeUnitField label="LG" value={themeTokens.spacing.lg} onChange={(v) => update(['spacing', 'lg'], v)} min={0} max={6} step={0.1} />
+            <ThemeUnitField label="XL" value={themeTokens.spacing.xl} onChange={(v) => update(['spacing', 'xl'], v)} min={0} max={8} step={0.1} />
           </div>
         </div>
       </ScrollArea>
