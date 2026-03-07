@@ -1041,6 +1041,9 @@ function PropsTab({ node, onUpdateProps, onUpdateStyle, onImageUpload }: { node:
         }
         return null;
       })()}
+
+      {/* Quick positioning for absolute/fixed nodes */}
+      <PositionAnchorControls node={node} onUpdateStyle={onUpdateStyle} />
     </div>
   );
 }
