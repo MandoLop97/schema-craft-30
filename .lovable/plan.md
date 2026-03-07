@@ -1,102 +1,122 @@
 
-## Instrucción permanente: Versionado automático
 
-**IMPORTANTE**: Cada vez que se haga un cambio en el proyecto, incrementar la versión en:
-1. `package.json` → campo `"version"`
-2. `src/components/builder/BuilderEditorShell.tsx` → texto de versión en el status bar
+## Plan: Paridad con Elementor Pro — 7 funcionalidades
 
-Formato: semver (major.minor.patch). Incrementar el **patch** (+1) en cada cambio. Versión actual: **1.2.1**
+Este es un conjunto grande de mejoras. Se implementarán en orden de impacto y complejidad.
 
 ---
 
-## Phase 1: Schema-First Foundation + eCommerce Home
+### 1. Responsive Editing por Breakpoint
 
-### Overview
-Build the core schema system, page renderer, storage layer, and a clean eCommerce Home page — all driven by JSON schema. This foundation makes Phase 2 (Builder UI) straightforward to add.
+**Qué**: Iconos de dispositivo (desktop/tablet/mobile) junto a cada campo de estilo en el Inspector. Al cambiar dispositivo, los valores se editan dentro de `node.style.responsive.{sm|md|lg}`.
 
----
+**Cómo**:
+- Pasar el `device` actual del `BuilderEditorShell` al `Inspector` como nueva prop
+- En `StyleTab`, envolver cada campo con un componente `ResponsiveFieldWrapper` que muestra 3 iconos (Monitor/Tablet/Smartphone) como toggle
+- Cuando el breakpoint activo no es "desktop", los cambios se escriben en `style.responsive[bp]` en vez de en `style` directo
+- Mostrar un indicador visual (punto azul) cuando un campo tiene override responsive
 
-### 1. Schema Types & Data Model
-Define TypeScript types for the entire schema system:
-- **Page** (id, slug, name, schemaId)
-- **Schema** (id, version, updatedAt, themeTokens, rootNodeId, nodes map)
-- **Node** (id, type, props, style, children, locked, hidden)
-- **ThemeTokens** (colors, typography, radius, spacing)
-- Support all node types: Section, Container, Grid, Stack, Text, Image, Button, Card, Badge, Divider, Input, ProductCard, Navbar, Footer
-
-### 2. Schema Store (LocalStorage)
-Create an abstraction layer (`SchemaStore`) with clean API:
-- `getPages()`, `getPageBySlug()`, `getSchema()`, `saveSchema()`
-- `createPage()`, `duplicatePage()`, `deletePage()`, `renamePage()`
-- All backed by LocalStorage, designed so swapping to a database later only changes the store internals
-
-### 3. Node Registry & Components
-Build a component for each node type, all receiving props/style from schema:
-- **Layout**: Section, Container, Grid, Stack
-- **Content**: Text, Image, Divider, Badge
-- **UI**: Button, Card, Input
-- **Commerce**: ProductCard (mock with image, title, price, CTA)
-- **Site**: Navbar, Footer
-
-### 4. PageRenderer
-Core rendering engine:
-- Takes a schema + mode (`public` | `preview` | `edit`)
-- Recursively renders nodes from the tree using the Node Registry
-- In `public`/`preview` mode: clean output, no editing UI
-- In `edit` mode: adds selection outlines and drop zones (prepared for Phase 2)
-- Applies ThemeTokens as CSS variables
-
-### 5. eCommerce Home Page (Schema-based)
-Create a default `home` schema that produces a modern eCommerce landing page:
-- **Navbar** with logo and navigation links
-- **Hero section** with headline, subtext, and CTA button
-- **Featured products grid** with 3-4 ProductCard mocks
-- **Value propositions** section (icons + text)
-- **Footer** with links and copyright
-- Clean, minimal design inspired by modern eCommerce (think Stripe/Linear aesthetics)
-
-### 6. Route Setup
-- `/` → Renders Home from schema via PageRenderer (public mode)
-- `/preview?page=home` → Same but in preview mode
-- `/admin/export?page=home` → Shows raw JSON schema with copy button
-- `/license-blocked` → Placeholder lock screen
-
-### 7. License Gate (Mock)
-- `license_status` stored in LocalStorage (active/inactive/exceeded)
-- Admin routes check license; public site always works
-- `/license-blocked` shows status, reason, and placeholder "Enter License" button
+**Archivos**: `Inspector.tsx`, `BuilderEditorShell.tsx`
 
 ---
 
-### What's NOT in Phase 1 (saved for Phase 2)
-- Full Builder UI (drag & drop canvas, left/right sidebars, inspector)
-- Undo/Redo history
-- AI Edit feature
-- Templates management (`/admin/templates`)
-- Theme editor (`/admin/theme`)
-- Device toggle & responsive overrides
+### 2. States Editing UI (Normal/Hover/Focus/Active)
 
-### Design Style
-Minimal, professional SaaS aesthetic — light background, clean typography, subtle borders, polished hover states.
+**Qué**: Tabs de estado en la parte superior de `StyleTab` para editar estilos por pseudo-estado.
 
-## ⚠️ REGLA FUNDAMENTAL: Alcance del proyecto
+**Cómo**:
+- Agregar un selector de estado (Normal | Hover | Focus | Active) al inicio de `StyleTab`
+- Cuando un estado != "normal" está activo, los campos leen/escriben desde `style.hover`, `style.focus` o `style.active`
+- Reutilizar los mismos campos existentes (`renderField`, `renderSelect`, `ColorField`) pero redirigiendo la lectura/escritura al sub-objeto del estado activo
+- Eliminar la sección colapsable "Estado: Hover" actual (se reemplaza por los tabs)
 
-**Este proyecto es un CONSTRUCTOR VISUAL (Builder) al 100%.** Su única responsabilidad es:
-1. Permitir diseñar y personalizar visualmente: **Header (Navbar)**, **Footer** y **Product Cards**
-2. Generar y guardar esquemas JSON en la base de datos
-3. Previsualizar el resultado en el canvas
-
-**NO es responsabilidad de este proyecto:**
-- Administrar productos (CRUD de productos) — eso lo hace la app consumidora (Template)
-- Gestionar inventario, pedidos o usuarios finales
-- Lógica de negocio, licencias o acceso al sitio final
-- Los productos y medios se **leen** de la base de datos para usarlos en el diseño, pero **no se crean ni editan** desde aquí
-
-**Los únicos componentes 100% editables/personalizables en el Builder son:**
-- **Navbar/Header**: logo, links, colores, estilos
-- **Footer**: logo, copyright, links, estilos  
-- **Product Cards**: layout, estilos, botones, imagen ratio, tipografía
-
-Las demás secciones del canvas (Hero, Sections, Grids, etc.) son bloques de contenido arrastrables y configurables pero NO tienen editores dedicados.
+**Archivos**: `Inspector.tsx`
 
 ---
+
+### 3. Previsualización de Hover en Canvas
+
+**Qué**: Al hacer hover sobre un nodo en edit mode, aplicar visualmente los estilos hover definidos en el schema.
+
+**Cómo**:
+- Ya se generan reglas CSS con `generatePseudoStateCSS` inyectadas via `<style>`. Estas reglas ya usan `:hover`
+- El problema es que `SortableNodeWrapper` bloquea el hover del elemento interior por sus propias capas
+- Agregar `pointer-events: auto` al nodo interior dentro del wrapper y asegurar que el `data-node-id` esté en el elemento correcto
+- Verificar que las reglas CSS pseudo generadas aplican correctamente en edit mode
+
+**Archivos**: `SortableNodeWrapper.tsx`, `PageRenderer.tsx`
+
+---
+
+### 4. Motion Effects (Scroll Animations)
+
+**Qué**: Animaciones de entrada al scroll (fade in, slide up, scale in) configurables por nodo.
+
+**Cómo**:
+- Agregar prop `scrollAnimation` al tipo `NodeProps`: `'fadeIn' | 'slideUp' | 'slideLeft' | 'scaleIn' | 'none'`
+- Agregar prop `scrollAnimationDelay` y `scrollAnimationDuration`
+- En `Inspector.tsx` (PropsTab o StyleTab), agregar sección "Animación al Scroll" con selector de efecto + delay + duración
+- Crear un componente wrapper `ScrollAnimationWrapper` que usa `IntersectionObserver` para agregar clase CSS cuando el nodo entra al viewport
+- En `PageRenderer`, envolver nodos que tengan `scrollAnimation` con este wrapper (solo en modo public/preview, no edit)
+- Definir los keyframes CSS necesarios en `index.css`
+
+**Archivos**: `Inspector.tsx`, `PageRenderer.tsx`, nuevo `src/components/schema/ScrollAnimationWrapper.tsx`, `index.css`, `schema.ts` (agregar tipos)
+
+---
+
+### 5. Copiar/Pegar Estilos
+
+**Qué**: "Copy Style" y "Paste Style" en el menú contextual de nodos.
+
+**Cómo**:
+- Agregar `clipboardStyleRef` en `BuilderEditorShell` para guardar un snapshot de `NodeStyle`
+- Nuevos callbacks `onCopyStyle(nodeId)` y `onPasteStyle(nodeId)` que copian/pegan `node.style` completo
+- Agregar opciones "Copiar Estilo" y "Pegar Estilo" al `ContextMenu` en `SortableNodeWrapper`
+- Shortcut: Ctrl+Alt+C / Ctrl+Alt+V
+
+**Archivos**: `BuilderEditorShell.tsx`, `SortableNodeWrapper.tsx`, `BuilderCanvas.tsx`, `PageRenderer.tsx`
+
+---
+
+### 6. Global Styles / Clases Reutilizables
+
+**Qué**: Sistema de clases globales (ej. "heading-style-1") definidas en el schema y aplicables a múltiples nodos.
+
+**Cómo**:
+- Agregar `globalStyles` al tipo `Schema`: `Record<string, { label: string; style: Partial<NodeStyle> }>`
+- Agregar `appliedGlobalStyles` a `SchemaNode`: `string[]` (IDs de global styles aplicados)
+- En `ThemeEditor`, nueva sección "Estilos Globales" para crear/editar/eliminar clases
+- En `Inspector`, mostrar selector de clases globales aplicadas al nodo, con indicador visual
+- En `PageRenderer`/`style-utils`, mezclar estilos globales con estilos locales del nodo (local tiene prioridad)
+
+**Archivos**: `schema.ts`, `ThemeEditor.tsx`, `Inspector.tsx`, `PageRenderer.tsx`, `style-utils.ts`
+
+---
+
+### 7. Responsive Preview Ruler
+
+**Qué**: Mostrar dimensiones actuales (ej. "768 × 1024") en el canvas al cambiar de dispositivo.
+
+**Cómo**:
+- En `BuilderCanvas.tsx`, agregar un badge/label encima del canvas que muestre el ancho actual según el device seleccionado
+- Formato: "375px" (mobile), "768px" (tablet), "100%" (desktop)
+- Estilos sutiles, tooltip con nombre del breakpoint
+
+**Archivos**: `BuilderCanvas.tsx`
+
+---
+
+### Orden de implementación
+
+1. Responsive Preview Ruler (más simple, impacto visual rápido)
+2. States Editing UI (reemplaza sección Hover actual)
+3. Responsive Editing por Breakpoint
+4. Previsualización de Hover en Canvas
+5. Copiar/Pegar Estilos
+6. Motion Effects (Scroll Animations)
+7. Global Styles / Clases Reutilizables
+
+### Estimación
+
+~12 archivos modificados/creados. Cambios concentrados en `Inspector.tsx` (~40% del trabajo), `BuilderEditorShell.tsx`, `SortableNodeWrapper.tsx`, `BuilderCanvas.tsx`, `PageRenderer.tsx` y `schema.ts`.
+
