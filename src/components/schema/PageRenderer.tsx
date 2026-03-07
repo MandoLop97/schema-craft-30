@@ -5,6 +5,7 @@ import { EditableDropZone } from './EditableDropZone';
 import { SortableNodeWrapper } from './SortableNodeWrapper';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { getBlockDef } from '@/lib/block-registry';
+import { generatePseudoStateCSS, generateResponsiveCSS } from '@/lib/style-utils';
 
 /** Given an HSL string like "222 84% 4.9%", returns a contrasting foreground HSL */
 function computeContrastForeground(hsl: string): string {
