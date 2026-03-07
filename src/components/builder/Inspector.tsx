@@ -17,6 +17,7 @@ interface InspectorProps {
   onUpdateProps: (props: Partial<NodeProps>) => void;
   onUpdateStyle: (style: Partial<NodeStyle>) => void;
   onDelete: () => void;
+  onDuplicate?: () => void;
 }
 
 function PropField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
