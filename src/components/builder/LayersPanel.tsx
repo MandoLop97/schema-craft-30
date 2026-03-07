@@ -33,6 +33,7 @@ interface LayersPanelProps {
   onDuplicateNode?: (nodeId: string) => void;
   onDeleteNode?: (nodeId: string) => void;
   onMoveNode?: (nodeId: string, newParentId: string, index: number) => void;
+  onRenameNode?: (nodeId: string, newName: string) => void;
 }
 
 /** Depth-based accent colors for tree lines */
