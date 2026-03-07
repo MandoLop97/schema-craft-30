@@ -298,8 +298,29 @@ export function ProductGridNode({ node, mode }: NodeComponentProps) {
     return <Component key={n.id} node={n} mode="public" renderChildren={renderChildren} />;
   };
 
-  // Edit mode: show placeholder grid
+  // Edit mode: show real template cards (non-interactive) or fallback placeholders
   if (mode === 'edit') {
+    // If template + products loaded, render real cards in edit mode too
+    if (!loading && templateData && hydratedCards.length > 0) {
+      return (
+        <div
+          data-node-id={node.id}
+          style={{
+            ...s(node.style),
+            display: 'grid',
+            gridTemplateColumns: `repeat(${columns}, 1fr)`,
+          }}
+        >
+          {hydratedCards.slice(0, columns).map(({ rootId, nodes }) => (
+            <div key={rootId} style={{ pointerEvents: 'none' }}>
+              {renderHydratedNode(rootId, nodes)}
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    // Fallback: loading or no data yet
     return (
       <div
         data-node-id={node.id}
@@ -327,7 +348,7 @@ export function ProductGridNode({ node, mode }: NodeComponentProps) {
           >
             <span style={{ fontSize: '2rem' }}>🛍️</span>
             <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
-              Product {i + 1}
+              {loading ? '⏳' : `Product ${i + 1}`}
             </span>
           </div>
         ))}
