@@ -1,4 +1,5 @@
 // Schema-First Data Model for Nexora Visual Builder
+import React from 'react';
 
 export type BuiltInNodeType =
   | 'Section' | 'Container' | 'Grid' | 'Stack'

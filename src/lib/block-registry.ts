@@ -130,8 +130,19 @@ export function getCategories(): string[] {
   return [...new Set(blockRegistry.map((b) => b.category))];
 }
 
-export function getBlocksByCategory(category: string): BlockDefinition[] {
-  return blockRegistry.filter((b) => b.category === category);
+export function getBlocksByCategory(category: string, templateType?: TemplateType): BlockDefinition[] {
+  return blockRegistry.filter((b) => {
+    if (b.category !== category) return false;
+    if (templateType && b.allowedTemplateTypes && b.allowedTemplateTypes.length > 0) {
+      return b.allowedTemplateTypes.includes(templateType);
+    }
+    return true;
+  });
+}
+
+/** Get categories that have at least one block for the given templateType */
+export function getCategoriesForTemplate(templateType?: TemplateType): string[] {
+  return getCategories().filter((cat) => getBlocksByCategory(cat, templateType).length > 0);
 }
 
 /**
