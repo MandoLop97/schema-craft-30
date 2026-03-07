@@ -1,4 +1,5 @@
-import { ThemeTokens } from '@/types/schema';
+import { useState } from 'react';
+import { ThemeTokens, GlobalStyleDef, NodeStyle } from '@/types/schema';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
@@ -6,12 +7,16 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Slider } from '@/components/ui/slider';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Paintbrush } from 'lucide-react';
+import { Paintbrush, Plus, Trash2, Edit2, Check, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { GradientEditor } from './GradientEditor';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface ThemeEditorProps {
   themeTokens: ThemeTokens;
   onUpdate: (tokens: ThemeTokens) => void;
+  globalStyles?: Record<string, GlobalStyleDef>;
+  onUpdateGlobalStyles?: (styles: Record<string, GlobalStyleDef>) => void;
 }
 
 const PRESET_COLORS = [
