@@ -168,3 +168,5 @@ export interface PageDefinition {
 }
 
 export type RenderMode = 'public' | 'preview' | 'edit';
+
+export type TemplateType = 'page' | 'header' | 'footer' | 'component' | 'single';
