@@ -24,7 +24,13 @@ export function TopBar({ onSave, onUndo, onRedo, canUndo, canRedo, onPreview, on
   const locale = t();
 
   return (
-    <div className="h-12 border-b flex items-center px-3 gap-1 shrink-0" style={{ backgroundColor: 'hsla(210, 60%, 50%, 0.08)' }}>
+    <div
+      className="h-12 border-b flex items-center px-3 gap-1 shrink-0 backdrop-blur-md"
+      style={{
+        backgroundColor: 'hsl(var(--background) / 0.8)',
+        boxShadow: '0 1px 20px hsl(var(--primary) / 0.04), 0 1px 3px hsl(var(--border) / 0.3)',
+      }}
+    >
       {onBack && (
         <Button variant="ghost" size="icon" onClick={onBack} title="Back" className="transition-transform active:scale-90 mr-0.5">
           <ArrowLeft className="h-4 w-4" />
@@ -34,7 +40,12 @@ export function TopBar({ onSave, onUndo, onRedo, canUndo, canRedo, onPreview, on
       {pageTitle && (
         <>
           <span className="text-muted-foreground/50 text-sm mx-0.5">/</span>
-          <span className="text-xs font-medium text-muted-foreground truncate max-w-[160px] bg-muted/60 px-2 py-0.5 rounded-md">{pageTitle}</span>
+          <span
+            className="text-xs font-medium text-muted-foreground truncate max-w-[160px] px-2 py-0.5 rounded-md"
+            style={{ backgroundColor: 'hsl(var(--muted) / 0.6)', backdropFilter: 'blur(4px)' }}
+          >
+            {pageTitle}
+          </span>
         </>
       )}
       <Separator orientation="vertical" className="h-5 ml-2" />
@@ -48,7 +59,10 @@ export function TopBar({ onSave, onUndo, onRedo, canUndo, canRedo, onPreview, on
 
       <Separator orientation="vertical" className="h-5" />
 
-      <div className="flex items-center bg-muted/50 rounded-md p-0.5 gap-0.5">
+      <div
+        className="flex items-center rounded-lg p-0.5 gap-0.5"
+        style={{ backgroundColor: 'hsl(var(--muted) / 0.5)' }}
+      >
         {(['desktop', 'tablet', 'mobile'] as const).map((d) => {
           const Icon = d === 'desktop' ? Monitor : d === 'tablet' ? Tablet : Smartphone;
           return (
@@ -57,7 +71,12 @@ export function TopBar({ onSave, onUndo, onRedo, canUndo, canRedo, onPreview, on
               variant="ghost"
               size="icon"
               onClick={() => onDeviceChange(d)}
-              className={`h-7 w-7 transition-all duration-200 active:scale-90 ${device === d ? 'bg-background shadow-sm' : ''}`}
+              className={`h-7 w-7 transition-all duration-200 active:scale-90 ${
+                device === d
+                  ? 'bg-background shadow-sm'
+                  : ''
+              }`}
+              style={device === d ? { boxShadow: '0 1px 4px hsl(var(--primary) / 0.1)' } : undefined}
             >
               <Icon className="h-3.5 w-3.5" />
             </Button>
@@ -74,7 +93,13 @@ export function TopBar({ onSave, onUndo, onRedo, canUndo, canRedo, onPreview, on
         <Download className="h-3.5 w-3.5" /> {locale.export}
       </Button>
       <Separator orientation="vertical" className="h-5" />
-      <Button size="sm" variant="outline" onClick={onSave} className="gap-1.5 text-xs h-7 transition-transform active:scale-95">
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={onSave}
+        className="gap-1.5 text-xs h-7 transition-all active:scale-95"
+        style={{ borderColor: 'hsl(var(--border) / 0.6)' }}
+      >
         <Save className="h-3.5 w-3.5" />
         {locale.save}
         {dirty && (
@@ -84,10 +109,21 @@ export function TopBar({ onSave, onUndo, onRedo, canUndo, canRedo, onPreview, on
           />
         )}
       </Button>
-      <Button size="sm" variant="outline" onClick={onSaveDraft} className="gap-1.5 text-xs h-7 transition-transform active:scale-95">
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={onSaveDraft}
+        className="gap-1.5 text-xs h-7 transition-all active:scale-95"
+        style={{ borderColor: 'hsl(var(--border) / 0.6)' }}
+      >
         {locale.saveDraft}
       </Button>
-      <Button size="sm" onClick={onPublish} className="gap-1.5 text-xs h-7 bg-primary text-primary-foreground hover:bg-primary/90 transition-transform active:scale-95">
+      <Button
+        size="sm"
+        onClick={onPublish}
+        className="gap-1.5 text-xs h-7 bg-primary text-primary-foreground hover:bg-primary/90 transition-all active:scale-95"
+        style={{ boxShadow: '0 2px 8px hsl(var(--primary) / 0.2)' }}
+      >
         <Globe className="h-3.5 w-3.5" /> {locale.publish}
       </Button>
     </div>
