@@ -82,6 +82,7 @@ export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode, cu
           onDuplicateNode={onDuplicateNode}
           onDeleteNode={onDeleteNode}
           canPaste={canPaste}
+          onEditSection={onEditSection}
         />
       </div>
     </div>
