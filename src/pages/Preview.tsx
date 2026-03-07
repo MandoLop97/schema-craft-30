@@ -1,14 +1,38 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { PageRenderer } from '@/components/schema/PageRenderer';
 import { Schema } from '@/types/schema';
 
-/**
- * Preview page — renders draft content directly from page_schemas (Supabase).
- * Composes: Header + Page Content + Footer
- * Route: /preview or /preview/:slug
- */
+/** Remove Navbar/Footer root nodes from a page schema to avoid duplicates with global header/footer */
+function stripSiteNodes(schema: Schema, hasHeader: boolean, hasFooter: boolean): Schema {
+  if (!hasHeader && !hasFooter) return schema;
+  const siteTypes = new Set<string>();
+  if (hasHeader) { siteTypes.add('Navbar'); siteTypes.add('AnnouncementBar'); }
+  if (hasFooter) siteTypes.add('Footer');
+
+  const rootNode = schema.nodes[schema.rootNodeId];
+  if (!rootNode?.children) return schema;
+
+  const removedIds = new Set(
+    rootNode.children.filter(id => {
+      const node = schema.nodes[id];
+      return node && siteTypes.has(node.type);
+    })
+  );
+
+  if (removedIds.size === 0) return schema;
+
+  const newNodes = { ...schema.nodes };
+  newNodes[schema.rootNodeId] = {
+    ...rootNode,
+    children: rootNode.children.filter(id => !removedIds.has(id)),
+  };
+  removedIds.forEach(id => delete newNodes[id]);
+
+  return { ...schema, nodes: newNodes };
+}
+
 const Preview = () => {
   const { slug } = useParams<{ slug: string }>();
   const pageSlug = slug || 'home';
@@ -26,7 +50,6 @@ const Preview = () => {
       setLoading(true);
       setNotFound(false);
 
-      // Fetch page, header, and footer in parallel
       const [pageRes, headerRes, footerRes] = await Promise.all([
         supabase.from('page_schemas').select('schema_json').eq('slug', pageSlug).maybeSingle(),
         supabase.from('page_schemas').select('schema_json').eq('slug', '__global/header').maybeSingle(),
@@ -51,6 +74,11 @@ const Preview = () => {
     return () => { cancelled = true; };
   }, [pageSlug]);
 
+  const cleanPageSchema = useMemo(() => {
+    if (!pageSchema) return null;
+    return stripSiteNodes(pageSchema, !!headerSchema, !!footerSchema);
+  }, [pageSchema, headerSchema, footerSchema]);
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
@@ -59,7 +87,7 @@ const Preview = () => {
     );
   }
 
-  if (notFound || !pageSchema) {
+  if (notFound || !cleanPageSchema) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="text-center">
@@ -74,7 +102,7 @@ const Preview = () => {
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {headerSchema && <PageRenderer schema={headerSchema} mode="preview" />}
       <div style={{ flex: 1 }}>
-        <PageRenderer schema={pageSchema} mode="preview" />
+        <PageRenderer schema={cleanPageSchema} mode="preview" />
       </div>
       {footerSchema && <PageRenderer schema={footerSchema} mode="preview" />}
     </div>
