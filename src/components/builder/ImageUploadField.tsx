@@ -3,8 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { Upload, X, Image as ImageIcon, Loader2, FolderOpen } from 'lucide-react';
 import { toast } from 'sonner';
+import { MediaGallery } from './MediaGallery';
 
 interface ImageUploadFieldProps {
   label: string;
@@ -14,6 +15,7 @@ interface ImageUploadFieldProps {
 
 export function ImageUploadField({ label, value, onChange }: ImageUploadFieldProps) {
   const [uploading, setUploading] = useState(false);
+  const [galleryOpen, setGalleryOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleUpload = async (file: File) => {
@@ -40,6 +42,15 @@ export function ImageUploadField({ label, value, onChange }: ImageUploadFieldPro
       const { data: urlData } = supabase.storage
         .from('builder-assets')
         .getPublicUrl(path);
+
+      // Also register in media_files table
+      await supabase.from('media_files').insert({
+        file_name: file.name,
+        file_url: urlData.publicUrl,
+        file_type: file.type,
+        file_size: file.size,
+        alt_text: file.name.replace(/\.[^/.]+$/, ''),
+      });
 
       onChange(urlData.publicUrl);
       toast.success('Imagen subida');
@@ -72,7 +83,7 @@ export function ImageUploadField({ label, value, onChange }: ImageUploadFieldPro
         </div>
       )}
 
-      {/* Upload button + URL input */}
+      {/* Upload + Gallery + URL */}
       <div className="flex gap-1">
         <Button
           variant="outline"
@@ -82,11 +93,20 @@ export function ImageUploadField({ label, value, onChange }: ImageUploadFieldPro
           onClick={() => fileRef.current?.click()}
         >
           {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
-          {uploading ? 'Subiendo...' : 'Subir'}
+          {uploading ? '...' : 'Subir'}
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="text-[10px] h-7 shrink-0 gap-1"
+          onClick={() => setGalleryOpen(true)}
+        >
+          <FolderOpen className="h-3 w-3" />
+          Galería
         </Button>
         <Input
           className="h-7 text-[10px] flex-1 font-mono"
-          placeholder="URL de imagen..."
+          placeholder="URL..."
           value={value}
           onChange={(e) => onChange(e.target.value)}
         />
@@ -102,6 +122,12 @@ export function ImageUploadField({ label, value, onChange }: ImageUploadFieldPro
           if (file) handleUpload(file);
           e.target.value = '';
         }}
+      />
+
+      <MediaGallery
+        open={galleryOpen}
+        onClose={() => setGalleryOpen(false)}
+        onSelect={(url) => onChange(url)}
       />
     </div>
   );
