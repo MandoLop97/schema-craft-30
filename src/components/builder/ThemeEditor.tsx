@@ -370,26 +370,38 @@ export function ThemeEditor({ themeTokens, onUpdate }: ThemeEditorProps) {
 
           {/* Product Card Layout */}
           <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Tarjeta de Producto</p>
-          <div className="space-y-1">
+          <div className="space-y-2">
             <Label className="text-[9px] uppercase tracking-wider text-muted-foreground">Diseño por defecto</Label>
-            <Select
-              value={themeTokens.defaultCardLayout || 'vertical'}
-              onValueChange={(v) => {
-                const next = JSON.parse(JSON.stringify(themeTokens)) as ThemeTokens;
-                next.defaultCardLayout = v as ThemeTokens['defaultCardLayout'];
-                onUpdate(next);
-              }}
-            >
-              <SelectTrigger className="h-7 text-[11px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="vertical">Vertical</SelectItem>
-                <SelectItem value="horizontal">Horizontal</SelectItem>
-                <SelectItem value="minimal">Minimal</SelectItem>
-                <SelectItem value="overlay">Overlay</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="grid grid-cols-2 gap-2">
+              {([
+                { value: 'vertical', label: 'Vertical', icon: <CardPreviewVertical /> },
+                { value: 'horizontal', label: 'Horizontal', icon: <CardPreviewHorizontal /> },
+                { value: 'minimal', label: 'Minimal', icon: <CardPreviewMinimal /> },
+                { value: 'overlay', label: 'Overlay', icon: <CardPreviewOverlay /> },
+              ] as const).map((opt) => {
+                const isActive = (themeTokens.defaultCardLayout || 'vertical') === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    onClick={() => {
+                      const next = JSON.parse(JSON.stringify(themeTokens)) as ThemeTokens;
+                      next.defaultCardLayout = opt.value as ThemeTokens['defaultCardLayout'];
+                      onUpdate(next);
+                    }}
+                    className={`flex flex-col items-center gap-1.5 rounded-lg border p-2 cursor-pointer transition-all duration-200 ${
+                      isActive
+                        ? 'border-primary bg-primary/5 ring-1 ring-primary/30'
+                        : 'border-border hover:border-primary/40 hover:bg-muted/30'
+                    }`}
+                  >
+                    {opt.icon}
+                    <span className={`text-[10px] font-medium ${isActive ? 'text-primary' : 'text-muted-foreground'}`}>
+                      {opt.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       </ScrollArea>

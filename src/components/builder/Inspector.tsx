@@ -660,6 +660,48 @@ function FormBlockPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: 
   );
 }
 
+/** Card layout selector with inherited vs custom indicator */
+function CardLayoutField({ value, onChange }: { value?: string; onChange: (v: string | undefined) => void }) {
+  const themeTokens = useThemeTokens();
+  const themeDefault = themeTokens?.defaultCardLayout || 'vertical';
+  const isCustom = !!value;
+  const effectiveValue = value || themeDefault;
+
+  return (
+    <div className="grid gap-1">
+      <div className="flex items-center justify-between">
+        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Layout</Label>
+        {isCustom ? (
+          <button
+            onClick={() => onChange(undefined)}
+            className="flex items-center gap-1 text-[9px] text-primary hover:underline cursor-pointer"
+            title="Volver al diseño del tema"
+          >
+            <RotateCcw className="h-2.5 w-2.5" />
+            Heredado
+          </button>
+        ) : (
+          <span className="text-[9px] text-muted-foreground italic">Heredado del tema</span>
+        )}
+      </div>
+      <Select
+        value={effectiveValue}
+        onValueChange={(v) => onChange(v)}
+      >
+        <SelectTrigger className={`h-8 text-xs ${!isCustom ? 'border-dashed' : ''}`}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="vertical">Vertical</SelectItem>
+          <SelectItem value="horizontal">Horizontal</SelectItem>
+          <SelectItem value="minimal">Minimal</SelectItem>
+          <SelectItem value="overlay">Overlay</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
 function ProductCardPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: Partial<NodeProps>) => void }) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const p = node.props;
