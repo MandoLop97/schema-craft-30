@@ -115,6 +115,7 @@ export function NexoraBuilderApp({
   onSaveWithSlug,
   onPublishSubmit,
   locale: localeProp,
+  customComponents,
 }: NexoraBuilderAppProps) {
   // Apply locale
   useEffect(() => {
