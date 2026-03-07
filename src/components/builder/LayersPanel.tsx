@@ -303,6 +303,7 @@ function SortableChildrenList({
   onDeleteNode,
   onMoveNode,
   onRenameNode,
+  onToggleVisibility,
 }: {
   parentNode: SchemaNode;
   schema: Schema;
@@ -314,6 +315,7 @@ function SortableChildrenList({
   onDeleteNode?: (nodeId: string) => void;
   onMoveNode?: (nodeId: string, newParentId: string, index: number) => void;
   onRenameNode?: (nodeId: string, newName: string) => void;
+  onToggleVisibility?: (nodeId: string) => void;
 }) {
   return (
     <SortableContext
@@ -336,6 +338,7 @@ function SortableChildrenList({
             onDeleteNode={onDeleteNode}
             onMoveNode={onMoveNode}
             onRenameNode={onRenameNode}
+            onToggleVisibility={onToggleVisibility}
           />
         );
       })}
