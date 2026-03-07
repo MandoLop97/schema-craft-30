@@ -1,4 +1,4 @@
-import { ChevronDown, EyeOff, Lock, GripVertical } from 'lucide-react';
+import { ChevronDown, EyeOff, Lock, GripVertical, Copy } from 'lucide-react';
 import { useState, useCallback } from 'react';
 import { Schema, SchemaNode } from '@/types/schema';
 import {
