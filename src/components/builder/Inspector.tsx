@@ -1208,7 +1208,7 @@ export function Inspector({ node, onUpdateProps, onUpdateStyle, onDelete, onDupl
             <PropsTab node={node} onUpdateProps={onUpdateProps} onUpdateStyle={onUpdateStyle} onImageUpload={onImageUpload} />
           </TabsContent>
           <TabsContent value="style" className="mt-0">
-            <StyleTab node={node} onUpdateStyle={onUpdateStyle} />
+            <StyleTab node={node} onUpdateStyle={onUpdateStyle} onUpdateCustomCSS={onUpdateCustomCSS} />
           </TabsContent>
         </div>
       </Tabs>
