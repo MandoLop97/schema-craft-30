@@ -1141,6 +1141,19 @@ function StyleTab({ node, onUpdateStyle, onUpdateCustomCSS }: { node: SchemaNode
         {renderSelect('Overflow', 'overflow', ['visible', 'hidden', 'scroll', 'auto'])}
         {renderSelect('Display', 'display', ['block', 'flex', 'grid', 'inline', 'inline-block', 'inline-flex', 'none'])}
       </CollapsibleStyleGroup>
+
+      {/* Custom CSS per widget */}
+      <Separator className="my-1" />
+      <CollapsibleStyleGroup title="CSS Personalizado" defaultOpen={false}>
+        <p className="text-[9px] text-muted-foreground mb-1">CSS aplicado solo a este widget. Usa <code className="bg-muted px-0.5 rounded">selector</code> como referencia al elemento.</p>
+        <Textarea
+          className="text-xs font-mono min-h-[80px]"
+          value={node.customCSS || ''}
+          onChange={(e) => onUpdateCustomCSS?.(e.target.value)}
+          placeholder={`/* Ejemplo */\nselector {\n  box-shadow: 0 4px 12px rgba(0,0,0,0.15);\n}`}
+          rows={5}
+        />
+      </CollapsibleStyleGroup>
     </div>
   );
 }
