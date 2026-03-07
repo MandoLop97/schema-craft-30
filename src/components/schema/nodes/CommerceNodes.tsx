@@ -39,8 +39,6 @@ export function ProductCardNode({ node, mode, renderChildren }: NodeComponentPro
   // ── Legacy monolithic rendering (for backwards compatibility) ──
   const productName = node.props.name || node.props.text || 'Product Name';
   const productImage = node.props.image || node.props.src || '/placeholder.svg';
-  const themeTokens = useThemeTokens();
-  const layout: CardLayout = (node.props.cardLayout as CardLayout) || themeTokens?.defaultCardLayout || 'vertical';
   const btnText = node.props.ctaText || 'Add to Cart';
   const btnVariant = node.props.btnVariant || 'outline';
   const showBadge = node.props.badge;
