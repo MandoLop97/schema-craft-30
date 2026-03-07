@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { SchemaNode, RenderMode, NodeStyle, Schema } from '@/types/schema';
-import { nodeStyleToCSS } from '@/lib/style-utils';
+import { SchemaNode, RenderMode, NodeStyle, Schema, ThemeTokens } from '@/types/schema';
+import { nodeStyleToCSS, generatePseudoStateCSS, generateResponsiveCSS, themeTokensToCSS } from '@/lib/style-utils';
 import { useThemeTokens } from '@/components/schema/ThemeContext';
 import { supabase } from '@/integrations/supabase/client';
 import { hydrateCardTemplate, ProductData } from '@/lib/card-template-utils';
@@ -208,7 +208,7 @@ export function ProductCardNode({ node, mode, renderChildren }: NodeComponentPro
 
 export function ProductGridNode({ node, mode }: NodeComponentProps) {
   const [products, setProducts] = useState<ProductData[]>([]);
-  const [templateData, setTemplateData] = useState<{ nodes: Record<string, SchemaNode>; rootNodeId: string } | null>(null);
+  const [templateData, setTemplateData] = useState<{ nodes: Record<string, SchemaNode>; rootNodeId: string; themeTokens?: ThemeTokens } | null>(null);
   const [loading, setLoading] = useState(true);
 
   const columns = Number(node.props.columns) || 4;
@@ -245,7 +245,7 @@ export function ProductGridNode({ node, mode }: NodeComponentProps) {
 
       if (templateRow?.schema_json) {
         const schema = templateRow.schema_json as unknown as Schema;
-        setTemplateData({ nodes: schema.nodes, rootNodeId: schema.rootNodeId });
+        setTemplateData({ nodes: schema.nodes, rootNodeId: schema.rootNodeId, themeTokens: schema.themeTokens });
       }
 
       setProducts((productsData || []) as ProductData[]);
@@ -269,6 +269,30 @@ export function ProductGridNode({ node, mode }: NodeComponentProps) {
       return { rootId, nodes: cardNodes, productId: product.id };
     });
   }, [templateData, products]);
+
+  // Convert template's themeTokens into scoped CSS custom properties
+  const templateThemeStyle = useMemo<React.CSSProperties>(() => {
+    if (!templateData?.themeTokens) return {};
+    return themeTokensToCSS(templateData.themeTokens);
+  }, [templateData?.themeTokens]);
+
+  // Generate dynamic CSS (pseudo-states, custom CSS) for all hydrated nodes
+  const templateDynamicCSS = useMemo(() => {
+    if (hydratedCards.length === 0) return '';
+    const rules: string[] = [];
+    for (const { nodes } of hydratedCards) {
+      for (const n of Object.values(nodes)) {
+        const pseudo = generatePseudoStateCSS(n.id, n.style);
+        if (pseudo) rules.push(pseudo);
+        const responsive = generateResponsiveCSS(n.id, n.style);
+        if (responsive) rules.push(responsive);
+        if (n.customCSS) {
+          rules.push(n.customCSS.replace(/selector/g, `[data-node-id="${n.id}"]`));
+        }
+      }
+    }
+    return rules.join('\n');
+  }, [hydratedCards]);
 
   const handleAddToCart = (productId: string) => {
     window.dispatchEvent(new CustomEvent('nexora:addToCart', { detail: { productId } }));
@@ -306,12 +330,14 @@ export function ProductGridNode({ node, mode }: NodeComponentProps) {
         <div
           data-node-id={node.id}
           style={{
+            ...templateThemeStyle,
             ...s(node.style),
             display: 'grid',
             gridTemplateColumns: `repeat(auto-fill, minmax(250px, 1fr))`,
             gap: (node.props.gap as string) || '1.5rem',
           }}
         >
+          {templateDynamicCSS && <style dangerouslySetInnerHTML={{ __html: templateDynamicCSS }} />}
           {hydratedCards.slice(0, columns).map(({ rootId, nodes }) => (
             <div key={rootId} style={{ pointerEvents: 'none', width: '100%', minWidth: 0, overflow: 'hidden' }}>
               {renderHydratedNode(rootId, nodes)}
@@ -392,12 +418,14 @@ export function ProductGridNode({ node, mode }: NodeComponentProps) {
     <div
       data-node-id={node.id}
       style={{
+        ...templateThemeStyle,
         ...s(node.style),
         display: 'grid',
         gridTemplateColumns: `repeat(auto-fill, minmax(250px, 1fr))`,
         gap: (node.props.gap as string) || '1.5rem',
       }}
     >
+      {templateDynamicCSS && <style dangerouslySetInnerHTML={{ __html: templateDynamicCSS }} />}
       {hydratedCards.map(({ rootId, nodes }) => (
         <div key={rootId} style={{ width: '100%', minWidth: 0, overflow: 'hidden' }}>
           {renderHydratedNode(rootId, nodes)}

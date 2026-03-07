@@ -38,7 +38,7 @@ export { createNode, createNodeTree, isContainerType, duplicateNodeTree } from '
 
 // Schema utilities — for hosts that want to scaffold or validate schemas
 export { createDefaultHomeSchema } from './lib/default-schema';
-export { nodeStyleToCSS, generatePseudoStateCSS, generateResponsiveCSS } from './lib/style-utils';
+export { nodeStyleToCSS, generatePseudoStateCSS, generateResponsiveCSS, themeTokensToCSS } from './lib/style-utils';
 export { validateSchema } from './lib/schema-validator';
 export type { SchemaValidationResult } from './lib/schema-validator';
 
