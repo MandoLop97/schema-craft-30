@@ -270,6 +270,7 @@ function SortableLayerItem({
           onDuplicateNode={onDuplicateNode}
           onDeleteNode={onDeleteNode}
           onMoveNode={onMoveNode}
+          onRenameNode={onRenameNode}
         />
       )}
     </div>
