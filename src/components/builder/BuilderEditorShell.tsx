@@ -287,6 +287,7 @@ export function BuilderEditorShell({
           onPublish={() => { onPublish ? onPublish(schema) : (setPublishMode('published'), setPublishOpen(true)); }}
           onSaveDraft={() => { setPublishMode('draft'); setPublishOpen(true); }}
           pageTitle={pageTitle}
+          onBack={onBack}
         />
 
         <div className="flex flex-1 overflow-hidden">
