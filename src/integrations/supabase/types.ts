@@ -47,6 +47,45 @@ export type Database = {
         }
         Relationships: []
       }
+      page_schemas: {
+        Row: {
+          canvas_size: Json | null
+          category: string
+          created_at: string
+          id: string
+          mock_data: Json | null
+          schema_json: Json
+          slug: string
+          template_type: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          canvas_size?: Json | null
+          category?: string
+          created_at?: string
+          id?: string
+          mock_data?: Json | null
+          schema_json?: Json
+          slug: string
+          template_type?: string
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          canvas_size?: Json | null
+          category?: string
+          created_at?: string
+          id?: string
+          mock_data?: Json | null
+          schema_json?: Json
+          slug?: string
+          template_type?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           badge: string | null
