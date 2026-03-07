@@ -188,7 +188,11 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
       '--muted': t.colors.muted,
       '--border': t.colors.border,
       '--accent': t.colors.accent || t.colors.secondary,
-      // Foreground variants derived from the base tokens
+      '--accent-foreground': t.colors.text,
+      // Foreground variants — auto-computed for contrast
+      '--primary-foreground': computeContrastForeground(t.colors.primary),
+      '--secondary-foreground': computeContrastForeground(t.colors.secondary),
+      '--muted-foreground': t.colors.muted,
       '--card': t.colors.background,
       '--card-foreground': t.colors.text,
       '--popover': t.colors.background,

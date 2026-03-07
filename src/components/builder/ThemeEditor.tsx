@@ -19,8 +19,8 @@ const PRESET_COLORS = [
 
 function hslStringToHex(hsl: string): string {
   try {
-    const parts = hsl.trim().split(/\s+/).map(Number);
-    if (parts.length !== 3) return '#888888';
+    const parts = hsl.replace(/%/g, '').trim().split(/\s+/).map(Number);
+    if (parts.length !== 3 || parts.some(isNaN)) return '#888888';
     const [h, s, l] = parts;
     const sN = s / 100;
     const lN = l / 100;
