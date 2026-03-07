@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { productCardNodes } from '@/lib/default-schemas';
 import { NexoraBuilderApp } from '@/NexoraBuilderApp';
 import { supabase } from '@/integrations/supabase/client';
 import { PublishPayload } from '@/components/builder/PublishDialog';
