@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { Schema, RenderMode, ThemeTokens } from '@/types/schema';
+import { ThemeProvider } from './ThemeContext';
 import { getNodeComponent, CustomComponentMap } from './NodeRegistry';
 import { EditableDropZone } from './EditableDropZone';
 import { SortableNodeWrapper } from './SortableNodeWrapper';
