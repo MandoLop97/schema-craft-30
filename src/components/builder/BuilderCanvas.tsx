@@ -5,7 +5,7 @@ import { CustomComponentMap } from '@/components/schema/NodeRegistry';
 import { CustomStylesInjector } from '@/components/builder/CustomStylesInjector';
 import { useMemo } from 'react';
 import { RenderContext } from '@/types/contract';
-import { buildMockRenderData } from '@/lib/mock-data';
+import { buildHostData } from '@/lib/host-data';
 
 interface BuilderCanvasProps {
   schema: Schema;
