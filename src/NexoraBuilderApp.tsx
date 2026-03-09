@@ -185,6 +185,8 @@ export function NexoraBuilderApp({
         customScripts={customScripts}
         onImageUpload={onImageUpload}
         resolveAssetUrl={resolveAssetUrl}
+        externalMockData={externalMockData}
+        externalRenderContext={externalRenderContext}
       />
     </TooltipProvider>
   );
