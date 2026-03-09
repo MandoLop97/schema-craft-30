@@ -208,7 +208,7 @@ export function ProductCardNode({ node, mode, renderChildren }: NodeComponentPro
    ProductGrid — loads template + products and renders a grid
    ═══════════════════════════════════════════════════════════ */
 
-export function ProductGridNode({ node, mode }: NodeComponentProps) {
+export function ProductGridNode({ node, mode, mockData }: NodeComponentProps) {
   const [products, setProducts] = useState<ProductData[]>([]);
   const [templateData, setTemplateData] = useState<{ nodes: Record<string, SchemaNode>; rootNodeId: string; themeTokens?: ThemeTokens } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -216,6 +216,19 @@ export function ProductGridNode({ node, mode }: NodeComponentProps) {
   const columns = Number(node.props.columns) || 4;
   const limit = Number(node.props.limit) || 8;
   const categoryFilter = node.props.category as string || '';
+  const sortOrder = node.props.sort as string || '';
+
+  // Get mock/injected products for edit/preview when DB is empty
+  const fallbackProducts = useMemo(() => {
+    const source = mockData?.products || DEFAULT_MOCK_PRODUCTS;
+    let filtered = [...source];
+    if (categoryFilter) {
+      filtered = filtered.filter((p: any) => p.category === categoryFilter);
+    }
+    if (sortOrder === 'price-asc') filtered.sort((a: any, b: any) => a.price - b.price);
+    else if (sortOrder === 'price-desc') filtered.sort((a: any, b: any) => b.price - a.price);
+    return filtered.slice(0, limit) as ProductData[];
+  }, [mockData, categoryFilter, sortOrder, limit]);
 
   useEffect(() => {
     let cancelled = false;
@@ -250,13 +263,15 @@ export function ProductGridNode({ node, mode }: NodeComponentProps) {
         setTemplateData({ nodes: schema.nodes, rootNodeId: schema.rootNodeId, themeTokens: schema.themeTokens });
       }
 
-      setProducts((productsData || []) as ProductData[]);
+      // Use DB products if available, otherwise use fallback mock data
+      const dbProducts = (productsData || []) as ProductData[];
+      setProducts(dbProducts.length > 0 ? dbProducts : fallbackProducts);
       setLoading(false);
     }
 
     fetchData();
     return () => { cancelled = true; };
-  }, [limit, categoryFilter]);
+  }, [limit, categoryFilter, fallbackProducts]);
 
   // Build hydrated cards
   const hydratedCards = useMemo(() => {
