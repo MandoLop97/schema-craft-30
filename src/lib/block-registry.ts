@@ -537,12 +537,12 @@ export const blockRegistry: BlockDefinition[] = [
     defaultProps: { 
       heading: 'Frequently Asked Questions',
       subtitle: 'Find answers to common questions below.',
-      items: [
+      faqItems: [
         { question: 'What is your return policy?', answer: 'We offer a 30-day return policy for all unused items.' },
         { question: 'How long does shipping take?', answer: 'Standard shipping takes 3-5 business days.' },
         { question: 'Do you ship internationally?', answer: 'Yes, we ship to over 50 countries worldwide.' },
       ],
-      layout: 'accordion',
+      faqLayout: 'accordion',
     }, 
     defaultStyle: { padding: '4rem 2rem', maxWidth: '48rem', margin: '0 auto' },
     supportsBinding: true,
