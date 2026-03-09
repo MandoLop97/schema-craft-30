@@ -192,7 +192,7 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
       );
     };
 
-    const element = <Component node={node} mode={mode} renderChildren={renderChildren} mockData={mockData} />;
+    const element = <Component node={resolvedNode} mode={mode} renderChildren={renderChildren} mockData={mockData} />;
 
     // Root node: don't wrap in sortable
     if (mode !== 'edit') return wrapWithScrollAnimation(nodeId, element);
