@@ -81,6 +81,8 @@ export interface BlockDefinition {
   supportsBinding?: boolean;
   /** Description for documentation */
   description?: string;
+  /** Restrict this block to specific page types */
+  allowedPageTypes?: PageType[];
 }
 
 const uid = () => `node-${Math.random().toString(36).slice(2, 9)}`;
