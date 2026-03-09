@@ -476,6 +476,13 @@ export const blockRegistry: BlockDefinition[] = [
       overlayPosition: 'center',
     }, 
     defaultStyle: { width: '100%', minHeight: '300px', borderRadius: '0.5rem' },
+    inspectorFields: [
+      { key: 'src', label: 'Image URL', type: 'image' },
+      { key: 'alt', label: 'Alt Text', type: 'text' },
+      { key: 'href', label: 'Link', type: 'link', placeholder: '/products' },
+      { key: 'overlayText', label: 'Overlay Text', type: 'text' },
+      { key: 'overlayPosition', label: 'Text Position', type: 'select', options: [{ label: 'Top', value: 'top' }, { label: 'Center', value: 'center' }, { label: 'Bottom', value: 'bottom' }] },
+    ],
     description: 'Clickable promotional banner with overlay text',
   },
   { 
