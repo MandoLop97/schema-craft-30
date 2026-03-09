@@ -210,6 +210,8 @@ export interface SchemaNode {
   customCSS?: string;
   /** IDs of global styles applied to this node */
   appliedGlobalStyles?: string[];
+  /** Slot assignment for template integration */
+  slot?: SlotAssignment;
 }
 
 export interface ThemeTokens {
