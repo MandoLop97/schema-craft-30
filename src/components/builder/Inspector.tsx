@@ -772,6 +772,8 @@ function PropsTab({ node, onUpdateProps, onUpdateStyle, onImageUpload }: { node:
       {(node.type === 'Accordion' || node.type === 'TabsBlock') && <PanelsPropsEditor node={node} onUpdate={onUpdateProps} />}
       {node.type === 'VideoEmbed' && <VideoEmbedPropsEditor node={node} onUpdate={onUpdateProps} />}
       {node.type === 'FormBlock' && <FormBlockPropsEditor node={node} onUpdate={onUpdateProps} />}
+      {node.type === 'TestimonialSection' && <TestimonialSectionPropsEditor node={node} onUpdate={onUpdateProps} />}
+      {node.type === 'FAQSection' && <FAQSectionPropsEditor node={node} onUpdate={onUpdateProps} />}
       {node.type === 'Spacer' && <PropField label="Altura" value={p.height || '2rem'} onChange={(v) => onUpdateProps({ height: v })} placeholder="2rem" />}
       {node.type === 'Icon' && (
         <>
