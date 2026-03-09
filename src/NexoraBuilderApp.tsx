@@ -11,6 +11,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { EDITOR_VERSION } from '@/lib/version';
 import { setLocaleByCode, BuilderLocale, setLocale } from '@/lib/i18n';
 import { CustomComponentMap } from '@/components/schema/NodeRegistry';
+import { RenderContext } from '@/types/contract';
 
 export interface NexoraBuilderAppProps {
   initialSchema?: Schema;
@@ -39,6 +40,10 @@ export interface NexoraBuilderAppProps {
   onImageUpload?: (file: File) => Promise<string>;
   /** Resolve asset paths to full URLs */
   resolveAssetUrl?: (path: string) => string;
+  /** Mock data for edit/preview mode (products, collections, settings, etc.) */
+  mockData?: Record<string, any>;
+  /** Data context for resolving bindings — passed to PageRenderer */
+  renderContext?: RenderContext;
 }
 
 export function NexoraBuilderApp({
