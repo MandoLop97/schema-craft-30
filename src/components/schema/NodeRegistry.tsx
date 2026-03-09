@@ -15,8 +15,10 @@ export interface NodeComponentProps {
   node: SchemaNode;
   mode: RenderMode;
   renderChildren: (childIds: string[]) => React.ReactNode;
-  /** Mock data from PageDefinition, available in edit/preview mode */
+  /** @deprecated Use hostData — kept for backward compatibility */
   mockData?: Record<string, any>;
+  /** Host-provided data for edit/preview binding resolution */
+  hostData?: Record<string, any>;
 }
 
 export type NodeComponent = React.FC<NodeComponentProps>;
