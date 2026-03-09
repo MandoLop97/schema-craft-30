@@ -69,14 +69,15 @@ export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode, cu
   const isCompact = templateType === 'component' || templateType === 'header' || templateType === 'footer';
 
   // Use external renderContext if provided, otherwise build from mockData
+  const resolvedHostData = hostData || mockData;
   const renderContext = useMemo<RenderContext>(() => {
     if (externalRenderContext) return externalRenderContext;
     return {
       mode: 'edit',
-      data: buildMockRenderData(mockData),
+      data: buildHostData(resolvedHostData),
       theme: schema.themeTokens,
     };
-  }, [externalRenderContext, mockData, schema.themeTokens]);
+  }, [externalRenderContext, resolvedHostData, schema.themeTokens]);
 
   return (
     <div
