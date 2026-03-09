@@ -158,8 +158,6 @@ export function PageRenderer({
               onPasteStyle={constraints.canEditStyles ? onPasteStyle : undefined}
               canPasteStyle={constraints.canEditStyles ? canPasteStyle : false}
               nodeStyle={childNode.style}
-              onRepositionNode={constraints.canMove ? onRepositionNode : undefined}
-              isLocked={isSlotLocked(childNode)}
             >
               {wrappedChild}
             </SortableNodeWrapper>
