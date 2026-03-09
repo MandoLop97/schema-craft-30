@@ -586,6 +586,13 @@ export const blockRegistry: BlockDefinition[] = [
       { key: 'subtitle', label: 'Subtitle', type: 'text', placeholder: 'Optional subtitle' },
       { key: 'layout', label: 'Layout', type: 'select', options: [{ label: 'Grid', value: 'grid' }, { label: 'Carousel', value: 'carousel' }, { label: 'Stack', value: 'stack' }] },
       { key: 'columns', label: 'Columns', type: 'select', options: [{ label: '2', value: '2' }, { label: '3', value: '3' }, { label: '4', value: '4' }] },
+      { key: 'testimonials', label: 'Testimonials', type: 'array', arrayFields: [
+        { key: 'quote', label: 'Quote', type: 'textarea', rows: 2, placeholder: 'Customer quote...' },
+        { key: 'author', label: 'Author', type: 'text', placeholder: 'Name' },
+        { key: 'role', label: 'Role', type: 'text', placeholder: 'e.g. Verified Buyer' },
+        { key: 'rating', label: 'Rating (1-5)', type: 'number', defaultValue: 5 },
+        { key: 'avatar', label: 'Avatar', type: 'image' },
+      ], newItemDefaults: { quote: 'Great product!', author: 'Customer', role: '', rating: 5, avatar: '' }, addLabel: '+ Add Testimonial' },
     ],
     description: 'Customer testimonials section with ratings, avatars and multiple layouts',
   },
