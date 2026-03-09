@@ -5,11 +5,13 @@ import { useThemeTokens } from '@/components/schema/ThemeContext';
 import { supabase } from '@/integrations/supabase/client';
 import { hydrateCardTemplate, ProductData } from '@/lib/card-template-utils';
 import { getNodeComponent } from '@/components/schema/NodeRegistry';
+import { DEFAULT_MOCK_PRODUCTS, DEFAULT_MOCK_COLLECTIONS } from '@/lib/mock-data';
 
 interface NodeComponentProps {
   node: SchemaNode;
   mode: RenderMode;
   renderChildren: (childIds: string[]) => React.ReactNode;
+  mockData?: Record<string, any>;
 }
 
 const s = (style: NodeStyle): React.CSSProperties => nodeStyleToCSS(style);
