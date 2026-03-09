@@ -23,8 +23,10 @@ interface PageRendererProps {
   mode: RenderMode;
   selectedNodeId?: string | null;
   onSelectNode?: (nodeId: string) => void;
-  customComponents?: CustomComponentMap;
+  /** @deprecated Use hostData */
   mockData?: Record<string, any>;
+  /** Host-provided data for edit/preview binding resolution */
+  hostData?: Record<string, any>;
   onCopyNode?: (nodeId: string) => void;
   onPasteNode?: (nodeId: string) => void;
   onDuplicateNode?: (nodeId: string) => void;
