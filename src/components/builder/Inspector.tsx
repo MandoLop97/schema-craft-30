@@ -18,6 +18,7 @@ import { ImageUploadField } from './ImageUploadField';
 import { GradientEditor } from './GradientEditor';
 import { ProductPicker } from './ProductPicker';
 import { useThemeTokens } from '@/components/schema/ThemeContext';
+import { BindingsPanel } from './BindingsPanel';
 
 interface InspectorProps {
   node: SchemaNode;
