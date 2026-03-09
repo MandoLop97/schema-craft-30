@@ -331,7 +331,7 @@ export interface RenderContext {
   page?: PageContext;
 
   /** All data available for binding resolution */
-  data: {
+  data?: {
     /** E-commerce product data */
     products: any[];
     /** Product collections / categories */
