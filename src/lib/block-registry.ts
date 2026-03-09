@@ -551,20 +551,24 @@ export const blockRegistry: BlockDefinition[] = [
     canHaveChildren: false, 
     defaultProps: { 
       heading: 'What Our Customers Say',
+      subtitle: '',
       testimonials: [
-        { quote: 'Absolutely love the quality!', author: 'Sarah M.', rating: 5 },
-        { quote: 'Fast shipping and great service.', author: 'John D.', rating: 5 },
-        { quote: 'Best purchase I\'ve made this year.', author: 'Emily R.', rating: 5 },
+        { quote: 'Absolutely love the quality!', author: 'Sarah M.', role: 'Verified Buyer', rating: 5, avatar: '' },
+        { quote: 'Fast shipping and great service.', author: 'John D.', role: '', rating: 5, avatar: '' },
+        { quote: 'Best purchase I\'ve made this year.', author: 'Emily R.', role: '', rating: 5, avatar: '' },
       ],
       layout: 'grid',
+      columns: 3,
     }, 
     defaultStyle: { padding: '4rem 2rem', backgroundColor: 'hsl(var(--secondary))' },
     supportsBinding: true,
     inspectorFields: [
       { key: 'heading', label: 'Heading', type: 'text' },
+      { key: 'subtitle', label: 'Subtitle', type: 'text', placeholder: 'Optional subtitle' },
       { key: 'layout', label: 'Layout', type: 'select', options: [{ label: 'Grid', value: 'grid' }, { label: 'Carousel', value: 'carousel' }, { label: 'Stack', value: 'stack' }] },
+      { key: 'columns', label: 'Columns', type: 'select', options: [{ label: '2', value: '2' }, { label: '3', value: '3' }, { label: '4', value: '4' }] },
     ],
-    description: 'Customer testimonials section with multiple layouts',
+    description: 'Customer testimonials section with ratings, avatars and multiple layouts',
   },
   { 
     type: 'FAQSection', 
@@ -581,6 +585,7 @@ export const blockRegistry: BlockDefinition[] = [
         { question: 'Do you ship internationally?', answer: 'Yes, we ship to over 50 countries worldwide.' },
       ],
       faqLayout: 'accordion',
+      columns: 1,
     }, 
     defaultStyle: { padding: '4rem 2rem', maxWidth: '48rem', margin: '0 auto' },
     supportsBinding: true,
@@ -588,8 +593,9 @@ export const blockRegistry: BlockDefinition[] = [
       { key: 'heading', label: 'Heading', type: 'text' },
       { key: 'subtitle', label: 'Subtitle', type: 'text' },
       { key: 'faqLayout', label: 'Layout', type: 'select', options: [{ label: 'Accordion', value: 'accordion' }, { label: 'Grid', value: 'grid' }] },
+      { key: 'columns', label: 'Columns (Grid mode)', type: 'select', options: [{ label: '1', value: '1' }, { label: '2', value: '2' }, { label: '3', value: '3' }] },
     ],
-    description: 'FAQ accordion or grid section',
+    description: 'FAQ accordion or grid section with configurable columns',
   },
 ];
 
