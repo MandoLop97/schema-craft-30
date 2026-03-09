@@ -602,7 +602,7 @@ export function BuilderEditorShell({
             customComponents={customComponents}
             templateType={activePageDef?.templateType}
             canvasSize={activePageDef?.canvasSize}
-            mockData={externalMockData || activePageDef?.mockData}
+            hostData={externalHostData || externalMockData || activePageDef?.hostData || activePageDef?.mockData}
             externalRenderContext={externalRenderContext}
             customStylesheets={customStylesheets}
             customCSS={customCSS}
