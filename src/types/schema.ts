@@ -278,7 +278,10 @@ export interface PageDefinition {
   category?: string;
   icon?: React.ComponentType;
   canvasSize?: { width: number; height: number };
+  /** @deprecated Use hostData */
   mockData?: Record<string, any>;
+  /** Host-provided data for edit/preview binding resolution */
+  hostData?: Record<string, any>;
 }
 
 export type RenderMode = 'public' | 'preview' | 'edit';
