@@ -1,6 +1,6 @@
 /**
  * ════════════════════════════════════════════════════════════════════════════
- * NEXORA VISUAL BUILDER — OFFICIAL CONTRACT
+ * NEXORA VISUAL BUILDER — OFFICIAL CONTRACT v1.7.0
  * ════════════════════════════════════════════════════════════════════════════
  * 
  * This file defines the **shared contract** between the Nexora Visual Builder
@@ -9,10 +9,28 @@
  * Both systems MUST use these exact types, names, and structures to ensure
  * full compatibility and seamless data flow.
  * 
- * VERSION: 1.5.0
+ * VERSION: 1.7.0
+ * 
+ * ── DATA OWNERSHIP POLICY ──
+ * 
+ * ┌─────────────┬────────────────────────────┬───────────────────────────┐
+ * │ Layer       │ Responsibility             │ Prohibitions              │
+ * ├─────────────┼────────────────────────────┼───────────────────────────┤
+ * │ Host/Template│ Fetch + adapt data.        │ Cannot modify schema      │
+ * │ (consumer)  │ Build RenderContext.        │ nodes directly.           │
+ * │             │ Provide hostData.           │                           │
+ * ├─────────────┼────────────────────────────┼───────────────────────────┤
+ * │ Builder     │ Schema CRUD.               │ NO fetch to external APIs │
+ * │ (editor)    │ Adapt hostData for preview. │ NO direct DB calls for    │
+ * │             │ Validate before publish.    │ business data.            │
+ * ├─────────────┼────────────────────────────┼───────────────────────────┤
+ * │ Renderer    │ Render nodes from schema + │ NO fetch. NO state        │
+ * │ (PageRender)│ resolved context. Pure.    │ mutation. Read-only.      │
+ * └─────────────┴────────────────────────────┴───────────────────────────┘
  */
 
 import { NodeStyle, ThemeTokens, AnimationPreset, SchemaNode, Schema } from './schema';
+import { PageType, PageMetadata } from './page-types';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 1. NODE TYPES — Official list of supported block types
@@ -130,7 +148,6 @@ export interface ButtonNodeProps extends BaseNodeProps {
 
 /** ProductCard props (for template) */
 export interface ProductCardNodeProps extends BaseNodeProps {
-  // These are typically bound to product data
   productId?: string;
   title?: string;
   price?: string;
@@ -280,33 +297,134 @@ export interface BoundSchemaNode extends SchemaNode {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 5. RENDER CONFIGURATION — How nodes should be rendered
+// 5. RENDER CONTEXT — Official v1.7.0 contract
 // ═══════════════════════════════════════════════════════════════════════════
 
 export type RenderMode = 'public' | 'preview' | 'edit';
 
-export interface RenderContext {
+/** Runtime context for the current page */
+export interface PageContext {
+  /** Type of the current page */
+  pageType: PageType;
+  /** Current page slug */
+  slug: string;
+  /** URL parameters (e.g., product handle, collection handle) */
+  params?: Record<string, string>;
+  /** Query string parameters */
+  query?: Record<string, string>;
+  /** Render mode — replaces the old `isPreview` boolean */
   mode: RenderMode;
-  /** Data available for binding */
-  data?: {
-    products?: any[];
-    collections?: any[];
-    pages?: any[];
-    settings?: Record<string, any>;
-    custom?: Record<string, any>;
+  /** The page metadata (SEO, OG, etc.) */
+  metadata?: PageMetadata;
+}
+
+/**
+ * RenderContext v1.7.0 — The single source of truth for all rendering data.
+ * 
+ * Built by the Host/Template layer and consumed read-only by Builder and Renderer.
+ */
+export interface RenderContext {
+  /** Current render mode */
+  mode: RenderMode;
+
+  /** Page-level context */
+  page: PageContext;
+
+  /** All data available for binding resolution */
+  data: {
+    /** E-commerce product data */
+    products: any[];
+    /** Product collections / categories */
+    collections: any[];
+    /** CMS / content pages */
+    pages: any[];
+    /** Global site settings (store name, currency, language, etc.) */
+    settings: Record<string, any>;
+    /** Card template schema for hydration (used by ProductGrid) */
+    cardTemplate?: {
+      nodes: Record<string, SchemaNode>;
+      rootNodeId: string;
+      themeTokens?: ThemeTokens;
+    };
+    /** Host-defined custom data sources */
+    custom: Record<string, any>;
   };
-  /** Current item when rendering inside a collection */
+
+  /** Iteration context — set by collection renderers (e.g., ProductGrid) */
   currentItem?: any;
-  /** Item index when rendering inside a collection */
+  /** Current item index in iteration */
   currentIndex?: number;
-  /** Theme tokens */
+
+  /** Theme tokens snapshot */
   theme?: ThemeTokens;
-  /** Resolve asset URLs */
+
+  /** Resolve asset paths to full URLs */
   resolveAssetUrl?: (path: string) => string;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 6. TEMPLATE INTEGRATION — For host templates
+// 6. SLOT SYSTEM — Template integration slots
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Slot behavior determines what can be done with a slot's content:
+ * - locked:    Render as-is. Inspector disabled. Cannot delete/move.
+ * - editable:  Full inspector access. Can reorder children.
+ * - dynamic:   Data-driven. Bindings resolved at render. Children generated from data.
+ */
+export type SlotBehavior = 'locked' | 'editable' | 'dynamic';
+
+/**
+ * Slot assignment for template integration.
+ * 
+ * Fallback rules:
+ * - If slot has no children AND fallbackNodeId is set → render fallback node.
+ * - If slot has no children AND no fallback → render empty placeholder (edit mode only).
+ */
+export interface SlotAssignment {
+  /** Slot identifier (e.g. 'header', 'footer', 'main', 'sidebar') */
+  __slot: string;
+  /** Slot behavior */
+  behavior: SlotBehavior;
+  /** Fallback node ID if slot is empty */
+  fallbackNodeId?: string;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 7. PUBLISH PIPELINE — Publication flow contract
+// ═══════════════════════════════════════════════════════════════════════════
+
+export type PublishStage = 'draft' | 'validated' | 'preview' | 'published';
+
+/** Options for the validation step */
+export interface ValidatorOptions {
+  /** Treat warnings as errors */
+  strict?: boolean;
+  /** Page type for context-aware validation */
+  pageType?: PageType;
+}
+
+/**
+ * Publication pipeline contract.
+ * 
+ * Rules:
+ * - `validate().errors.length > 0` blocks publish.
+ * - Warnings are displayed but do NOT block.
+ * - Preview is optional.
+ */
+export interface PublishPipeline {
+  /** 1. Save work-in-progress */
+  saveDraft: (schema: Schema) => Promise<void>;
+  /** 2. Run validation — must pass with 0 errors to proceed */
+  validate: (schema: Schema, opts?: ValidatorOptions) => { errors: string[]; warnings: string[] };
+  /** 3. Generate preview (optional) — returns preview URL */
+  preview?: (schema: Schema) => Promise<string>;
+  /** 4. Publish to production */
+  publish: (payload: any) => Promise<void>;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 8. TEMPLATE INTEGRATION — For host templates
 // ═══════════════════════════════════════════════════════════════════════════
 
 export type TemplateType = 'page' | 'header' | 'footer' | 'component' | 'single';
@@ -320,11 +438,17 @@ export interface PageDefinition {
   category?: string;
   icon?: React.ComponentType;
   canvasSize?: { width: number; height: number };
+  /**
+   * Host-provided data for edit/preview binding resolution.
+   * @deprecated Use `hostData` instead. This alias is kept for backward compatibility.
+   */
   mockData?: Record<string, any>;
+  /** Host-provided data for edit/preview binding resolution */
+  hostData?: Record<string, any>;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 7. BLOCK REGISTRY CONTRACT — Block definition structure
+// 9. BLOCK REGISTRY CONTRACT — Block definition structure
 // ═══════════════════════════════════════════════════════════════════════════
 
 export interface InspectorFieldDef {
@@ -369,7 +493,7 @@ export interface BlockDefinition {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 8. EXPORT CONTRACT — What the NPM package exports
+// 10. EXPORT CONTRACT — What the NPM package exports
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
@@ -431,7 +555,7 @@ export interface NexoraExports {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 9. UTILITY TYPES
+// 11. UTILITY TYPES
 // ═══════════════════════════════════════════════════════════════════════════
 
 /** Union of all node prop types */
