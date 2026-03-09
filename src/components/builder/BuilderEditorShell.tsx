@@ -66,6 +66,8 @@ export function BuilderEditorShell({
   customScripts,
   onImageUpload,
   resolveAssetUrl,
+  externalMockData,
+  externalRenderContext,
 }: BuilderEditorShellProps) {
   const locale = t();
   const { schema, setSchema, undo, redo, canUndo, canRedo } = useSchemaHistory(initialSchema);
