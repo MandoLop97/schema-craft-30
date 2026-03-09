@@ -40,11 +40,12 @@ export interface NexoraBuilderAppProps {
   onImageUpload?: (file: File) => Promise<string>;
   /** Resolve asset paths to full URLs */
   resolveAssetUrl?: (path: string) => string;
-  /** Mock data for edit/preview mode (products, collections, settings, etc.) */
+  /** @deprecated Use hostData instead */
   mockData?: Record<string, any>;
+  /** Host-provided data for edit/preview mode (products, collections, settings, etc.) */
+  hostData?: Record<string, any>;
   /** Data context for resolving bindings — passed to PageRenderer */
   renderContext?: RenderContext;
-}
 
 export function NexoraBuilderApp({
   initialSchema,

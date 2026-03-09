@@ -412,7 +412,7 @@ export function CollectionGridNode({ node, mode, mockData }: NodeComponentProps)
   const showCount = node.props.showCount !== false;
 
   // Use mock data from host or fallback to default
-  const sourceCollections = mockData?.collections || DEFAULT_MOCK_COLLECTIONS;
+  const sourceCollections = mockData?.collections || DEFAULT_SAMPLE_COLLECTIONS;
   const mockCollections = sourceCollections.map((c: any) => ({
     name: c.name,
     image: c.image || c.image_url || 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=400&h=300&fit=crop',
