@@ -14,8 +14,10 @@ interface BuilderCanvasProps {
   onSelectNode: (id: string) => void;
   customComponents?: CustomComponentMap;
   templateType?: TemplateType;
-  canvasSize?: { width: number; height: number };
+  /** @deprecated Use hostData */
   mockData?: Record<string, any>;
+  /** Host-provided data for edit/preview binding resolution */
+  hostData?: Record<string, any>;
   customStylesheets?: string[];
   customCSS?: string;
   customScripts?: string[];
