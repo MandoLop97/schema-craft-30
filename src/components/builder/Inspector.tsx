@@ -634,6 +634,52 @@ function ScrollAnimationControls({ node, onUpdate }: { node: SchemaNode; onUpdat
   );
 }
 
+function TestimonialSectionPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: Partial<NodeProps>) => void }) {
+  const testimonials: any[] = node.props.testimonials || [];
+  return (
+    <>
+      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Testimonials</Label>
+      {testimonials.map((item, i) => (
+        <div key={i} className="space-y-1 border rounded-md p-2 relative">
+          <Button variant="ghost" size="icon" className="absolute top-1 right-1 h-5 w-5 text-muted-foreground hover:text-destructive" onClick={() => {
+            onUpdate({ testimonials: testimonials.filter((_, idx) => idx !== i) });
+          }}><Trash2 className="h-3 w-3" /></Button>
+          <Textarea className="text-xs min-h-[40px]" placeholder="Quote" value={item.quote || ''} onChange={(e) => { const updated = [...testimonials]; updated[i] = { ...item, quote: e.target.value }; onUpdate({ testimonials: updated }); }} rows={2} />
+          <Input className="h-7 text-xs" placeholder="Author" value={item.author || ''} onChange={(e) => { const updated = [...testimonials]; updated[i] = { ...item, author: e.target.value }; onUpdate({ testimonials: updated }); }} />
+          <Input className="h-7 text-xs" placeholder="Role" value={item.role || ''} onChange={(e) => { const updated = [...testimonials]; updated[i] = { ...item, role: e.target.value }; onUpdate({ testimonials: updated }); }} />
+          <div className="flex items-center gap-2">
+            <Label className="text-[9px] text-muted-foreground">Rating</Label>
+            <Select value={String(item.rating || 5)} onValueChange={(v) => { const updated = [...testimonials]; updated[i] = { ...item, rating: parseInt(v) }; onUpdate({ testimonials: updated }); }}>
+              <SelectTrigger className="h-7 text-xs w-16"><SelectValue /></SelectTrigger>
+              <SelectContent>{[1,2,3,4,5].map(n => <SelectItem key={n} value={String(n)}>{n}★</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
+        </div>
+      ))}
+      <Button variant="outline" size="sm" className="text-xs w-full" onClick={() => onUpdate({ testimonials: [...testimonials, { quote: 'Great product!', author: 'Customer', rating: 5 }] })}>+ Add Testimonial</Button>
+    </>
+  );
+}
+
+function FAQSectionPropsEditor({ node, onUpdate }: { node: SchemaNode; onUpdate: (p: Partial<NodeProps>) => void }) {
+  const items: any[] = node.props.faqItems || [];
+  return (
+    <>
+      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">FAQ Items</Label>
+      {items.map((item, i) => (
+        <div key={i} className="space-y-1 border rounded-md p-2 relative">
+          <Button variant="ghost" size="icon" className="absolute top-1 right-1 h-5 w-5 text-muted-foreground hover:text-destructive" onClick={() => {
+            onUpdate({ faqItems: items.filter((_, idx) => idx !== i) });
+          }}><Trash2 className="h-3 w-3" /></Button>
+          <Input className="h-7 text-xs" placeholder="Question" value={item.question || ''} onChange={(e) => { const updated = [...items]; updated[i] = { ...item, question: e.target.value }; onUpdate({ faqItems: updated }); }} />
+          <Textarea className="text-xs min-h-[40px]" placeholder="Answer" value={item.answer || ''} onChange={(e) => { const updated = [...items]; updated[i] = { ...item, answer: e.target.value }; onUpdate({ faqItems: updated }); }} rows={2} />
+        </div>
+      ))}
+      <Button variant="outline" size="sm" className="text-xs w-full" onClick={() => onUpdate({ faqItems: [...items, { question: 'New question?', answer: 'Answer here.' }] })}>+ Add FAQ</Button>
+    </>
+  );
+}
+
 function PropsTab({ node, onUpdateProps, onUpdateStyle, onImageUpload }: { node: SchemaNode; onUpdateProps: (p: Partial<NodeProps>) => void; onUpdateStyle: (s: Partial<NodeStyle>) => void; onImageUpload?: (file: File) => Promise<string> }) {
   const p = node.props;
   return (
