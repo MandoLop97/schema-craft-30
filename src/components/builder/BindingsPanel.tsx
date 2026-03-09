@@ -40,7 +40,7 @@ const PRODUCT_FIELDS = ['name', 'price', 'original_price', 'image_url', 'descrip
 const COLLECTION_FIELDS = ['name', 'image', 'slug', 'description', 'productCount'];
 
 /** Preset binding configurations per block type */
-const BINDING_PRESETS: Record<string, { label: string; bindings: DataBinding[] }[]> = {
+const BINDING_PRESETS: Record<string, { label: string; bindings: DataBinding[]; dataSource?: any }[]> = {
   ProductCard: [
     {
       label: 'Standard Product',
@@ -52,6 +52,27 @@ const BINDING_PRESETS: Record<string, { label: string; bindings: DataBinding[] }
         { propKey: 'price', fieldPath: 'price', transform: 'formatPrice' },
         { propKey: 'originalPrice', fieldPath: 'original_price', transform: 'formatPrice' },
         { propKey: 'badge', fieldPath: 'badge' },
+      ],
+    },
+  ],
+  ProductGrid: [
+    {
+      label: 'All Products',
+      dataSource: { type: 'products', isCollection: true, itemVariable: 'product', query: { limit: 8 } },
+      bindings: [],
+    },
+    {
+      label: 'Products by Category',
+      dataSource: { type: 'products', isCollection: true, itemVariable: 'product', query: { limit: 8, category: '' } },
+      bindings: [],
+    },
+  ],
+  CollectionGrid: [
+    {
+      label: 'All Collections',
+      dataSource: { type: 'collections', isCollection: true, itemVariable: 'collection', query: { limit: 6 } },
+      bindings: [
+        { propKey: 'collections', fieldPath: '' },
       ],
     },
   ],
@@ -107,8 +128,12 @@ export function BindingsPanel({ node, onUpdateProps }: BindingsPanelProps) {
     }
   };
 
-  const applyPreset = (preset: { bindings: DataBinding[] }) => {
-    updateBindings({ bindings: preset.bindings });
+  const applyPreset = (preset: { bindings: DataBinding[]; dataSource?: any }) => {
+    const updates: Partial<NodeBindings> = { bindings: preset.bindings };
+    if (preset.dataSource) {
+      updates.dataSource = preset.dataSource;
+    }
+    updateBindings(updates);
   };
 
   const addFieldBinding = () => {

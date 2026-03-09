@@ -5,11 +5,13 @@ import { useThemeTokens } from '@/components/schema/ThemeContext';
 import { supabase } from '@/integrations/supabase/client';
 import { hydrateCardTemplate, ProductData } from '@/lib/card-template-utils';
 import { getNodeComponent } from '@/components/schema/NodeRegistry';
+import { DEFAULT_MOCK_PRODUCTS, DEFAULT_MOCK_COLLECTIONS } from '@/lib/mock-data';
 
 interface NodeComponentProps {
   node: SchemaNode;
   mode: RenderMode;
   renderChildren: (childIds: string[]) => React.ReactNode;
+  mockData?: Record<string, any>;
 }
 
 const s = (style: NodeStyle): React.CSSProperties => nodeStyleToCSS(style);
@@ -206,7 +208,7 @@ export function ProductCardNode({ node, mode, renderChildren }: NodeComponentPro
    ProductGrid — loads template + products and renders a grid
    ═══════════════════════════════════════════════════════════ */
 
-export function ProductGridNode({ node, mode }: NodeComponentProps) {
+export function ProductGridNode({ node, mode, mockData }: NodeComponentProps) {
   const [products, setProducts] = useState<ProductData[]>([]);
   const [templateData, setTemplateData] = useState<{ nodes: Record<string, SchemaNode>; rootNodeId: string; themeTokens?: ThemeTokens } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -214,6 +216,19 @@ export function ProductGridNode({ node, mode }: NodeComponentProps) {
   const columns = Number(node.props.columns) || 4;
   const limit = Number(node.props.limit) || 8;
   const categoryFilter = node.props.category as string || '';
+  const sortOrder = node.props.sort as string || '';
+
+  // Get mock/injected products for edit/preview when DB is empty
+  const fallbackProducts = useMemo(() => {
+    const source = mockData?.products || DEFAULT_MOCK_PRODUCTS;
+    let filtered = [...source];
+    if (categoryFilter) {
+      filtered = filtered.filter((p: any) => p.category === categoryFilter);
+    }
+    if (sortOrder === 'price-asc') filtered.sort((a: any, b: any) => a.price - b.price);
+    else if (sortOrder === 'price-desc') filtered.sort((a: any, b: any) => b.price - a.price);
+    return filtered.slice(0, limit) as ProductData[];
+  }, [mockData, categoryFilter, sortOrder, limit]);
 
   useEffect(() => {
     let cancelled = false;
@@ -248,13 +263,15 @@ export function ProductGridNode({ node, mode }: NodeComponentProps) {
         setTemplateData({ nodes: schema.nodes, rootNodeId: schema.rootNodeId, themeTokens: schema.themeTokens });
       }
 
-      setProducts((productsData || []) as ProductData[]);
+      // Use DB products if available, otherwise use fallback mock data
+      const dbProducts = (productsData || []) as ProductData[];
+      setProducts(dbProducts.length > 0 ? dbProducts : fallbackProducts);
       setLoading(false);
     }
 
     fetchData();
     return () => { cancelled = true; };
-  }, [limit, categoryFilter]);
+  }, [limit, categoryFilter, fallbackProducts]);
 
   // Build hydrated cards
   const hydratedCards = useMemo(() => {
@@ -322,9 +339,9 @@ export function ProductGridNode({ node, mode }: NodeComponentProps) {
     return <Component key={n.id} node={n} mode="public" renderChildren={renderChildren} />;
   };
 
-  // Edit mode: show real template cards (non-interactive) or fallback placeholders
+  // Edit mode: show real template cards (non-interactive) or fallback with mock data
   if (mode === 'edit') {
-    // If template + products loaded, render real cards in edit mode too
+    // If template + products loaded, render real cards in edit mode
     if (!loading && templateData && hydratedCards.length > 0) {
       return (
         <div
@@ -347,7 +364,66 @@ export function ProductGridNode({ node, mode }: NodeComponentProps) {
       );
     }
 
-    // Fallback: loading or no data yet
+    // Fallback: show inline product cards using mock data (no template needed)
+    const previewProducts = loading ? [] : (products.length > 0 ? products : fallbackProducts);
+    
+    if (previewProducts.length > 0) {
+      return (
+        <div
+          data-node-id={node.id}
+          style={{
+            ...s(node.style),
+            display: 'grid',
+            gridTemplateColumns: `repeat(auto-fill, minmax(250px, 1fr))`,
+            gap: (node.props.gap as string) || '1.5rem',
+          }}
+        >
+          {previewProducts.slice(0, columns).map((product, i) => (
+            <div
+              key={product.id || i}
+              style={{
+                borderRadius: '0.75rem',
+                overflow: 'hidden',
+                border: '1px solid hsl(var(--border))',
+                backgroundColor: 'hsl(var(--card))',
+                pointerEvents: 'none',
+              }}
+            >
+              <div style={{ position: 'relative', overflow: 'hidden', aspectRatio: '1/1' }}>
+                <img
+                  src={product.image_url || '/placeholder.svg'}
+                  alt={product.name}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+                {product.badge && (
+                  <span style={{
+                    position: 'absolute', top: '0.75rem', left: '0.75rem',
+                    padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.75rem',
+                    fontWeight: '600', backgroundColor: 'hsl(var(--primary))',
+                    color: 'hsl(var(--primary-foreground))', zIndex: 2,
+                  }}>
+                    {product.badge}
+                  </span>
+                )}
+              </div>
+              <div style={{ padding: '1rem' }}>
+                <h3 style={{ fontWeight: '500', fontSize: '0.95rem', marginBottom: '0.5rem' }}>{product.name}</h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ fontWeight: '600', fontSize: '1rem' }}>${product.price?.toFixed(2)}</span>
+                  {product.original_price && (
+                    <span style={{ textDecoration: 'line-through', color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem' }}>
+                      ${product.original_price.toFixed(2)}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    // Ultimate fallback: loading placeholder
     return (
       <div
         data-node-id={node.id}
@@ -376,7 +452,7 @@ export function ProductGridNode({ node, mode }: NodeComponentProps) {
           >
             <span style={{ fontSize: '2rem' }}>🛍️</span>
             <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
-              {loading ? '⏳' : `Product ${i + 1}`}
+              ⏳ Loading...
             </span>
           </div>
         ))}
@@ -438,21 +514,19 @@ export function ProductGridNode({ node, mode }: NodeComponentProps) {
 // ═══════════════════════════════════════════════════════════════════════════
 // COLLECTION GRID — Grid of product collections/categories
 // ═══════════════════════════════════════════════════════════════════════════
-export function CollectionGridNode({ node, mode }: NodeComponentProps) {
+export function CollectionGridNode({ node, mode, mockData }: NodeComponentProps) {
   const columns = node.props.columns || 3;
   const gap = node.props.gap || '1.5rem';
   const showTitle = node.props.showTitle !== false;
   const showCount = node.props.showCount !== false;
 
-  // Mock collections for edit/preview mode
-  const mockCollections = [
-    { name: 'Electronics', image: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=400&h=300&fit=crop', count: 24 },
-    { name: 'Clothing', image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=300&fit=crop', count: 18 },
-    { name: 'Accessories', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop', count: 12 },
-    { name: 'Home & Garden', image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=300&fit=crop', count: 31 },
-    { name: 'Sports', image: 'https://images.unsplash.com/photo-1461896836934-bd45ba8fcfbb?w=400&h=300&fit=crop', count: 9 },
-    { name: 'Beauty', image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=300&fit=crop', count: 15 },
-  ];
+  // Use mock data from renderContext or fallback to default
+  const sourceCollections = mockData?.collections || DEFAULT_MOCK_COLLECTIONS;
+  const mockCollections = sourceCollections.map((c: any) => ({
+    name: c.name,
+    image: c.image || c.image_url || 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=400&h=300&fit=crop',
+    count: c.productCount || c.count || 0,
+  }));
 
   const limit = node.props.limit || 6;
   const collections = mockCollections.slice(0, limit);
