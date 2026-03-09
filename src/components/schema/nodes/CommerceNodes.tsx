@@ -216,7 +216,7 @@ export function ProductGridNode({ node, mode, mockData }: NodeComponentProps) {
 
   // ── Resolve products: mockData (host-injected) > DEFAULT_MOCK ──
   const products = useMemo(() => {
-    const source: ProductData[] = mockData?.products || DEFAULT_MOCK_PRODUCTS;
+    const source: ProductData[] = mockData?.products || DEFAULT_SAMPLE_PRODUCTS;
     let filtered = [...source];
     if (categoryFilter) {
       filtered = filtered.filter((p: any) => p.category === categoryFilter);
