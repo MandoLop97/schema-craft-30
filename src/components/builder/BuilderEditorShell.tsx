@@ -69,6 +69,7 @@ export function BuilderEditorShell({
   onImageUpload,
   resolveAssetUrl,
   externalMockData,
+  externalHostData,
   externalRenderContext,
 }: BuilderEditorShellProps) {
   const locale = t();
