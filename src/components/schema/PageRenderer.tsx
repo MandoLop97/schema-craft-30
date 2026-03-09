@@ -160,13 +160,26 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
             const childNode = schema.nodes[cid];
             if (!childNode || childNode.hidden) return null;
 
-            const ChildComponent = getNodeComponent(childNode.type, customComponents);
+            // Resolve bindings for nested child nodes
+            let resolvedChild = childNode;
+            if (renderContext) {
+              const childBindings = (childNode.props as any).__bindings;
+              if (childBindings && (childBindings.mode === 'bound' || childBindings.mode === 'hybrid')) {
+                const resolvedChildProps = resolveBindings(
+                  { ...childNode as BoundSchemaNode, bindings: childBindings },
+                  renderContext
+                );
+                resolvedChild = { ...childNode, props: { ...resolvedChildProps } };
+              }
+            }
+
+            const ChildComponent = getNodeComponent(resolvedChild.type, customComponents);
             if (!ChildComponent) return null;
 
-            const childBlockDef = getBlockDef(childNode.type);
+            const childBlockDef = getBlockDef(resolvedChild.type);
             const childCanHaveChildren = childBlockDef?.canHaveChildren ?? false;
 
-            const childElement = <ChildComponent node={childNode} mode={mode} renderChildren={(ids: string[]) => renderChildren2(ids)} />;
+            const childElement = <ChildComponent node={resolvedChild} mode={mode} renderChildren={(ids: string[]) => renderChildren2(ids)} mockData={mockData} />;
 
             const wrappedChild = childCanHaveChildren ? (
               <EditableDropZone nodeId={childNode.id} isEmpty={childNode.children.length === 0}>
