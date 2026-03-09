@@ -127,8 +127,7 @@ export function PageRenderer({
               node={resolvedChild} 
               mode={mode} 
               renderChildren={(ids: string[]) => renderEditableChildren(ids, depth + 1)} 
-              hostData={resolvedHostData}
-              mockData={resolvedHostData} // backward compat
+              mockData={resolvedHostData}
             />
           );
 
