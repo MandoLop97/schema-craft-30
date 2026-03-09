@@ -30,6 +30,8 @@ interface BuilderCanvasProps {
   onCopyStyle?: (nodeId: string) => void;
   onPasteStyle?: (nodeId: string) => void;
   canPasteStyle?: boolean;
+  /** Pre-built render context from host — takes priority over auto-built one */
+  externalRenderContext?: RenderContext;
 }
 
 const DEVICE_WIDTHS = {
