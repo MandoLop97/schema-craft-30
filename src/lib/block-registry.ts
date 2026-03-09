@@ -518,6 +518,16 @@ export const blockRegistry: BlockDefinition[] = [
       backgroundStyle: 'gradient',
     }, 
     defaultStyle: { padding: '4rem 2rem', textAlign: 'center' },
+    inspectorFields: [
+      { key: 'heading', label: 'Heading', type: 'text' },
+      { key: 'description', label: 'Description', type: 'textarea', rows: 3 },
+      { key: 'primaryCtaText', label: 'Primary Button Text', type: 'text' },
+      { key: 'primaryCtaHref', label: 'Primary Button Link', type: 'link' },
+      { key: 'secondaryCtaText', label: 'Secondary Button Text', type: 'text' },
+      { key: 'secondaryCtaHref', label: 'Secondary Button Link', type: 'link' },
+      { key: 'backgroundStyle', label: 'Background Style', type: 'select', options: [{ label: 'Solid', value: 'solid' }, { label: 'Gradient', value: 'gradient' }, { label: 'Image', value: 'image' }] },
+      { key: 'backgroundImage', label: 'Background Image', type: 'image' },
+    ],
     description: 'Call-to-action section with primary and secondary buttons',
   },
   { 
