@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Schema, RenderMode, ThemeTokens } from '@/types/schema';
+import { Schema, RenderMode, ThemeTokens, SchemaNode } from '@/types/schema';
 import { ThemeProvider } from './ThemeContext';
 import { getNodeComponent, CustomComponentMap } from './NodeRegistry';
 import { EditableDropZone } from './EditableDropZone';
@@ -10,6 +10,7 @@ import { generatePseudoStateCSS, generateResponsiveCSS, mergeGlobalStyles } from
 import { ScrollAnimationWrapper } from './ScrollAnimationWrapper';
 import { RenderContext, BoundSchemaNode } from '@/types/contract';
 import { resolveBindings, hasActiveBindings } from '@/lib/binding-utils';
+import { getSlotConstraints, isSlotLocked, isSlotDynamic, getSlotFallback } from '@/lib/slot-utils';
 
 /** Given an HSL string like "222 84% 4.9%", returns a contrasting foreground HSL */
 function computeContrastForeground(hsl: string): string {
@@ -43,9 +44,49 @@ interface PageRendererProps {
   renderContext?: RenderContext;
 }
 
-export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, customComponents, mockData, hostData, onCopyNode, onPasteNode, onDuplicateNode, onDeleteNode, canPaste, onEditSection, onSaveAsTemplate, onRepositionNode, onCopyStyle, onPasteStyle, canPasteStyle, renderContext }: PageRendererProps) {
+export function PageRenderer({ 
+  schema, 
+  mode, 
+  selectedNodeId, 
+  onSelectNode, 
+  customComponents, 
+  mockData, 
+  hostData, 
+  onCopyNode, 
+  onPasteNode, 
+  onDuplicateNode, 
+  onDeleteNode, 
+  canPaste, 
+  onEditSection, 
+  onSaveAsTemplate, 
+  onRepositionNode, 
+  onCopyStyle, 
+  onPasteStyle, 
+  canPasteStyle, 
+  renderContext 
+}: PageRendererProps) {
   const resolvedHostData = hostData || mockData;
 
+  /**
+   * Resolve bindings for a node if renderContext is available.
+   */
+  const resolveNodeBindings = (node: SchemaNode): SchemaNode => {
+    if (!renderContext) return node;
+    
+    const bindingsConfig = (node.props as any).__bindings;
+    if (bindingsConfig && (bindingsConfig.mode === 'bound' || bindingsConfig.mode === 'hybrid')) {
+      const resolvedProps = resolveBindings(
+        { ...node as BoundSchemaNode, bindings: bindingsConfig },
+        renderContext
+      );
+      return { ...node, props: { ...resolvedProps } };
+    }
+    return node;
+  };
+
+  /**
+   * Wrap element with scroll animation if configured.
+   */
   const wrapWithScrollAnimation = (nodeId: string, element: React.ReactNode): React.ReactNode => {
     if (mode === 'edit') return element;
     const node = schema.nodes[nodeId];
@@ -61,170 +102,144 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
     );
   };
 
+  /**
+   * Render children with edit mode support (sortable wrappers).
+   */
+  const renderEditableChildren = (childIds: string[], depth: number = 0): React.ReactNode => {
+    return (
+      <SortableContext items={childIds} strategy={verticalListSortingStrategy}>
+        {childIds.map((cid) => {
+          const childNode = schema.nodes[cid];
+          if (!childNode || childNode.hidden) return null;
+
+          // Check slot constraints
+          const constraints = getSlotConstraints(childNode);
+          const resolvedChild = resolveNodeBindings(childNode);
+          
+          const ChildComponent = getNodeComponent(resolvedChild.type, customComponents);
+          if (!ChildComponent) return null;
+
+          const childBlockDef = getBlockDef(resolvedChild.type);
+          const childCanHaveChildren = childBlockDef?.canHaveChildren ?? false;
+
+          const childElement = (
+            <ChildComponent 
+              node={resolvedChild} 
+              mode={mode} 
+              renderChildren={(ids: string[]) => renderEditableChildren(ids, depth + 1)} 
+              hostData={resolvedHostData}
+              mockData={resolvedHostData} // backward compat
+            />
+          );
+
+          const wrappedChild = childCanHaveChildren ? (
+            <EditableDropZone nodeId={childNode.id} isEmpty={childNode.children.length === 0}>
+              {childElement}
+            </EditableDropZone>
+          ) : (
+            childElement
+          );
+
+          // Apply slot constraints to wrapper
+          return (
+            <SortableNodeWrapper
+              key={cid}
+              nodeId={cid}
+              isSelected={selectedNodeId === cid}
+              nodeType={childNode.type}
+              onSelect={constraints.canEditProps ? (id) => onSelectNode?.(id) : undefined}
+              onCopy={constraints.canDuplicate ? onCopyNode : undefined}
+              onPaste={constraints.canEditProps ? onPasteNode : undefined}
+              onDuplicate={constraints.canDuplicate ? onDuplicateNode : undefined}
+              onDelete={constraints.canDelete ? onDeleteNode : undefined}
+              canPaste={constraints.canEditProps ? canPaste : false}
+              onEditSection={onEditSection}
+              onSaveAsTemplate={onSaveAsTemplate}
+              onCopyStyle={constraints.canEditStyles ? onCopyStyle : undefined}
+              onPasteStyle={constraints.canEditStyles ? onPasteStyle : undefined}
+              canPasteStyle={constraints.canEditStyles ? canPasteStyle : false}
+              nodeStyle={childNode.style}
+              onRepositionNode={constraints.canMove ? onRepositionNode : undefined}
+              isLocked={isSlotLocked(childNode)}
+            >
+              {wrappedChild}
+            </SortableNodeWrapper>
+          );
+        })}
+      </SortableContext>
+    );
+  };
+
+  /**
+   * Render children for public/preview mode (no edit wrappers).
+   */
+  const renderPublicChildren = (childIds: string[]): React.ReactNode => {
+    return childIds.map((cid) => (
+      <React.Fragment key={cid}>{renderNode(cid)}</React.Fragment>
+    ));
+  };
+
+  /**
+   * Main node render function.
+   */
   const renderNode = (nodeId: string): React.ReactNode => {
     const node = schema.nodes[nodeId];
     if (!node || node.hidden) return null;
 
-    // Resolve bindings in all modes when renderContext is available
-    let resolvedNode = node;
-    if (renderContext) {
-      const bindingsConfig = (node.props as any).__bindings;
-      if (bindingsConfig && (bindingsConfig.mode === 'bound' || bindingsConfig.mode === 'hybrid')) {
-        const resolvedProps = resolveBindings(
-          { ...node as BoundSchemaNode, bindings: bindingsConfig },
-          renderContext
-        );
-        resolvedNode = { ...node, props: { ...resolvedProps } };
+    // Handle dynamic slots with fallback
+    if (isSlotDynamic(node) && node.children.length === 0) {
+      const fallbackId = getSlotFallback(node);
+      if (fallbackId && schema.nodes[fallbackId]) {
+        return renderNode(fallbackId);
       }
+      // In edit mode, show placeholder for empty dynamic slots
+      if (mode === 'edit') {
+        return (
+          <div 
+            data-node-id={nodeId}
+            style={{
+              border: '2px dashed hsl(var(--muted))',
+              borderRadius: '0.5rem',
+              padding: '2rem',
+              textAlign: 'center',
+              color: 'hsl(var(--muted-foreground))',
+              fontSize: '0.75rem',
+            }}
+          >
+            Dynamic slot: {node.slot?.__slot || nodeId}
+            <br />
+            <span style={{ opacity: 0.6 }}>Will be populated by data</span>
+          </div>
+        );
+      }
+      return null;
     }
 
+    const resolvedNode = resolveNodeBindings(node);
     const Component = getNodeComponent(resolvedNode.type, customComponents);
     if (!Component) return null;
 
     const blockDef = getBlockDef(resolvedNode.type);
     const canHaveChildren = blockDef?.canHaveChildren ?? false;
 
-    const renderChildren = (childIds: string[]) => {
-      if (mode !== 'edit' || !canHaveChildren) {
-        return childIds.map((cid) => <React.Fragment key={cid}>{renderNode(cid)}</React.Fragment>);
-      }
+    const renderChildren = mode === 'edit' && canHaveChildren
+      ? (childIds: string[]) => renderEditableChildren(childIds)
+      : renderPublicChildren;
 
-      return (
-        <SortableContext items={childIds} strategy={verticalListSortingStrategy}>
-          {childIds.map((cid) => {
-            const childNode = schema.nodes[cid];
-            if (!childNode || childNode.hidden) return null;
+    const element = (
+      <Component 
+        node={resolvedNode} 
+        mode={mode} 
+        renderChildren={renderChildren} 
+        hostData={resolvedHostData}
+        mockData={resolvedHostData} // backward compat
+      />
+    );
 
-            // Resolve bindings for child nodes in edit mode
-            let resolvedChild = childNode;
-            if (renderContext) {
-              const childBindings = (childNode.props as any).__bindings;
-              if (childBindings && (childBindings.mode === 'bound' || childBindings.mode === 'hybrid')) {
-                const resolvedChildProps = resolveBindings(
-                  { ...childNode as BoundSchemaNode, bindings: childBindings },
-                  renderContext
-                );
-                resolvedChild = { ...childNode, props: { ...resolvedChildProps } };
-              }
-            }
-
-            const ChildComponent = getNodeComponent(resolvedChild.type, customComponents);
-            if (!ChildComponent) return null;
-
-            const childBlockDef = getBlockDef(resolvedChild.type);
-            const childCanHaveChildren = childBlockDef?.canHaveChildren ?? false;
-
-            const childElement = <ChildComponent node={resolvedChild} mode={mode} renderChildren={(ids: string[]) => renderChildren2(ids)} mockData={resolvedHostData} />;
-
-            const wrappedChild = childCanHaveChildren ? (
-              <EditableDropZone nodeId={childNode.id} isEmpty={childNode.children.length === 0}>
-                {childElement}
-              </EditableDropZone>
-            ) : (
-              childElement
-            );
-
-            return (
-              <SortableNodeWrapper
-                key={cid}
-                nodeId={cid}
-                isSelected={selectedNodeId === cid}
-                nodeType={childNode.type}
-                onSelect={(id) => onSelectNode?.(id)}
-                onCopy={onCopyNode}
-                onPaste={onPasteNode}
-                onDuplicate={onDuplicateNode}
-                onDelete={onDeleteNode}
-                canPaste={canPaste}
-                onEditSection={onEditSection}
-                onSaveAsTemplate={onSaveAsTemplate}
-                onCopyStyle={onCopyStyle}
-                onPasteStyle={onPasteStyle}
-                canPasteStyle={canPasteStyle}
-                nodeStyle={childNode.style}
-                onRepositionNode={onRepositionNode}
-              >
-                {wrappedChild}
-              </SortableNodeWrapper>
-            );
-          })}
-        </SortableContext>
-      );
-    };
-
-    // Non-sortable renderChildren for nested levels
-    const renderChildren2 = (childIds: string[]): React.ReactNode => {
-      if (mode !== 'edit') {
-        return childIds.map((cid) => <React.Fragment key={cid}>{renderNode(cid)}</React.Fragment>);
-      }
-
-      return (
-        <SortableContext items={childIds} strategy={verticalListSortingStrategy}>
-          {childIds.map((cid) => {
-            const childNode = schema.nodes[cid];
-            if (!childNode || childNode.hidden) return null;
-
-            // Resolve bindings for nested child nodes
-            let resolvedChild = childNode;
-            if (renderContext) {
-              const childBindings = (childNode.props as any).__bindings;
-              if (childBindings && (childBindings.mode === 'bound' || childBindings.mode === 'hybrid')) {
-                const resolvedChildProps = resolveBindings(
-                  { ...childNode as BoundSchemaNode, bindings: childBindings },
-                  renderContext
-                );
-                resolvedChild = { ...childNode, props: { ...resolvedChildProps } };
-              }
-            }
-
-            const ChildComponent = getNodeComponent(resolvedChild.type, customComponents);
-            if (!ChildComponent) return null;
-
-            const childBlockDef = getBlockDef(resolvedChild.type);
-            const childCanHaveChildren = childBlockDef?.canHaveChildren ?? false;
-
-            const childElement = <ChildComponent node={resolvedChild} mode={mode} renderChildren={(ids: string[]) => renderChildren2(ids)} mockData={resolvedHostData} />;
-
-            const wrappedChild = childCanHaveChildren ? (
-              <EditableDropZone nodeId={childNode.id} isEmpty={childNode.children.length === 0}>
-                {childElement}
-              </EditableDropZone>
-            ) : (
-              childElement
-            );
-
-            return (
-              <SortableNodeWrapper
-                key={cid}
-                nodeId={cid}
-                isSelected={selectedNodeId === cid}
-                nodeType={childNode.type}
-                onSelect={(id) => onSelectNode?.(id)}
-                onCopy={onCopyNode}
-                onPaste={onPasteNode}
-                onDuplicate={onDuplicateNode}
-                onDelete={onDeleteNode}
-                canPaste={canPaste}
-                onEditSection={onEditSection}
-                onSaveAsTemplate={onSaveAsTemplate}
-                onCopyStyle={onCopyStyle}
-                onPasteStyle={onPasteStyle}
-                canPasteStyle={canPasteStyle}
-                nodeStyle={childNode.style}
-                onRepositionNode={onRepositionNode}
-              >
-                {wrappedChild}
-              </SortableNodeWrapper>
-            );
-          })}
-        </SortableContext>
-      );
-    };
-
-    const element = <Component node={resolvedNode} mode={mode} renderChildren={renderChildren} mockData={resolvedHostData} />;
-
-    // Root node: don't wrap in sortable
-    if (mode !== 'edit') return wrapWithScrollAnimation(nodeId, element);
+    // Root node handling
+    if (mode !== 'edit') {
+      return wrapWithScrollAnimation(nodeId, element);
+    }
 
     if (nodeId === schema.rootNodeId) {
       return (
@@ -234,21 +249,24 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
       );
     }
 
-    // Non-root nodes at top level (shouldn't happen normally, but safety)
+    // Non-root nodes at top level (safety)
     const isSelected = selectedNodeId === node.id;
+    const constraints = getSlotConstraints(node);
 
     return (
       <div
         key={node.id}
         onClick={(e) => {
+          if (!constraints.canEditProps) return;
           e.stopPropagation();
           onSelectNode?.(node.id);
         }}
         style={{
           outline: isSelected ? '2px solid hsl(var(--primary))' : undefined,
           outlineOffset: isSelected ? '2px' : undefined,
-          cursor: 'pointer',
+          cursor: constraints.canEditProps ? 'pointer' : 'not-allowed',
           position: 'relative',
+          opacity: isSlotLocked(node) && mode === 'edit' ? 0.7 : 1,
         }}
       >
         {isSelected && (
@@ -267,6 +285,7 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
             }}
           >
             {node.type}
+            {isSlotLocked(node) && ' 🔒'}
           </div>
         )}
         {canHaveChildren ? (
