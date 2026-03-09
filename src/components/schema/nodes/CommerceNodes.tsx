@@ -339,9 +339,9 @@ export function ProductGridNode({ node, mode, mockData }: NodeComponentProps) {
     return <Component key={n.id} node={n} mode="public" renderChildren={renderChildren} />;
   };
 
-  // Edit mode: show real template cards (non-interactive) or fallback placeholders
+  // Edit mode: show real template cards (non-interactive) or fallback with mock data
   if (mode === 'edit') {
-    // If template + products loaded, render real cards in edit mode too
+    // If template + products loaded, render real cards in edit mode
     if (!loading && templateData && hydratedCards.length > 0) {
       return (
         <div
@@ -364,7 +364,66 @@ export function ProductGridNode({ node, mode, mockData }: NodeComponentProps) {
       );
     }
 
-    // Fallback: loading or no data yet
+    // Fallback: show inline product cards using mock data (no template needed)
+    const previewProducts = loading ? [] : (products.length > 0 ? products : fallbackProducts);
+    
+    if (previewProducts.length > 0) {
+      return (
+        <div
+          data-node-id={node.id}
+          style={{
+            ...s(node.style),
+            display: 'grid',
+            gridTemplateColumns: `repeat(auto-fill, minmax(250px, 1fr))`,
+            gap: (node.props.gap as string) || '1.5rem',
+          }}
+        >
+          {previewProducts.slice(0, columns).map((product, i) => (
+            <div
+              key={product.id || i}
+              style={{
+                borderRadius: '0.75rem',
+                overflow: 'hidden',
+                border: '1px solid hsl(var(--border))',
+                backgroundColor: 'hsl(var(--card))',
+                pointerEvents: 'none',
+              }}
+            >
+              <div style={{ position: 'relative', overflow: 'hidden', aspectRatio: '1/1' }}>
+                <img
+                  src={product.image_url || '/placeholder.svg'}
+                  alt={product.name}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+                {product.badge && (
+                  <span style={{
+                    position: 'absolute', top: '0.75rem', left: '0.75rem',
+                    padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.75rem',
+                    fontWeight: '600', backgroundColor: 'hsl(var(--primary))',
+                    color: 'hsl(var(--primary-foreground))', zIndex: 2,
+                  }}>
+                    {product.badge}
+                  </span>
+                )}
+              </div>
+              <div style={{ padding: '1rem' }}>
+                <h3 style={{ fontWeight: '500', fontSize: '0.95rem', marginBottom: '0.5rem' }}>{product.name}</h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ fontWeight: '600', fontSize: '1rem' }}>${product.price?.toFixed(2)}</span>
+                  {product.original_price && (
+                    <span style={{ textDecoration: 'line-through', color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem' }}>
+                      ${product.original_price.toFixed(2)}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    // Ultimate fallback: loading placeholder
     return (
       <div
         data-node-id={node.id}
@@ -393,7 +452,7 @@ export function ProductGridNode({ node, mode, mockData }: NodeComponentProps) {
           >
             <span style={{ fontSize: '2rem' }}>🛍️</span>
             <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
-              {loading ? '⏳' : `Product ${i + 1}`}
+              ⏳ Loading...
             </span>
           </div>
         ))}
