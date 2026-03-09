@@ -461,6 +461,16 @@ export const blockRegistry: BlockDefinition[] = [
     defaultProps: { text: 'Build Something Amazing', subtitle: 'The all-in-one platform to launch your next big idea — fast, beautiful, and effortless.', ctaText: 'Get Started', ctaHref: '#', src: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&h=800&fit=crop', overlayOpacity: '0.55' }, 
     defaultStyle: { minHeight: '32rem', padding: '4rem 2rem' },
     supportsBinding: true,
+    inspectorFields: [
+      { key: 'text', label: 'Heading', type: 'text' },
+      { key: 'subtitle', label: 'Subtitle', type: 'textarea', rows: 2 },
+      { key: 'ctaText', label: 'CTA Text', type: 'text' },
+      { key: 'ctaHref', label: 'CTA Link', type: 'link' },
+      { key: 'secondaryCtaText', label: 'Secondary CTA Text', type: 'text' },
+      { key: 'secondaryCtaLink', label: 'Secondary CTA Link', type: 'link' },
+      { key: 'src', label: 'Background Image', type: 'image' },
+      { key: 'overlayOpacity', label: 'Overlay Opacity', type: 'slider', min: 0, max: 1, step: 0.05 },
+    ],
     description: 'Full-width hero with background image and CTA',
   },
   { 
