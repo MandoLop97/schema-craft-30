@@ -195,10 +195,13 @@ export function NewsletterSectionNode({ node }: NodeComponentProps) {
 // HERO SECTION
 // ═══════════════════════════════════════════════════════════════════════════
 export function HeroSectionNode({ node }: NodeComponentProps) {
-  const opacity = parseFloat(node.props.overlayOpacity || '0.55');
+  const rawOpacity = parseFloat(node.props.overlayOpacity || '55');
+  // Normalize: if > 1 treat as percentage (0-100), otherwise as decimal (0-1)
+  const opacity = rawOpacity > 1 ? rawOpacity / 100 : rawOpacity;
   const heading = node.props.heading || node.props.text || 'Hero Title';
   const bgSrc = node.props.src || node.props.image;
   const ctaLink = node.props.ctaLink || node.props.ctaHref || '#';
+  const align = node.props.textAlign || 'center';
   return (
     <div
       className="nxr-hero"
@@ -206,9 +209,9 @@ export function HeroSectionNode({ node }: NodeComponentProps) {
         position: 'relative',
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center',
+        alignItems: align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center',
         justifyContent: 'center',
-        textAlign: 'center',
+        textAlign: align as any,
         minHeight: node.style.minHeight || '32rem',
         padding: node.style.padding || '4rem 2rem',
         overflow: 'hidden',
