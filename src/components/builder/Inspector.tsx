@@ -203,9 +203,9 @@ function InspectorFieldRenderer({ field, value, onChange, onImageUpload }: {
     case 'select': return (
       <div className="grid gap-1">
         <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">{field.label}</Label>
-        <Select value={String(value ?? '')} onValueChange={onChange}>
+        <Select value={String(value ?? '') || undefined} onValueChange={onChange}>
           <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-          <SelectContent>{field.options?.map((o) => (<SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>))}</SelectContent>
+          <SelectContent>{field.options?.filter((o) => o.value !== '').map((o) => (<SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>))}</SelectContent>
         </Select>
       </div>
     );
