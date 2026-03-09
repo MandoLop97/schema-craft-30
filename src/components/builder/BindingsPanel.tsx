@@ -128,8 +128,12 @@ export function BindingsPanel({ node, onUpdateProps }: BindingsPanelProps) {
     }
   };
 
-  const applyPreset = (preset: { bindings: DataBinding[] }) => {
-    updateBindings({ bindings: preset.bindings });
+  const applyPreset = (preset: { bindings: DataBinding[]; dataSource?: any }) => {
+    const updates: Partial<NodeBindings> = { bindings: preset.bindings };
+    if (preset.dataSource) {
+      updates.dataSource = preset.dataSource;
+    }
+    updateBindings(updates);
   };
 
   const addFieldBinding = () => {
