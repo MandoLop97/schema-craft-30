@@ -23,6 +23,7 @@ interface PageRendererProps {
   mode: RenderMode;
   selectedNodeId?: string | null;
   onSelectNode?: (nodeId: string) => void;
+  customComponents?: CustomComponentMap;
   /** @deprecated Use hostData */
   mockData?: Record<string, any>;
   /** Host-provided data for edit/preview binding resolution */
