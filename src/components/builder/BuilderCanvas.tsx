@@ -66,12 +66,15 @@ export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode, cu
 
   const isCompact = templateType === 'component' || templateType === 'header' || templateType === 'footer';
 
-  // Build renderContext from mockData for edit-mode binding preview
-  const renderContext = useMemo<RenderContext>(() => ({
-    mode: 'edit',
-    data: buildMockRenderData(mockData),
-    theme: schema.themeTokens,
-  }), [mockData, schema.themeTokens]);
+  // Use external renderContext if provided, otherwise build from mockData
+  const renderContext = useMemo<RenderContext>(() => {
+    if (externalRenderContext) return externalRenderContext;
+    return {
+      mode: 'edit',
+      data: buildMockRenderData(mockData),
+      theme: schema.themeTokens,
+    };
+  }, [externalRenderContext, mockData, schema.themeTokens]);
 
   return (
     <div
