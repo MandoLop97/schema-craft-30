@@ -126,8 +126,8 @@ export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode, cu
           selectedNodeId={selectedNodeId}
           onSelectNode={onSelectNode}
           customComponents={customComponents}
-          mockData={mockData}
-          renderContext={renderContext}
+          mockData={resolvedHostData}
+          hostData={resolvedHostData}
           onCopyNode={onCopyNode}
           onPasteNode={onPasteNode}
           onDuplicateNode={onDuplicateNode}
