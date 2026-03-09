@@ -19,7 +19,11 @@ export { ANIMATION_PRESETS } from './types/schema';
 // Contract types — shared between constructor and template
 export type {
   DataBinding, NodeDataSource, NodeBindings, DataSourceType,
-  BoundSchemaNode, RenderContext,
+  BoundSchemaNode, RenderContext, PageContext,
+  // Slot system
+  SlotBehavior, SlotAssignment,
+  // Publish pipeline
+  PublishStage, ValidatorOptions, PublishPipeline,
   // Per-node prop types
   TextNodeProps, ImageNodeProps, ButtonNodeProps,
   ProductCardNodeProps, ProductGridNodeProps, CollectionGridNodeProps,
@@ -39,7 +43,9 @@ export {
   registerTransform, getAvailableTransforms,
 } from './lib/binding-utils';
 
-// Mock data for edit/preview mode
+// Host data for edit/preview mode (v1.7.0 naming)
+export { DEFAULT_SAMPLE_PRODUCTS, DEFAULT_SAMPLE_COLLECTIONS, DEFAULT_SAMPLE_SETTINGS, buildHostData } from './lib/host-data';
+// Deprecated aliases — backward compatibility
 export { DEFAULT_MOCK_PRODUCTS, DEFAULT_MOCK_COLLECTIONS, DEFAULT_MOCK_SETTINGS, buildMockRenderData } from './lib/mock-data';
 
 // Renderer — for hosts that want to render schemas outside the builder
@@ -73,7 +79,7 @@ export { validateForPublish } from './lib/publish-validator';
 export type { PublishValidationResult, ValidationIssue, ValidationSeverity } from './lib/publish-validator';
 
 // Page types, metadata, visibility
-export type { PageType, PageMetadata, PageContext, VisibilityRule, DeviceVisibility, LockedPropsConfig } from './types/page-types';
+export type { PageType, PageMetadata, VisibilityRule, DeviceVisibility, LockedPropsConfig } from './types/page-types';
 export { PAGE_TYPE_LABELS, BLOCK_PAGE_TYPE_DEFAULTS, isBlockCompatibleWithPage } from './types/page-types';
 
 // Default schemas — all 8 page schema factories + definitions

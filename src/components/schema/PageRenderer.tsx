@@ -24,7 +24,10 @@ interface PageRendererProps {
   selectedNodeId?: string | null;
   onSelectNode?: (nodeId: string) => void;
   customComponents?: CustomComponentMap;
+  /** @deprecated Use hostData */
   mockData?: Record<string, any>;
+  /** Host-provided data for edit/preview binding resolution */
+  hostData?: Record<string, any>;
   onCopyNode?: (nodeId: string) => void;
   onPasteNode?: (nodeId: string) => void;
   onDuplicateNode?: (nodeId: string) => void;
@@ -40,7 +43,8 @@ interface PageRendererProps {
   renderContext?: RenderContext;
 }
 
-export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, customComponents, mockData, onCopyNode, onPasteNode, onDuplicateNode, onDeleteNode, canPaste, onEditSection, onSaveAsTemplate, onRepositionNode, onCopyStyle, onPasteStyle, canPasteStyle, renderContext }: PageRendererProps) {
+export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, customComponents, mockData, hostData, onCopyNode, onPasteNode, onDuplicateNode, onDeleteNode, canPaste, onEditSection, onSaveAsTemplate, onRepositionNode, onCopyStyle, onPasteStyle, canPasteStyle, renderContext }: PageRendererProps) {
+  const resolvedHostData = hostData || mockData;
 
   const wrapWithScrollAnimation = (nodeId: string, element: React.ReactNode): React.ReactNode => {
     if (mode === 'edit') return element;
@@ -110,7 +114,7 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
             const childBlockDef = getBlockDef(resolvedChild.type);
             const childCanHaveChildren = childBlockDef?.canHaveChildren ?? false;
 
-            const childElement = <ChildComponent node={resolvedChild} mode={mode} renderChildren={(ids: string[]) => renderChildren2(ids)} mockData={mockData} />;
+            const childElement = <ChildComponent node={resolvedChild} mode={mode} renderChildren={(ids: string[]) => renderChildren2(ids)} mockData={resolvedHostData} />;
 
             const wrappedChild = childCanHaveChildren ? (
               <EditableDropZone nodeId={childNode.id} isEmpty={childNode.children.length === 0}>
@@ -179,7 +183,7 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
             const childBlockDef = getBlockDef(resolvedChild.type);
             const childCanHaveChildren = childBlockDef?.canHaveChildren ?? false;
 
-            const childElement = <ChildComponent node={resolvedChild} mode={mode} renderChildren={(ids: string[]) => renderChildren2(ids)} mockData={mockData} />;
+            const childElement = <ChildComponent node={resolvedChild} mode={mode} renderChildren={(ids: string[]) => renderChildren2(ids)} mockData={resolvedHostData} />;
 
             const wrappedChild = childCanHaveChildren ? (
               <EditableDropZone nodeId={childNode.id} isEmpty={childNode.children.length === 0}>
@@ -217,7 +221,7 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
       );
     };
 
-    const element = <Component node={resolvedNode} mode={mode} renderChildren={renderChildren} mockData={mockData} />;
+    const element = <Component node={resolvedNode} mode={mode} renderChildren={renderChildren} mockData={resolvedHostData} />;
 
     // Root node: don't wrap in sortable
     if (mode !== 'edit') return wrapWithScrollAnimation(nodeId, element);

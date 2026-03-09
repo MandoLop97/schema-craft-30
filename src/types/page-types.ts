@@ -5,6 +5,7 @@
  */
 
 import { NodeType } from './schema';
+import type { RenderMode } from './contract';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // PAGE TYPES
@@ -63,23 +64,14 @@ export interface PageMetadata {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// PAGE CONTEXT — Runtime context for a page
+// PAGE CONTEXT — Re-exported from contract.ts for convenience
 // ═══════════════════════════════════════════════════════════════════════════
 
-export interface PageContext {
-  /** Type of the current page */
-  pageType: PageType;
-  /** Current page slug */
-  slug: string;
-  /** URL parameters (e.g., product handle, collection handle) */
-  params?: Record<string, string>;
-  /** Query string parameters */
-  query?: Record<string, string>;
-  /** Whether this is a preview render */
-  isPreview?: boolean;
-  /** The page metadata */
-  metadata?: PageMetadata;
-}
+/**
+ * @deprecated Import PageContext from '@/types/contract' instead.
+ * This re-export is kept for backward compatibility.
+ */
+export type { PageContext } from './contract';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // VISIBILITY RULES
@@ -133,14 +125,11 @@ export const BLOCK_PAGE_TYPE_DEFAULTS: Partial<Record<NodeType, PageType[]>> = {
   TestimonialSection: ['home', 'landing', 'static'],
   FAQSection: ['home', 'landing', 'static', 'product'],
   NewsletterSection: ['home', 'landing', 'static', 'blog'],
-  // Layout, Content, UI, Interactive blocks are allowed on all page types by default
 };
 
 /** Check if a block type is compatible with a page type */
 export function isBlockCompatibleWithPage(blockType: NodeType, pageType: PageType, allowedPageTypes?: PageType[]): boolean {
-  // If the block explicitly declares allowedPageTypes, use those
   const allowed = allowedPageTypes || BLOCK_PAGE_TYPE_DEFAULTS[blockType];
-  // No restrictions = allowed everywhere
   if (!allowed || allowed.length === 0) return true;
   return allowed.includes(pageType);
 }

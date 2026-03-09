@@ -1,5 +1,6 @@
 // Schema-First Data Model for Nexora Visual Builder
 import React from 'react';
+import type { SlotAssignment } from './contract';
 
 export type BuiltInNodeType =
   | 'Section' | 'Container' | 'Grid' | 'Stack'
@@ -209,6 +210,8 @@ export interface SchemaNode {
   customCSS?: string;
   /** IDs of global styles applied to this node */
   appliedGlobalStyles?: string[];
+  /** Slot assignment for template integration */
+  slot?: SlotAssignment;
 }
 
 export interface ThemeTokens {
@@ -275,7 +278,10 @@ export interface PageDefinition {
   category?: string;
   icon?: React.ComponentType;
   canvasSize?: { width: number; height: number };
+  /** @deprecated Use hostData */
   mockData?: Record<string, any>;
+  /** Host-provided data for edit/preview binding resolution */
+  hostData?: Record<string, any>;
 }
 
 export type RenderMode = 'public' | 'preview' | 'edit';

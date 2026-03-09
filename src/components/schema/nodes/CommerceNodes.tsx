@@ -4,7 +4,7 @@ import { nodeStyleToCSS, generatePseudoStateCSS, generateResponsiveCSS, themeTok
 import { useThemeTokens } from '@/components/schema/ThemeContext';
 import { hydrateCardTemplate, ProductData } from '@/lib/card-template-utils';
 import { getNodeComponent } from '@/components/schema/NodeRegistry';
-import { DEFAULT_MOCK_PRODUCTS, DEFAULT_MOCK_COLLECTIONS } from '@/lib/mock-data';
+import { DEFAULT_SAMPLE_PRODUCTS, DEFAULT_SAMPLE_COLLECTIONS } from '@/lib/host-data';
 
 interface NodeComponentProps {
   node: SchemaNode;
@@ -216,7 +216,7 @@ export function ProductGridNode({ node, mode, mockData }: NodeComponentProps) {
 
   // ── Resolve products: mockData (host-injected) > DEFAULT_MOCK ──
   const products = useMemo(() => {
-    const source: ProductData[] = mockData?.products || DEFAULT_MOCK_PRODUCTS;
+    const source: ProductData[] = mockData?.products || DEFAULT_SAMPLE_PRODUCTS;
     let filtered = [...source];
     if (categoryFilter) {
       filtered = filtered.filter((p: any) => p.category === categoryFilter);
@@ -412,7 +412,7 @@ export function CollectionGridNode({ node, mode, mockData }: NodeComponentProps)
   const showCount = node.props.showCount !== false;
 
   // Use mock data from host or fallback to default
-  const sourceCollections = mockData?.collections || DEFAULT_MOCK_COLLECTIONS;
+  const sourceCollections = mockData?.collections || DEFAULT_SAMPLE_COLLECTIONS;
   const mockCollections = sourceCollections.map((c: any) => ({
     name: c.name,
     image: c.image || c.image_url || 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=400&h=300&fit=crop',
