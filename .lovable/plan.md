@@ -1,102 +1,95 @@
 
-## Instrucción permanente: Versionado automático
 
-**IMPORTANTE**: Cada vez que se haga un cambio en el proyecto, incrementar la versión en:
-1. `package.json` → campo `"version"`
-2. `src/components/builder/BuilderEditorShell.tsx` → texto de versión en el status bar
+# Plan: Corregir arrastre de secciones (drag & drop)
 
-Formato: semver (major.minor.patch). Incrementar el **patch** (+1) en cada cambio. Versión actual: **1.4.0**
+## Problema
 
----
+El handler `handleDragEnd` para nodos `sortable` (línea 228-244 de `BuilderEditorShell.tsx`) solo soporta reordenamiento entre hermanos del mismo padre. Si el nodo destino (`overId`) no está en el mismo `parent.children` que el nodo arrastrado, `indexOf(overId)` retorna `-1` y el movimiento se ignora silenciosamente.
 
-## Phase 1: Schema-First Foundation + eCommerce Home
+Esto rompe:
+1. Reordenar secciones hijas directas del root cuando se suelta sobre un hijo interno de otra sección
+2. Mover nodos entre contenedores diferentes (cross-parent)
 
-### Overview
-Build the core schema system, page renderer, storage layer, and a clean eCommerce Home page — all driven by JSON schema. This foundation makes Phase 2 (Builder UI) straightforward to add.
+## Solución
 
----
+Reescribir el bloque `sortable` en `handleDragEnd` (líneas 228-244) para soportar tres escenarios:
 
-### 1. Schema Types & Data Model
-Define TypeScript types for the entire schema system:
-- **Page** (id, slug, name, schemaId)
-- **Schema** (id, version, updatedAt, themeTokens, rootNodeId, nodes map)
-- **Node** (id, type, props, style, children, locked, hidden)
-- **ThemeTokens** (colors, typography, radius, spacing)
-- Support all node types: Section, Container, Grid, Stack, Text, Image, Button, Card, Badge, Divider, Input, ProductCard, Navbar, Footer
+### 1. Same-parent reorder (actual, funciona)
+Si `activeId` y `overId` comparten padre → `arrayMove` como ahora.
 
-### 2. Schema Store (LocalStorage)
-Create an abstraction layer (`SchemaStore`) with clean API:
-- `getPages()`, `getPageBySlug()`, `getSchema()`, `saveSchema()`
-- `createPage()`, `duplicatePage()`, `deletePage()`, `renamePage()`
-- All backed by LocalStorage, designed so swapping to a database later only changes the store internals
+### 2. Cross-parent move
+Si tienen padres distintos:
+- Validar con `canDropInto` que el nodo puede entrar al nuevo padre
+- Remover `activeId` del padre original
+- Insertar `activeId` en el nuevo padre junto al `overId`
 
-### 3. Node Registry & Components
-Build a component for each node type, all receiving props/style from schema:
-- **Layout**: Section, Container, Grid, Stack
-- **Content**: Text, Image, Divider, Badge
-- **UI**: Button, Card, Input
-- **Commerce**: ProductCard (mock with image, title, price, CTA)
-- **Site**: Navbar, Footer
+### 3. Drop sobre contenedor vacío
+Si `overId` corresponde a un nodo contenedor (droppable zone) y no es hermano:
+- Validar con `canDropInto`
+- Remover del padre original
+- Añadir al final de `children` del contenedor destino
 
-### 4. PageRenderer
-Core rendering engine:
-- Takes a schema + mode (`public` | `preview` | `edit`)
-- Recursively renders nodes from the tree using the Node Registry
-- In `public`/`preview` mode: clean output, no editing UI
-- In `edit` mode: adds selection outlines and drop zones (prepared for Phase 2)
-- Applies ThemeTokens as CSS variables
+## Cambios
 
-### 5. eCommerce Home Page (Schema-based)
-Create a default `home` schema that produces a modern eCommerce landing page:
-- **Navbar** with logo and navigation links
-- **Hero section** with headline, subtext, and CTA button
-- **Featured products grid** with 3-4 ProductCard mocks
-- **Value propositions** section (icons + text)
-- **Footer** with links and copyright
-- Clean, minimal design inspired by modern eCommerce (think Stripe/Linear aesthetics)
+### `src/components/builder/BuilderEditorShell.tsx` (líneas 228-244)
 
-### 6. Route Setup
-- `/` → Renders Home from schema via PageRenderer (public mode)
-- `/preview?page=home` → Same but in preview mode
-- `/admin/export?page=home` → Shows raw JSON schema with copy button
-- `/license-blocked` → Placeholder lock screen
+Reemplazar el bloque sortable por:
 
-### 7. License Gate (Mock)
-- `license_status` stored in LocalStorage (active/inactive/exceeded)
-- Admin routes check license; public site always works
-- `/license-blocked` shows status, reason, and placeholder "Enter License" button
+```typescript
+if (activeData?.type === 'sortable') {
+  const activeId = String(active.id);
+  const overId = String(over.id);
+  if (activeId === overId) return;
 
----
+  updateSchema((s) => {
+    const findParent = (id: string) =>
+      Object.values(s.nodes).find((n) => n.children.includes(id));
 
-### What's NOT in Phase 1 (saved for Phase 2)
-- Full Builder UI (drag & drop canvas, left/right sidebars, inspector)
-- Undo/Redo history
-- AI Edit feature
-- Templates management (`/admin/templates`)
-- Theme editor (`/admin/theme`)
-- Device toggle & responsive overrides
+    const activeParent = findParent(activeId);
+    if (!activeParent) return s;
 
-### Design Style
-Minimal, professional SaaS aesthetic — light background, clean typography, subtle borders, polished hover states.
+    const overParent = findParent(overId);
 
-## ⚠️ REGLA FUNDAMENTAL: Alcance del proyecto
+    // Case 1: Same parent — simple reorder
+    if (overParent && activeParent.id === overParent.id) {
+      const oldIdx = activeParent.children.indexOf(activeId);
+      const newIdx = activeParent.children.indexOf(overId);
+      if (oldIdx !== -1 && newIdx !== -1) {
+        activeParent.children = arrayMove(activeParent.children, oldIdx, newIdx);
+      }
+      return s;
+    }
 
-**Este proyecto es un CONSTRUCTOR VISUAL (Builder) al 100%.** Su única responsabilidad es:
-1. Permitir diseñar y personalizar visualmente: **Header (Navbar)**, **Footer** y **Product Cards**
-2. Generar y guardar esquemas JSON en la base de datos
-3. Previsualizar el resultado en el canvas
+    // Case 2: overId is a container node (drop zone) — move into it
+    const overNode = s.nodes[overId];
+    if (overNode) {
+      const activeNode = s.nodes[activeId];
+      if (activeNode && canDropInto(activeNode.type, overNode.type, overId === s.rootNodeId)) {
+        // Remove from old parent
+        const idx = activeParent.children.indexOf(activeId);
+        if (idx !== -1) activeParent.children.splice(idx, 1);
+        // Add to new parent
+        overNode.children.push(activeId);
+        return s;
+      }
+    }
 
-**NO es responsabilidad de este proyecto:**
-- Administrar productos (CRUD de productos) — eso lo hace la app consumidora (Template)
-- Gestionar inventario, pedidos o usuarios finales
-- Lógica de negocio, licencias o acceso al sitio final
-- Los productos y medios se **leen** de la base de datos para usarlos en el diseño, pero **no se crean ni editan** desde aquí
+    // Case 3: Cross-parent — move next to overId in its parent
+    if (overParent) {
+      const activeNode = s.nodes[activeId];
+      if (activeNode && canDropInto(activeNode.type, overParent.type as any, overParent.id === s.rootNodeId)) {
+        const oldIdx = activeParent.children.indexOf(activeId);
+        if (oldIdx !== -1) activeParent.children.splice(oldIdx, 1);
+        const newIdx = overParent.children.indexOf(overId);
+        overParent.children.splice(newIdx + 1, 0, activeId);
+        return s;
+      }
+    }
 
-**Los únicos componentes 100% editables/personalizables en el Builder son:**
-- **Navbar/Header**: logo, links, colores, estilos
-- **Footer**: logo, copyright, links, estilos  
-- **Product Cards**: layout, estilos, botones, imagen ratio, tipografía
+    return s;
+  });
+}
+```
 
-Las demás secciones del canvas (Hero, Sections, Grids, etc.) son bloques de contenido arrastrables y configurables pero NO tienen editores dedicados.
+Esto es un cambio único en un solo archivo (~30 líneas reemplazadas).
 
----
