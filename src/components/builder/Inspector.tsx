@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { ArrayEditor } from './ArrayEditor';
 import { SchemaNode, NodeProps, NodeStyle, ANIMATION_PRESETS, AnimationPreset, GlobalStyleDef } from '@/types/schema';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -225,6 +226,18 @@ function InspectorFieldRenderer({ field, value, onChange, onImageUpload }: {
           ))}
         </CollapsibleContent>
       </Collapsible>
+    );
+    case 'array': return (
+      <ArrayEditor
+        label={field.label}
+        items={Array.isArray(value) ? value : []}
+        fields={field.arrayFields || []}
+        onChange={onChange}
+        newItemDefaults={field.newItemDefaults}
+        addLabel={field.addLabel}
+        maxItems={field.maxItems}
+        onImageUpload={onImageUpload}
+      />
     );
     default: return <PropField label={field.label} value={String(value ?? '')} onChange={onChange} placeholder={field.placeholder} />;
   }

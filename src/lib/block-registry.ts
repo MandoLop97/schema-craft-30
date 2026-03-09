@@ -8,7 +8,16 @@ import {
   Image, AlignCenter, MessageCircle, HelpCircle, Grid3X3,
 } from 'lucide-react';
 import { NodeType, NodeProps, NodeStyle, TemplateType, SchemaNode } from '@/types/schema';
-import React from 'react';
+import { PageType } from '@/types/page-types';
+
+export interface ArrayFieldDef {
+  key: string;
+  label: string;
+  type: 'text' | 'textarea' | 'number' | 'image' | 'toggle';
+  placeholder?: string;
+  rows?: number;
+  defaultValue?: any;
+}
 
 export interface InspectorFieldDef {
   /** Property key on NodeProps */
@@ -16,7 +25,7 @@ export interface InspectorFieldDef {
   /** Display label */
   label: string;
   /** Field type */
-  type: 'text' | 'select' | 'color' | 'number' | 'image' | 'toggle' | 'slider' | 'textarea' | 'link' | 'icon' | 'spacing' | 'group' | 'binding';
+  type: 'text' | 'select' | 'color' | 'number' | 'image' | 'toggle' | 'slider' | 'textarea' | 'link' | 'icon' | 'spacing' | 'group' | 'binding' | 'array';
   /** Options for 'select' type */
   options?: { label: string; value: string }[];
   /** Min value for 'slider' and 'number' */
@@ -39,6 +48,14 @@ export interface InspectorFieldDef {
   allowedDataSources?: string[];
   /** For binding type: available fields */
   bindableFields?: string[];
+  /** For 'array' type: field definitions per item */
+  arrayFields?: ArrayFieldDef[];
+  /** For 'array' type: default values for new items */
+  newItemDefaults?: Record<string, any>;
+  /** For 'array' type: add button label */
+  addLabel?: string;
+  /** For 'array' type: max items */
+  maxItems?: number;
 }
 
 export interface CompositeNodeTree {
@@ -64,6 +81,8 @@ export interface BlockDefinition {
   supportsBinding?: boolean;
   /** Description for documentation */
   description?: string;
+  /** Restrict this block to specific page types */
+  allowedPageTypes?: PageType[];
 }
 
 const uid = () => `node-${Math.random().toString(36).slice(2, 9)}`;
@@ -567,6 +586,13 @@ export const blockRegistry: BlockDefinition[] = [
       { key: 'subtitle', label: 'Subtitle', type: 'text', placeholder: 'Optional subtitle' },
       { key: 'layout', label: 'Layout', type: 'select', options: [{ label: 'Grid', value: 'grid' }, { label: 'Carousel', value: 'carousel' }, { label: 'Stack', value: 'stack' }] },
       { key: 'columns', label: 'Columns', type: 'select', options: [{ label: '2', value: '2' }, { label: '3', value: '3' }, { label: '4', value: '4' }] },
+      { key: 'testimonials', label: 'Testimonials', type: 'array', arrayFields: [
+        { key: 'quote', label: 'Quote', type: 'textarea', rows: 2, placeholder: 'Customer quote...' },
+        { key: 'author', label: 'Author', type: 'text', placeholder: 'Name' },
+        { key: 'role', label: 'Role', type: 'text', placeholder: 'e.g. Verified Buyer' },
+        { key: 'rating', label: 'Rating (1-5)', type: 'number', defaultValue: 5 },
+        { key: 'avatar', label: 'Avatar', type: 'image' },
+      ], newItemDefaults: { quote: 'Great product!', author: 'Customer', role: '', rating: 5, avatar: '' }, addLabel: '+ Add Testimonial' },
     ],
     description: 'Customer testimonials section with ratings, avatars and multiple layouts',
   },
@@ -594,6 +620,10 @@ export const blockRegistry: BlockDefinition[] = [
       { key: 'subtitle', label: 'Subtitle', type: 'text' },
       { key: 'faqLayout', label: 'Layout', type: 'select', options: [{ label: 'Accordion', value: 'accordion' }, { label: 'Grid', value: 'grid' }] },
       { key: 'columns', label: 'Columns (Grid mode)', type: 'select', options: [{ label: '1', value: '1' }, { label: '2', value: '2' }, { label: '3', value: '3' }] },
+      { key: 'faqItems', label: 'FAQ Items', type: 'array', arrayFields: [
+        { key: 'question', label: 'Question', type: 'text', placeholder: 'Your question...' },
+        { key: 'answer', label: 'Answer', type: 'textarea', rows: 2, placeholder: 'Answer...' },
+      ], newItemDefaults: { question: 'New question?', answer: 'Answer here.' }, addLabel: '+ Add FAQ' },
     ],
     description: 'FAQ accordion or grid section with configurable columns',
   },

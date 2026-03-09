@@ -68,6 +68,14 @@ export { nodeStyleToCSS, generatePseudoStateCSS, generateResponsiveCSS, themeTok
 export { validateSchema } from './lib/schema-validator';
 export type { SchemaValidationResult } from './lib/schema-validator';
 
+// Publish validation — pre-publish checks
+export { validateForPublish } from './lib/publish-validator';
+export type { PublishValidationResult, ValidationIssue, ValidationSeverity } from './lib/publish-validator';
+
+// Page types, metadata, visibility
+export type { PageType, PageMetadata, PageContext, VisibilityRule, DeviceVisibility, LockedPropsConfig } from './types/page-types';
+export { PAGE_TYPE_LABELS, BLOCK_PAGE_TYPE_DEFAULTS, isBlockCompatibleWithPage } from './types/page-types';
+
 // Default schemas — all 8 page schema factories + definitions
 export {
   createHomeSchema,
