@@ -46,6 +46,7 @@ export interface NexoraBuilderAppProps {
   hostData?: Record<string, any>;
   /** Data context for resolving bindings — passed to PageRenderer */
   renderContext?: RenderContext;
+}
 
 export function NexoraBuilderApp({
   initialSchema,
