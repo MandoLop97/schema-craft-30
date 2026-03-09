@@ -48,6 +48,14 @@ export { DEFAULT_SAMPLE_PRODUCTS, DEFAULT_SAMPLE_COLLECTIONS, DEFAULT_SAMPLE_SET
 // Deprecated aliases — backward compatibility
 export { DEFAULT_MOCK_PRODUCTS, DEFAULT_MOCK_COLLECTIONS, DEFAULT_MOCK_SETTINGS, buildMockRenderData } from './lib/mock-data';
 
+// RenderContext utilities
+export { buildRenderContext, buildEditContext, createIterationContext, validateRenderContext, isStrictRenderContext } from './lib/render-context-utils';
+export type { BuildRenderContextOptions } from './lib/render-context-utils';
+
+// Slot utilities
+export { getSlotAssignment, isInSlot, getSlotBehavior, isSlotLocked, isSlotEditable, isSlotDynamic, getNodesInSlot, getSlotFallback, getSlotConstraints, validateSlots } from './lib/slot-utils';
+export type { SlotConstraints } from './lib/slot-utils';
+
 // Renderer — for hosts that want to render schemas outside the builder
 export { PageRenderer } from './components/schema/PageRenderer';
 export { CustomStylesInjector } from './components/builder/CustomStylesInjector';
