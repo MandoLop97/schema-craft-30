@@ -8,6 +8,8 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { getBlockDef } from '@/lib/block-registry';
 import { generatePseudoStateCSS, generateResponsiveCSS, mergeGlobalStyles } from '@/lib/style-utils';
 import { ScrollAnimationWrapper } from './ScrollAnimationWrapper';
+import { RenderContext, BoundSchemaNode } from '@/types/contract';
+import { resolveBindings, hasActiveBindings } from '@/lib/binding-utils';
 
 /** Given an HSL string like "222 84% 4.9%", returns a contrasting foreground HSL */
 function computeContrastForeground(hsl: string): string {
