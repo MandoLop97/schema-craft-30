@@ -231,14 +231,48 @@ export function BuilderEditorShell({
       if (activeId === overId) return;
 
       updateSchema((s) => {
-        const parent = Object.values(s.nodes).find((n) => n.children.includes(activeId));
-        if (!parent) return s;
+        const findParent = (id: string) =>
+          Object.values(s.nodes).find((n) => n.children.includes(id));
 
-        const oldIndex = parent.children.indexOf(activeId);
-        const newIndex = parent.children.indexOf(overId);
-        if (oldIndex === -1 || newIndex === -1) return s;
+        const activeParent = findParent(activeId);
+        if (!activeParent) return s;
 
-        parent.children = arrayMove(parent.children, oldIndex, newIndex);
+        const overParent = findParent(overId);
+
+        // Case 1: Same parent — simple reorder
+        if (overParent && activeParent.id === overParent.id) {
+          const oldIdx = activeParent.children.indexOf(activeId);
+          const newIdx = activeParent.children.indexOf(overId);
+          if (oldIdx !== -1 && newIdx !== -1) {
+            activeParent.children = arrayMove(activeParent.children, oldIdx, newIdx);
+          }
+          return s;
+        }
+
+        // Case 2: overId is a container node (drop zone) — move into it
+        const overNode = s.nodes[overId];
+        if (overNode) {
+          const activeNode = s.nodes[activeId];
+          if (activeNode && canDropInto(activeNode.type, overNode.type, overId === s.rootNodeId)) {
+            const idx = activeParent.children.indexOf(activeId);
+            if (idx !== -1) activeParent.children.splice(idx, 1);
+            overNode.children.push(activeId);
+            return s;
+          }
+        }
+
+        // Case 3: Cross-parent — move next to overId in its parent
+        if (overParent) {
+          const activeNode = s.nodes[activeId];
+          if (activeNode && canDropInto(activeNode.type, overParent.type as any, overParent.id === s.rootNodeId)) {
+            const oldIdx = activeParent.children.indexOf(activeId);
+            if (oldIdx !== -1) activeParent.children.splice(oldIdx, 1);
+            const newIdx = overParent.children.indexOf(overId);
+            overParent.children.splice(newIdx + 1, 0, activeId);
+            return s;
+          }
+        }
+
         return s;
       });
     }
