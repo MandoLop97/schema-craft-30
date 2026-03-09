@@ -8,7 +8,7 @@ import {
   Image, AlignCenter, MessageCircle, HelpCircle, Grid3X3,
 } from 'lucide-react';
 import { NodeType, NodeProps, NodeStyle, TemplateType, SchemaNode } from '@/types/schema';
-import React from 'react';
+import { PageType } from '@/types/page-types';
 
 export interface ArrayFieldDef {
   key: string;
