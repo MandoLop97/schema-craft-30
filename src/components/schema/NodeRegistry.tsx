@@ -3,9 +3,12 @@ import { SchemaNode, NodeType, RenderMode } from '@/types/schema';
 import { SectionNode, ContainerNode, GridNode, StackNode } from './nodes/LayoutNodes';
 import { TextNode, ImageNode, DividerNode, BadgeNode, SpacerNode, IconNode, SocialIconsNode } from './nodes/ContentNodes';
 import { ButtonNode, CardNode, InputNode } from './nodes/UINodes';
-import { ProductCardNode, ProductGridNode } from './nodes/CommerceNodes';
+import { ProductCardNode, ProductGridNode, CollectionGridNode } from './nodes/CommerceNodes';
 import { NavbarNode, FooterNode } from './nodes/SiteNodes';
-import { AnnouncementBarNode, FeatureBarNode, TestimonialCardNode, NewsletterSectionNode, HeroSectionNode } from './nodes/TemplateNodes';
+import { 
+  AnnouncementBarNode, FeatureBarNode, TestimonialCardNode, NewsletterSectionNode, HeroSectionNode,
+  ImageBannerNode, RichTextSectionNode, CTASectionNode, TestimonialSectionNode, FAQSectionNode,
+} from './nodes/TemplateNodes';
 import { AccordionNode, TabsBlockNode, VideoEmbedNode, FormBlockNode } from './nodes/InteractiveNodes';
 
 export interface NodeComponentProps {
@@ -49,6 +52,12 @@ const registry: Record<NodeType, NodeComponent> = {
   SocialIcons: SocialIconsNode,
   FormBlock: FormBlockNode,
   ProductGrid: ProductGridNode,
+  CollectionGrid: CollectionGridNode,
+  ImageBanner: ImageBannerNode,
+  RichTextSection: RichTextSectionNode,
+  CTASection: CTASectionNode,
+  TestimonialSection: TestimonialSectionNode,
+  FAQSection: FAQSectionNode,
 };
 
 export function getNodeComponent(type: NodeType, customComponents?: CustomComponentMap): NodeComponent | undefined {
