@@ -16,6 +16,29 @@ export type { PublishPayload } from './components/builder/PublishDialog';
 export type { Schema, SchemaNode, NodeType, BuiltInNodeType, NodeProps, NodeStyle, ThemeTokens, Page, PageDefinition, RenderMode, TemplateType, AnimationPreset } from './types/schema';
 export { ANIMATION_PRESETS } from './types/schema';
 
+// Contract types — shared between constructor and template
+export type {
+  DataBinding, NodeDataSource, NodeBindings, DataSourceType,
+  BoundSchemaNode, RenderContext,
+  // Per-node prop types
+  TextNodeProps, ImageNodeProps, ButtonNodeProps,
+  ProductCardNodeProps, ProductGridNodeProps, CollectionGridNodeProps,
+  HeroSectionNodeProps, ImageBannerNodeProps, RichTextSectionNodeProps,
+  CTASectionNodeProps, TestimonialSectionNodeProps, FAQSectionNodeProps,
+  NavbarNodeProps, FooterNodeProps, BaseNodeProps, AllNodeProps,
+  // Block definition types (re-exported from contract)
+  NexoraExports,
+} from './types/contract';
+export { supportsDataBinding, isCommerceBlock, isTemplateBlock } from './types/contract';
+
+// Data binding utilities
+export {
+  resolveBindings, hydrateTemplate, hydrateNodeForItem,
+  resolveFieldPath, setFieldPath,
+  createDefaultBindings, hasActiveBindings, getBoundProps,
+  registerTransform, getAvailableTransforms,
+} from './lib/binding-utils';
+
 // Renderer — for hosts that want to render schemas outside the builder
 export { PageRenderer } from './components/schema/PageRenderer';
 export { CustomStylesInjector } from './components/builder/CustomStylesInjector';
