@@ -547,6 +547,10 @@ export const blockRegistry: BlockDefinition[] = [
     }, 
     defaultStyle: { padding: '4rem 2rem', backgroundColor: 'hsl(var(--secondary))' },
     supportsBinding: true,
+    inspectorFields: [
+      { key: 'heading', label: 'Heading', type: 'text' },
+      { key: 'layout', label: 'Layout', type: 'select', options: [{ label: 'Grid', value: 'grid' }, { label: 'Carousel', value: 'carousel' }, { label: 'Stack', value: 'stack' }] },
+    ],
     description: 'Customer testimonials section with multiple layouts',
   },
   { 
