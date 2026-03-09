@@ -1,5 +1,6 @@
 // Schema-First Data Model for Nexora Visual Builder
 import React from 'react';
+import type { SlotAssignment } from './contract';
 
 export type BuiltInNodeType =
   | 'Section' | 'Container' | 'Grid' | 'Stack'
