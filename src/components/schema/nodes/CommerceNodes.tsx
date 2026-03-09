@@ -4,7 +4,7 @@ import { nodeStyleToCSS, generatePseudoStateCSS, generateResponsiveCSS, themeTok
 import { useThemeTokens } from '@/components/schema/ThemeContext';
 import { hydrateCardTemplate, ProductData } from '@/lib/card-template-utils';
 import { getNodeComponent } from '@/components/schema/NodeRegistry';
-import { DEFAULT_MOCK_PRODUCTS, DEFAULT_MOCK_COLLECTIONS } from '@/lib/mock-data';
+import { DEFAULT_SAMPLE_PRODUCTS, DEFAULT_SAMPLE_COLLECTIONS } from '@/lib/host-data';
 
 interface NodeComponentProps {
   node: SchemaNode;
