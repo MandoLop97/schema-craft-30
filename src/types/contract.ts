@@ -327,8 +327,8 @@ export interface RenderContext {
   /** Current render mode */
   mode: RenderMode;
 
-  /** Page-level context */
-  page: PageContext;
+  /** Page-level context (optional — auto-built from mode if not provided) */
+  page?: PageContext;
 
   /** All data available for binding resolution */
   data: {
