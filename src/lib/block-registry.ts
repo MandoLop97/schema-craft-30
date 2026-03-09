@@ -39,6 +39,14 @@ export interface InspectorFieldDef {
   allowedDataSources?: string[];
   /** For binding type: available fields */
   bindableFields?: string[];
+  /** For 'array' type: field definitions per item */
+  arrayFields?: ArrayFieldDef[];
+  /** For 'array' type: default values for new items */
+  newItemDefaults?: Record<string, any>;
+  /** For 'array' type: add button label */
+  addLabel?: string;
+  /** For 'array' type: max items */
+  maxItems?: number;
 }
 
 export interface CompositeNodeTree {
