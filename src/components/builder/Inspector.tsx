@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { ArrayEditor } from './ArrayEditor';
 import { SchemaNode, NodeProps, NodeStyle, ANIMATION_PRESETS, AnimationPreset, GlobalStyleDef } from '@/types/schema';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
