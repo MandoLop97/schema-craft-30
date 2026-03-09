@@ -61,10 +61,24 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
     const node = schema.nodes[nodeId];
     if (!node || node.hidden) return null;
 
-    const Component = getNodeComponent(node.type, customComponents);
+    // Resolve bindings in public/preview mode
+    let resolvedNode = node;
+    if (mode !== 'edit' && renderContext) {
+      const boundNode = node as BoundSchemaNode;
+      const bindingsConfig = (node.props as any).__bindings;
+      if (bindingsConfig && (bindingsConfig.mode === 'bound' || bindingsConfig.mode === 'hybrid')) {
+        const resolvedProps = resolveBindings(
+          { ...boundNode, bindings: bindingsConfig },
+          renderContext
+        );
+        resolvedNode = { ...node, props: { ...resolvedProps } };
+      }
+    }
+
+    const Component = getNodeComponent(resolvedNode.type, customComponents);
     if (!Component) return null;
 
-    const blockDef = getBlockDef(node.type);
+    const blockDef = getBlockDef(resolvedNode.type);
     const canHaveChildren = blockDef?.canHaveChildren ?? false;
 
     const renderChildren = (childIds: string[]) => {
