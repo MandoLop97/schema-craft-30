@@ -68,6 +68,8 @@ export function NexoraBuilderApp({
   customScripts,
   onImageUpload,
   resolveAssetUrl,
+  mockData: externalMockData,
+  renderContext: externalRenderContext,
 }: NexoraBuilderAppProps) {
   // Register extra blocks
   useEffect(() => {
