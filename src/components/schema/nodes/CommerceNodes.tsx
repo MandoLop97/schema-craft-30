@@ -514,21 +514,19 @@ export function ProductGridNode({ node, mode, mockData }: NodeComponentProps) {
 // ═══════════════════════════════════════════════════════════════════════════
 // COLLECTION GRID — Grid of product collections/categories
 // ═══════════════════════════════════════════════════════════════════════════
-export function CollectionGridNode({ node, mode }: NodeComponentProps) {
+export function CollectionGridNode({ node, mode, mockData }: NodeComponentProps) {
   const columns = node.props.columns || 3;
   const gap = node.props.gap || '1.5rem';
   const showTitle = node.props.showTitle !== false;
   const showCount = node.props.showCount !== false;
 
-  // Mock collections for edit/preview mode
-  const mockCollections = [
-    { name: 'Electronics', image: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=400&h=300&fit=crop', count: 24 },
-    { name: 'Clothing', image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=300&fit=crop', count: 18 },
-    { name: 'Accessories', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop', count: 12 },
-    { name: 'Home & Garden', image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=300&fit=crop', count: 31 },
-    { name: 'Sports', image: 'https://images.unsplash.com/photo-1461896836934-bd45ba8fcfbb?w=400&h=300&fit=crop', count: 9 },
-    { name: 'Beauty', image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=300&fit=crop', count: 15 },
-  ];
+  // Use mock data from renderContext or fallback to default
+  const sourceCollections = mockData?.collections || DEFAULT_MOCK_COLLECTIONS;
+  const mockCollections = sourceCollections.map((c: any) => ({
+    name: c.name,
+    image: c.image || c.image_url || 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=400&h=300&fit=crop',
+    count: c.productCount || c.count || 0,
+  }));
 
   const limit = node.props.limit || 6;
   const collections = mockCollections.slice(0, limit);
