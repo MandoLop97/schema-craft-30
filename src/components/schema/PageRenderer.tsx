@@ -159,6 +159,7 @@ export function PageRenderer({
               canPasteStyle={constraints.canEditStyles ? canPasteStyle : false}
               nodeStyle={childNode.style}
               onRepositionNode={constraints.canMove ? onRepositionNode : undefined}
+            >
               {wrappedChild}
             </SortableNodeWrapper>
           );
