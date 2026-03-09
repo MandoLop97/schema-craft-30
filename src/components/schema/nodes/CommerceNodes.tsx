@@ -1,8 +1,7 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { SchemaNode, RenderMode, NodeStyle, Schema, ThemeTokens } from '@/types/schema';
 import { nodeStyleToCSS, generatePseudoStateCSS, generateResponsiveCSS, themeTokensToCSS } from '@/lib/style-utils';
 import { useThemeTokens } from '@/components/schema/ThemeContext';
-import { supabase } from '@/integrations/supabase/client';
 import { hydrateCardTemplate, ProductData } from '@/lib/card-template-utils';
 import { getNodeComponent } from '@/components/schema/NodeRegistry';
 import { DEFAULT_MOCK_PRODUCTS, DEFAULT_MOCK_COLLECTIONS } from '@/lib/mock-data';
@@ -205,78 +204,38 @@ export function ProductCardNode({ node, mode, renderChildren }: NodeComponentPro
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ProductGrid — loads template + products and renders a grid
+   ProductGrid — fully host-driven, no direct DB fetches
    ═══════════════════════════════════════════════════════════ */
 
 export function ProductGridNode({ node, mode, mockData }: NodeComponentProps) {
-  const [products, setProducts] = useState<ProductData[]>([]);
-  const [templateData, setTemplateData] = useState<{ nodes: Record<string, SchemaNode>; rootNodeId: string; themeTokens?: ThemeTokens } | null>(null);
-  const [loading, setLoading] = useState(true);
-
   const columns = Number(node.props.columns) || 4;
   const limit = Number(node.props.limit) || 8;
   const categoryFilter = node.props.category as string || '';
   const sortOrder = node.props.sort as string || '';
+  const gap = (node.props.gap as string) || '1.5rem';
 
-  // Get mock/injected products for edit/preview when DB is empty
-  const fallbackProducts = useMemo(() => {
-    const source = mockData?.products || DEFAULT_MOCK_PRODUCTS;
+  // ── Resolve products: mockData (host-injected) > DEFAULT_MOCK ──
+  const products = useMemo(() => {
+    const source: ProductData[] = mockData?.products || DEFAULT_MOCK_PRODUCTS;
     let filtered = [...source];
     if (categoryFilter) {
       filtered = filtered.filter((p: any) => p.category === categoryFilter);
     }
     if (sortOrder === 'price-asc') filtered.sort((a: any, b: any) => a.price - b.price);
     else if (sortOrder === 'price-desc') filtered.sort((a: any, b: any) => b.price - a.price);
-    return filtered.slice(0, limit) as ProductData[];
+    return filtered.slice(0, limit);
   }, [mockData, categoryFilter, sortOrder, limit]);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function fetchData() {
-      setLoading(true);
-
-      // Fetch template
-      const { data: templateRow } = await supabase
-        .from('page_schemas')
-        .select('schema_json')
-        .eq('slug', '__template/product-card')
-        .maybeSingle();
-
-      // Fetch products
-      let query = supabase
-        .from('products')
-        .select('*')
-        .limit(limit)
-        .order('created_at', { ascending: false });
-
-      if (categoryFilter) {
-        query = query.eq('category', categoryFilter);
-      }
-
-      const { data: productsData } = await query;
-
-      if (cancelled) return;
-
-      if (templateRow?.schema_json) {
-        const schema = templateRow.schema_json as unknown as Schema;
-        setTemplateData({ nodes: schema.nodes, rootNodeId: schema.rootNodeId, themeTokens: schema.themeTokens });
-      }
-
-      // Use DB products if available, otherwise use fallback mock data
-      const dbProducts = (productsData || []) as ProductData[];
-      setProducts(dbProducts.length > 0 ? dbProducts : fallbackProducts);
-      setLoading(false);
-    }
-
-    fetchData();
-    return () => { cancelled = true; };
-  }, [limit, categoryFilter, fallbackProducts]);
+  // ── Resolve card template from mockData if host provides it ──
+  const templateData = useMemo(() => {
+    const tpl = mockData?.cardTemplate;
+    if (!tpl?.nodes || !tpl?.rootNodeId) return null;
+    return { nodes: tpl.nodes as Record<string, SchemaNode>, rootNodeId: tpl.rootNodeId as string, themeTokens: tpl.themeTokens as ThemeTokens | undefined };
+  }, [mockData?.cardTemplate]);
 
   // Build hydrated cards
   const hydratedCards = useMemo(() => {
     if (!templateData || products.length === 0) return [];
-
     return products.map((product) => {
       const { nodes: cardNodes, rootId } = hydrateCardTemplate(
         templateData.nodes,
@@ -339,172 +298,104 @@ export function ProductGridNode({ node, mode, mockData }: NodeComponentProps) {
     return <Component key={n.id} node={n} mode="public" renderChildren={renderChildren} />;
   };
 
-  // Edit mode: show real template cards (non-interactive) or fallback with mock data
-  if (mode === 'edit') {
-    // If template + products loaded, render real cards in edit mode
-    if (!loading && templateData && hydratedCards.length > 0) {
-      return (
-        <div
-          data-node-id={node.id}
-          style={{
-            ...templateThemeStyle,
-            ...s(node.style),
-            display: 'grid',
-            gridTemplateColumns: `repeat(auto-fill, minmax(250px, 1fr))`,
-            gap: (node.props.gap as string) || '1.5rem',
-          }}
-        >
-          {templateDynamicCSS && <style dangerouslySetInnerHTML={{ __html: templateDynamicCSS }} />}
-          {hydratedCards.slice(0, columns).map(({ rootId, nodes }) => (
-            <div key={rootId} style={{ pointerEvents: 'none', width: '100%', minWidth: 0, overflow: 'hidden' }}>
-              {renderHydratedNode(rootId, nodes)}
-            </div>
-          ))}
-        </div>
-      );
-    }
+  const gridStyle: React.CSSProperties = {
+    ...s(node.style),
+    display: 'grid',
+    gridTemplateColumns: `repeat(auto-fill, minmax(250px, 1fr))`,
+    gap,
+  };
 
-    // Fallback: show inline product cards using mock data (no template needed)
-    const previewProducts = loading ? [] : (products.length > 0 ? products : fallbackProducts);
-    
-    if (previewProducts.length > 0) {
-      return (
-        <div
-          data-node-id={node.id}
-          style={{
-            ...s(node.style),
-            display: 'grid',
-            gridTemplateColumns: `repeat(auto-fill, minmax(250px, 1fr))`,
-            gap: (node.props.gap as string) || '1.5rem',
-          }}
-        >
-          {previewProducts.slice(0, columns).map((product, i) => (
-            <div
-              key={product.id || i}
-              style={{
-                borderRadius: '0.75rem',
-                overflow: 'hidden',
-                border: '1px solid hsl(var(--border))',
-                backgroundColor: 'hsl(var(--card))',
-                pointerEvents: 'none',
-              }}
-            >
-              <div style={{ position: 'relative', overflow: 'hidden', aspectRatio: '1/1' }}>
-                <img
-                  src={product.image_url || '/placeholder.svg'}
-                  alt={product.name}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-                {product.badge && (
-                  <span style={{
-                    position: 'absolute', top: '0.75rem', left: '0.75rem',
-                    padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.75rem',
-                    fontWeight: '600', backgroundColor: 'hsl(var(--primary))',
-                    color: 'hsl(var(--primary-foreground))', zIndex: 2,
-                  }}>
-                    {product.badge}
-                  </span>
-                )}
-              </div>
-              <div style={{ padding: '1rem' }}>
-                <h3 style={{ fontWeight: '500', fontSize: '0.95rem', marginBottom: '0.5rem' }}>{product.name}</h3>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span style={{ fontWeight: '600', fontSize: '1rem' }}>${product.price?.toFixed(2)}</span>
-                  {product.original_price && (
-                    <span style={{ textDecoration: 'line-through', color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem' }}>
-                      ${product.original_price.toFixed(2)}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      );
-    }
-
-    // Ultimate fallback: loading placeholder
+  // ── Template-based rendering ──
+  if (templateData && hydratedCards.length > 0) {
+    const visibleCards = mode === 'edit' ? hydratedCards.slice(0, columns) : hydratedCards;
     return (
-      <div
-        data-node-id={node.id}
-        style={{
-          ...s(node.style),
-          display: 'grid',
-          gridTemplateColumns: `repeat(auto-fill, minmax(250px, 1fr))`,
-          gap: (node.props.gap as string) || '1.5rem',
-        }}
-      >
-        {Array.from({ length: Math.min(columns, 4) }).map((_, i) => (
-          <div
-            key={i}
-            style={{
-              border: '1px dashed hsl(var(--border))',
-              borderRadius: '0.75rem',
-              padding: '2rem',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.5rem',
-              minHeight: '200px',
-              backgroundColor: 'hsl(var(--muted) / 0.3)',
-            }}
-          >
-            <span style={{ fontSize: '2rem' }}>🛍️</span>
-            <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
-              ⏳ Loading...
-            </span>
+      <div data-node-id={node.id} style={{ ...templateThemeStyle, ...gridStyle }}>
+        {templateDynamicCSS && <style dangerouslySetInnerHTML={{ __html: templateDynamicCSS }} />}
+        {visibleCards.map(({ rootId, nodes }) => (
+          <div key={rootId} style={{ ...(mode === 'edit' ? { pointerEvents: 'none' } : {}), width: '100%', minWidth: 0, overflow: 'hidden' }}>
+            {renderHydratedNode(rootId, nodes)}
           </div>
         ))}
       </div>
     );
   }
 
-  // Loading state
-  if (loading) {
+  // ── Inline fallback rendering (no template) ──
+  if (products.length > 0) {
+    const visibleProducts = mode === 'edit' ? products.slice(0, columns) : products;
     return (
-      <div
-        data-node-id={node.id}
-        style={{
-          ...s(node.style),
-          display: 'grid',
-          gridTemplateColumns: `repeat(auto-fill, minmax(250px, 1fr))`,
-          gap: (node.props.gap as string) || '1.5rem',
-        }}
-      >
-        {Array.from({ length: columns }).map((_, i) => (
-          <div key={i} style={{ borderRadius: '0.75rem', backgroundColor: 'hsl(var(--muted) / 0.3)', minHeight: '280px', animation: 'pulse 2s infinite' }} />
+      <div data-node-id={node.id} style={gridStyle}>
+        {visibleProducts.map((product, i) => (
+          <div
+            key={product.id || i}
+            style={{
+              borderRadius: '0.75rem',
+              overflow: 'hidden',
+              border: '1px solid hsl(var(--border))',
+              backgroundColor: 'hsl(var(--card))',
+              ...(mode === 'edit' ? { pointerEvents: 'none' } : {}),
+            }}
+          >
+            <div style={{ position: 'relative', overflow: 'hidden', aspectRatio: '1/1' }}>
+              <img
+                src={product.image_url || '/placeholder.svg'}
+                alt={product.name}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+              {product.badge && (
+                <span style={{
+                  position: 'absolute', top: '0.75rem', left: '0.75rem',
+                  padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.75rem',
+                  fontWeight: '600', backgroundColor: 'hsl(var(--primary))',
+                  color: 'hsl(var(--primary-foreground))', zIndex: 2,
+                }}>
+                  {product.badge}
+                </span>
+              )}
+            </div>
+            <div style={{ padding: '1rem' }}>
+              <h3 style={{ fontWeight: '500', fontSize: '0.95rem', marginBottom: '0.5rem' }}>{product.name}</h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ fontWeight: '600', fontSize: '1rem' }}>${product.price?.toFixed(2)}</span>
+                {product.original_price && (
+                  <span style={{ textDecoration: 'line-through', color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem' }}>
+                    ${product.original_price.toFixed(2)}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
         ))}
       </div>
     );
   }
 
-  // No template found — fallback
-  if (!templateData) {
-    return (
-      <div data-node-id={node.id} style={{ ...s(node.style), textAlign: 'center', padding: '3rem', color: 'hsl(var(--muted-foreground))' }}>
-        <p>No se encontró el template de Product Card.</p>
-        <p style={{ fontSize: '0.75rem' }}>Diseña una card en el template <strong>__template/product-card</strong> primero.</p>
-      </div>
-    );
-  }
-
-  // Render hydrated grid
+  // ── Empty state ──
   return (
     <div
       data-node-id={node.id}
-      style={{
-        ...templateThemeStyle,
-        ...s(node.style),
-        display: 'grid',
-        gridTemplateColumns: `repeat(auto-fill, minmax(250px, 1fr))`,
-        gap: (node.props.gap as string) || '1.5rem',
-      }}
+      style={gridStyle}
     >
-      {templateDynamicCSS && <style dangerouslySetInnerHTML={{ __html: templateDynamicCSS }} />}
-      {hydratedCards.map(({ rootId, nodes }) => (
-        <div key={rootId} style={{ width: '100%', minWidth: 0, overflow: 'hidden' }}>
-          {renderHydratedNode(rootId, nodes)}
+      {Array.from({ length: Math.min(columns, 4) }).map((_, i) => (
+        <div
+          key={i}
+          style={{
+            border: '1px dashed hsl(var(--border))',
+            borderRadius: '0.75rem',
+            padding: '2rem',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            minHeight: '200px',
+            backgroundColor: 'hsl(var(--muted) / 0.3)',
+          }}
+        >
+          <span style={{ fontSize: '2rem' }}>🛍️</span>
+          <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+            {mode === 'edit' ? 'Product Card' : 'No products'}
+          </span>
         </div>
       ))}
     </div>
@@ -512,7 +403,7 @@ export function ProductGridNode({ node, mode, mockData }: NodeComponentProps) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// COLLECTION GRID — Grid of product collections/categories
+// COLLECTION GRID — fully host-driven, no direct DB fetches
 // ═══════════════════════════════════════════════════════════════════════════
 export function CollectionGridNode({ node, mode, mockData }: NodeComponentProps) {
   const columns = node.props.columns || 3;
@@ -520,7 +411,7 @@ export function CollectionGridNode({ node, mode, mockData }: NodeComponentProps)
   const showTitle = node.props.showTitle !== false;
   const showCount = node.props.showCount !== false;
 
-  // Use mock data from renderContext or fallback to default
+  // Use mock data from host or fallback to default
   const sourceCollections = mockData?.collections || DEFAULT_MOCK_COLLECTIONS;
   const mockCollections = sourceCollections.map((c: any) => ({
     name: c.name,
