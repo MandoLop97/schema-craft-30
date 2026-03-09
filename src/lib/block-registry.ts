@@ -10,13 +10,22 @@ import {
 import { NodeType, NodeProps, NodeStyle, TemplateType, SchemaNode } from '@/types/schema';
 import React from 'react';
 
+export interface ArrayFieldDef {
+  key: string;
+  label: string;
+  type: 'text' | 'textarea' | 'number' | 'image' | 'toggle';
+  placeholder?: string;
+  rows?: number;
+  defaultValue?: any;
+}
+
 export interface InspectorFieldDef {
   /** Property key on NodeProps */
   key: string;
   /** Display label */
   label: string;
   /** Field type */
-  type: 'text' | 'select' | 'color' | 'number' | 'image' | 'toggle' | 'slider' | 'textarea' | 'link' | 'icon' | 'spacing' | 'group' | 'binding';
+  type: 'text' | 'select' | 'color' | 'number' | 'image' | 'toggle' | 'slider' | 'textarea' | 'link' | 'icon' | 'spacing' | 'group' | 'binding' | 'array';
   /** Options for 'select' type */
   options?: { label: string; value: string }[];
   /** Min value for 'slider' and 'number' */
