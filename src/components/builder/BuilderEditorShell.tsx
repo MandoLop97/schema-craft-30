@@ -599,7 +599,8 @@ export function BuilderEditorShell({
             customComponents={customComponents}
             templateType={activePageDef?.templateType}
             canvasSize={activePageDef?.canvasSize}
-            mockData={activePageDef?.mockData}
+            mockData={externalMockData || activePageDef?.mockData}
+            externalRenderContext={externalRenderContext}
             customStylesheets={customStylesheets}
             customCSS={customCSS}
             customScripts={customScripts}
