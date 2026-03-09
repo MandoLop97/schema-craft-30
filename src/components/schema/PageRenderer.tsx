@@ -36,6 +36,8 @@ interface PageRendererProps {
   onCopyStyle?: (nodeId: string) => void;
   onPasteStyle?: (nodeId: string) => void;
   canPasteStyle?: boolean;
+  /** Data context for resolving bindings in public/preview mode */
+  renderContext?: RenderContext;
 }
 
 export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, customComponents, mockData, onCopyNode, onPasteNode, onDuplicateNode, onDeleteNode, canPaste, onEditSection, onSaveAsTemplate, onRepositionNode, onCopyStyle, onPasteStyle, canPasteStyle }: PageRendererProps) {
