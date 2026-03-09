@@ -496,6 +496,10 @@ export const blockRegistry: BlockDefinition[] = [
       columns: 1,
     }, 
     defaultStyle: { padding: '3rem 2rem', maxWidth: '48rem', margin: '0 auto' },
+    inspectorFields: [
+      { key: 'content', label: 'Content (Markdown)', type: 'textarea', rows: 10, placeholder: '# Heading\n\nParagraph text...' },
+      { key: 'columns', label: 'Columns', type: 'select', options: [{ label: '1 Column', value: '1' }, { label: '2 Columns', value: '2' }] },
+    ],
     description: 'Markdown-style rich text content section',
   },
   { 
