@@ -113,7 +113,7 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
             const childBlockDef = getBlockDef(resolvedChild.type);
             const childCanHaveChildren = childBlockDef?.canHaveChildren ?? false;
 
-            const childElement = <ChildComponent node={resolvedChild} mode={mode} renderChildren={(ids: string[]) => renderChildren2(ids)} mockData={mockData} />;
+            const childElement = <ChildComponent node={resolvedChild} mode={mode} renderChildren={(ids: string[]) => renderChildren2(ids)} mockData={resolvedHostData} />;
 
             const wrappedChild = childCanHaveChildren ? (
               <EditableDropZone nodeId={childNode.id} isEmpty={childNode.children.length === 0}>
