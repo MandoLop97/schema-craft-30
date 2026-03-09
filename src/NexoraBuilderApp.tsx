@@ -71,6 +71,7 @@ export function NexoraBuilderApp({
   onImageUpload,
   resolveAssetUrl,
   mockData: externalMockData,
+  hostData: externalHostData,
   renderContext: externalRenderContext,
 }: NexoraBuilderAppProps) {
   // Register extra blocks
