@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors, closestCenter, defaultDropAnimationSideEffects } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
+import { RenderContext } from '@/types/contract';
 import { useSchemaHistory } from '@/hooks/use-schema-history';
 import { Schema, NodeType, NodeStyle, SchemaNode, PageDefinition, ThemeTokens, TemplateType } from '@/types/schema';
 import { createNode, createNodeTree, duplicateNodeTree } from '@/lib/node-factory';
@@ -40,6 +41,10 @@ export interface BuilderEditorShellProps {
   customScripts?: string[];
   onImageUpload?: (file: File) => Promise<string>;
   resolveAssetUrl?: (path: string) => string;
+  /** Mock data from host for edit/preview binding resolution */
+  externalMockData?: Record<string, any>;
+  /** Pre-built render context from host */
+  externalRenderContext?: RenderContext;
 }
 
 export function BuilderEditorShell({
@@ -61,6 +66,8 @@ export function BuilderEditorShell({
   customScripts,
   onImageUpload,
   resolveAssetUrl,
+  externalMockData,
+  externalRenderContext,
 }: BuilderEditorShellProps) {
   const locale = t();
   const { schema, setSchema, undo, redo, canUndo, canRedo } = useSchemaHistory(initialSchema);
@@ -592,7 +599,8 @@ export function BuilderEditorShell({
             customComponents={customComponents}
             templateType={activePageDef?.templateType}
             canvasSize={activePageDef?.canvasSize}
-            mockData={activePageDef?.mockData}
+            mockData={externalMockData || activePageDef?.mockData}
+            externalRenderContext={externalRenderContext}
             customStylesheets={customStylesheets}
             customCSS={customCSS}
             customScripts={customScripts}

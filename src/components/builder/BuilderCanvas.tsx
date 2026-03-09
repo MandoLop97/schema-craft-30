@@ -30,6 +30,8 @@ interface BuilderCanvasProps {
   onCopyStyle?: (nodeId: string) => void;
   onPasteStyle?: (nodeId: string) => void;
   canPasteStyle?: boolean;
+  /** Pre-built render context from host — takes priority over auto-built one */
+  externalRenderContext?: RenderContext;
 }
 
 const DEVICE_WIDTHS = {
@@ -53,7 +55,7 @@ const DEVICE_LABELS: Record<string, string> = {
   mobile: 'Mobile',
 };
 
-export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode, customComponents, templateType = 'page', canvasSize, mockData, customStylesheets, customCSS, customScripts, onCopyNode, onPasteNode, onDuplicateNode, onDeleteNode, canPaste, onEditSection, onSaveAsTemplate, onRepositionNode, onCopyStyle, onPasteStyle, canPasteStyle }: BuilderCanvasProps) {
+export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode, customComponents, templateType = 'page', canvasSize, mockData, customStylesheets, customCSS, customScripts, onCopyNode, onPasteNode, onDuplicateNode, onDeleteNode, canPaste, onEditSection, onSaveAsTemplate, onRepositionNode, onCopyStyle, onPasteStyle, canPasteStyle, externalRenderContext }: BuilderCanvasProps) {
   const { setNodeRef, isOver } = useDroppable({ id: schema.rootNodeId });
 
   const preset = TEMPLATE_CANVAS[templateType];
@@ -64,12 +66,15 @@ export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode, cu
 
   const isCompact = templateType === 'component' || templateType === 'header' || templateType === 'footer';
 
-  // Build renderContext from mockData for edit-mode binding preview
-  const renderContext = useMemo<RenderContext>(() => ({
-    mode: 'edit',
-    data: buildMockRenderData(mockData),
-    theme: schema.themeTokens,
-  }), [mockData, schema.themeTokens]);
+  // Use external renderContext if provided, otherwise build from mockData
+  const renderContext = useMemo<RenderContext>(() => {
+    if (externalRenderContext) return externalRenderContext;
+    return {
+      mode: 'edit',
+      data: buildMockRenderData(mockData),
+      theme: schema.themeTokens,
+    };
+  }, [externalRenderContext, mockData, schema.themeTokens]);
 
   return (
     <div
