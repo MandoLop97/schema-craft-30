@@ -3,6 +3,9 @@ import { PageRenderer } from '@/components/schema/PageRenderer';
 import { Schema, TemplateType } from '@/types/schema';
 import { CustomComponentMap } from '@/components/schema/NodeRegistry';
 import { CustomStylesInjector } from '@/components/builder/CustomStylesInjector';
+import { useMemo } from 'react';
+import { RenderContext } from '@/types/contract';
+import { buildMockRenderData } from '@/lib/mock-data';
 
 interface BuilderCanvasProps {
   schema: Schema;
@@ -61,6 +64,13 @@ export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode, cu
 
   const isCompact = templateType === 'component' || templateType === 'header' || templateType === 'footer';
 
+  // Build renderContext from mockData for edit-mode binding preview
+  const renderContext = useMemo<RenderContext>(() => ({
+    mode: 'edit',
+    data: buildMockRenderData(mockData),
+    theme: schema.themeTokens,
+  }), [mockData, schema.themeTokens]);
+
   return (
     <div
       className={`flex-1 overflow-auto flex flex-col items-center ${isCompact ? 'justify-center' : ''} p-6 ${preset.checkerboard ? 'nxr-checkerboard' : 'nxr-canvas-grid'}`}
@@ -109,6 +119,7 @@ export function BuilderCanvas({ schema, device, selectedNodeId, onSelectNode, cu
           onSelectNode={onSelectNode}
           customComponents={customComponents}
           mockData={mockData}
+          renderContext={renderContext}
           onCopyNode={onCopyNode}
           onPasteNode={onPasteNode}
           onDuplicateNode={onDuplicateNode}

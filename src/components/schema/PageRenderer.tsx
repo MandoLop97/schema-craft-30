@@ -61,14 +61,13 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
     const node = schema.nodes[nodeId];
     if (!node || node.hidden) return null;
 
-    // Resolve bindings in public/preview mode
+    // Resolve bindings in all modes when renderContext is available
     let resolvedNode = node;
-    if (mode !== 'edit' && renderContext) {
-      const boundNode = node as BoundSchemaNode;
+    if (renderContext) {
       const bindingsConfig = (node.props as any).__bindings;
       if (bindingsConfig && (bindingsConfig.mode === 'bound' || bindingsConfig.mode === 'hybrid')) {
         const resolvedProps = resolveBindings(
-          { ...boundNode, bindings: bindingsConfig },
+          { ...node as BoundSchemaNode, bindings: bindingsConfig },
           renderContext
         );
         resolvedNode = { ...node, props: { ...resolvedProps } };
