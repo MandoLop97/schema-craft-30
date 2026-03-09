@@ -571,6 +571,11 @@ export const blockRegistry: BlockDefinition[] = [
     }, 
     defaultStyle: { padding: '4rem 2rem', maxWidth: '48rem', margin: '0 auto' },
     supportsBinding: true,
+    inspectorFields: [
+      { key: 'heading', label: 'Heading', type: 'text' },
+      { key: 'subtitle', label: 'Subtitle', type: 'text' },
+      { key: 'faqLayout', label: 'Layout', type: 'select', options: [{ label: 'Accordion', value: 'accordion' }, { label: 'Grid', value: 'grid' }] },
+    ],
     description: 'FAQ accordion or grid section',
   },
 ];

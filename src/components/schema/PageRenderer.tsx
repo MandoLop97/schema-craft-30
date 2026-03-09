@@ -40,7 +40,7 @@ interface PageRendererProps {
   renderContext?: RenderContext;
 }
 
-export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, customComponents, mockData, onCopyNode, onPasteNode, onDuplicateNode, onDeleteNode, canPaste, onEditSection, onSaveAsTemplate, onRepositionNode, onCopyStyle, onPasteStyle, canPasteStyle }: PageRendererProps) {
+export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, customComponents, mockData, onCopyNode, onPasteNode, onDuplicateNode, onDeleteNode, canPaste, onEditSection, onSaveAsTemplate, onRepositionNode, onCopyStyle, onPasteStyle, canPasteStyle, renderContext }: PageRendererProps) {
 
   const wrapWithScrollAnimation = (nodeId: string, element: React.ReactNode): React.ReactNode => {
     if (mode === 'edit') return element;

@@ -1267,6 +1267,12 @@ export function Inspector({ node, onUpdateProps, onUpdateStyle, onDelete, onDupl
         <TabsList className="mx-3 mt-2 w-auto">
           {!isLocked && <TabsTrigger value="props" className="text-xs">{locale.props}</TabsTrigger>}
           <TabsTrigger value="style" className="text-xs">{locale.style}</TabsTrigger>
+          {!isLocked && (() => {
+            const def = getBlockDef(node.type);
+            return def?.supportsBinding;
+          })() && (
+            <TabsTrigger value="bindings" className="text-xs">Bindings</TabsTrigger>
+          )}
         </TabsList>
         <div className="flex-1 overflow-y-auto">
           {!isLocked && (
@@ -1284,6 +1290,11 @@ export function Inspector({ node, onUpdateProps, onUpdateStyle, onDelete, onDupl
               onUpdateAppliedGlobalStyles={onUpdateAppliedGlobalStyles}
             />
           </TabsContent>
+          {!isLocked && (
+            <TabsContent value="bindings" className="mt-0">
+              <BindingsPanel node={node} onUpdateProps={onUpdateProps} />
+            </TabsContent>
+          )}
         </div>
       </Tabs>
     </div>
