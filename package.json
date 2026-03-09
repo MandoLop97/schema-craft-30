@@ -1,7 +1,7 @@
 {
   "name": "@mandolop97/constructor-nexora",
   "private": false,
-  "version": "1.5.0",
+  "version": "1.7.1",
   "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -17,7 +17,7 @@
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
   },
-  "files": ["dist", "NEXORA.md"],
+  "files": ["dist", "NEXORA.md", "CHANGELOG.md"],
   "scripts": {
     "dev": "vite",
     "build": "vite build",
