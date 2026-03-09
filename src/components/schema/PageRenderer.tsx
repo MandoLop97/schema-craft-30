@@ -8,6 +8,8 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { getBlockDef } from '@/lib/block-registry';
 import { generatePseudoStateCSS, generateResponsiveCSS, mergeGlobalStyles } from '@/lib/style-utils';
 import { ScrollAnimationWrapper } from './ScrollAnimationWrapper';
+import { RenderContext, BoundSchemaNode } from '@/types/contract';
+import { resolveBindings, hasActiveBindings } from '@/lib/binding-utils';
 
 /** Given an HSL string like "222 84% 4.9%", returns a contrasting foreground HSL */
 function computeContrastForeground(hsl: string): string {
@@ -34,9 +36,11 @@ interface PageRendererProps {
   onCopyStyle?: (nodeId: string) => void;
   onPasteStyle?: (nodeId: string) => void;
   canPasteStyle?: boolean;
+  /** Data context for resolving bindings in public/preview mode */
+  renderContext?: RenderContext;
 }
 
-export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, customComponents, mockData, onCopyNode, onPasteNode, onDuplicateNode, onDeleteNode, canPaste, onEditSection, onSaveAsTemplate, onRepositionNode, onCopyStyle, onPasteStyle, canPasteStyle }: PageRendererProps) {
+export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, customComponents, mockData, onCopyNode, onPasteNode, onDuplicateNode, onDeleteNode, canPaste, onEditSection, onSaveAsTemplate, onRepositionNode, onCopyStyle, onPasteStyle, canPasteStyle, renderContext }: PageRendererProps) {
 
   const wrapWithScrollAnimation = (nodeId: string, element: React.ReactNode): React.ReactNode => {
     if (mode === 'edit') return element;
@@ -57,10 +61,24 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
     const node = schema.nodes[nodeId];
     if (!node || node.hidden) return null;
 
-    const Component = getNodeComponent(node.type, customComponents);
+    // Resolve bindings in public/preview mode
+    let resolvedNode = node;
+    if (mode !== 'edit' && renderContext) {
+      const boundNode = node as BoundSchemaNode;
+      const bindingsConfig = (node.props as any).__bindings;
+      if (bindingsConfig && (bindingsConfig.mode === 'bound' || bindingsConfig.mode === 'hybrid')) {
+        const resolvedProps = resolveBindings(
+          { ...boundNode, bindings: bindingsConfig },
+          renderContext
+        );
+        resolvedNode = { ...node, props: { ...resolvedProps } };
+      }
+    }
+
+    const Component = getNodeComponent(resolvedNode.type, customComponents);
     if (!Component) return null;
 
-    const blockDef = getBlockDef(node.type);
+    const blockDef = getBlockDef(resolvedNode.type);
     const canHaveChildren = blockDef?.canHaveChildren ?? false;
 
     const renderChildren = (childIds: string[]) => {
@@ -174,7 +192,7 @@ export function PageRenderer({ schema, mode, selectedNodeId, onSelectNode, custo
       );
     };
 
-    const element = <Component node={node} mode={mode} renderChildren={renderChildren} mockData={mockData} />;
+    const element = <Component node={resolvedNode} mode={mode} renderChildren={renderChildren} mockData={mockData} />;
 
     // Root node: don't wrap in sortable
     if (mode !== 'edit') return wrapWithScrollAnimation(nodeId, element);

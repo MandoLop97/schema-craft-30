@@ -476,6 +476,13 @@ export const blockRegistry: BlockDefinition[] = [
       overlayPosition: 'center',
     }, 
     defaultStyle: { width: '100%', minHeight: '300px', borderRadius: '0.5rem' },
+    inspectorFields: [
+      { key: 'src', label: 'Image URL', type: 'image' },
+      { key: 'alt', label: 'Alt Text', type: 'text' },
+      { key: 'href', label: 'Link', type: 'link', placeholder: '/products' },
+      { key: 'overlayText', label: 'Overlay Text', type: 'text' },
+      { key: 'overlayPosition', label: 'Text Position', type: 'select', options: [{ label: 'Top', value: 'top' }, { label: 'Center', value: 'center' }, { label: 'Bottom', value: 'bottom' }] },
+    ],
     description: 'Clickable promotional banner with overlay text',
   },
   { 
@@ -489,6 +496,10 @@ export const blockRegistry: BlockDefinition[] = [
       columns: 1,
     }, 
     defaultStyle: { padding: '3rem 2rem', maxWidth: '48rem', margin: '0 auto' },
+    inspectorFields: [
+      { key: 'content', label: 'Content (Markdown)', type: 'textarea', rows: 10, placeholder: '# Heading\n\nParagraph text...' },
+      { key: 'columns', label: 'Columns', type: 'select', options: [{ label: '1 Column', value: '1' }, { label: '2 Columns', value: '2' }] },
+    ],
     description: 'Markdown-style rich text content section',
   },
   { 
@@ -507,6 +518,16 @@ export const blockRegistry: BlockDefinition[] = [
       backgroundStyle: 'gradient',
     }, 
     defaultStyle: { padding: '4rem 2rem', textAlign: 'center' },
+    inspectorFields: [
+      { key: 'heading', label: 'Heading', type: 'text' },
+      { key: 'description', label: 'Description', type: 'textarea', rows: 3 },
+      { key: 'primaryCtaText', label: 'Primary Button Text', type: 'text' },
+      { key: 'primaryCtaHref', label: 'Primary Button Link', type: 'link' },
+      { key: 'secondaryCtaText', label: 'Secondary Button Text', type: 'text' },
+      { key: 'secondaryCtaHref', label: 'Secondary Button Link', type: 'link' },
+      { key: 'backgroundStyle', label: 'Background Style', type: 'select', options: [{ label: 'Solid', value: 'solid' }, { label: 'Gradient', value: 'gradient' }, { label: 'Image', value: 'image' }] },
+      { key: 'backgroundImage', label: 'Background Image', type: 'image' },
+    ],
     description: 'Call-to-action section with primary and secondary buttons',
   },
   { 
@@ -526,6 +547,10 @@ export const blockRegistry: BlockDefinition[] = [
     }, 
     defaultStyle: { padding: '4rem 2rem', backgroundColor: 'hsl(var(--secondary))' },
     supportsBinding: true,
+    inspectorFields: [
+      { key: 'heading', label: 'Heading', type: 'text' },
+      { key: 'layout', label: 'Layout', type: 'select', options: [{ label: 'Grid', value: 'grid' }, { label: 'Carousel', value: 'carousel' }, { label: 'Stack', value: 'stack' }] },
+    ],
     description: 'Customer testimonials section with multiple layouts',
   },
   { 
@@ -546,6 +571,11 @@ export const blockRegistry: BlockDefinition[] = [
     }, 
     defaultStyle: { padding: '4rem 2rem', maxWidth: '48rem', margin: '0 auto' },
     supportsBinding: true,
+    inspectorFields: [
+      { key: 'heading', label: 'Heading', type: 'text' },
+      { key: 'subtitle', label: 'Subtitle', type: 'text' },
+      { key: 'faqLayout', label: 'Layout', type: 'select', options: [{ label: 'Accordion', value: 'accordion' }, { label: 'Grid', value: 'grid' }] },
+    ],
     description: 'FAQ accordion or grid section',
   },
 ];
