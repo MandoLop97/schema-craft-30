@@ -41,8 +41,10 @@ export interface BuilderEditorShellProps {
   customScripts?: string[];
   onImageUpload?: (file: File) => Promise<string>;
   resolveAssetUrl?: (path: string) => string;
-  /** Mock data from host for edit/preview binding resolution */
+  /** @deprecated Use externalHostData */
   externalMockData?: Record<string, any>;
+  /** Host-provided data for edit/preview binding resolution */
+  externalHostData?: Record<string, any>;
   /** Pre-built render context from host */
   externalRenderContext?: RenderContext;
 }
