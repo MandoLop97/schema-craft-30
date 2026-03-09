@@ -229,8 +229,7 @@ export function PageRenderer({
         node={resolvedNode} 
         mode={mode} 
         renderChildren={renderChildren} 
-        hostData={resolvedHostData}
-        mockData={resolvedHostData} // backward compat
+        mockData={resolvedHostData}
       />
     );
 
