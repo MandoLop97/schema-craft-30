@@ -39,6 +39,9 @@ export {
   registerTransform, getAvailableTransforms,
 } from './lib/binding-utils';
 
+// Mock data for edit/preview mode
+export { DEFAULT_MOCK_PRODUCTS, DEFAULT_MOCK_COLLECTIONS, DEFAULT_MOCK_SETTINGS, buildMockRenderData } from './lib/mock-data';
+
 // Renderer — for hosts that want to render schemas outside the builder
 export { PageRenderer } from './components/schema/PageRenderer';
 export { CustomStylesInjector } from './components/builder/CustomStylesInjector';

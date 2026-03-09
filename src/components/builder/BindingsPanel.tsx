@@ -1,15 +1,16 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { SchemaNode, NodeProps } from '@/types/schema';
 import { NodeBindings, DataSourceType, DataBinding } from '@/types/contract';
-import { createDefaultBindings, getAvailableTransforms } from '@/lib/binding-utils';
+import { createDefaultBindings, getAvailableTransforms, resolveBindings } from '@/lib/binding-utils';
 import { getBlockDef } from '@/lib/block-registry';
+import { buildMockRenderData, DEFAULT_MOCK_PRODUCTS } from '@/lib/mock-data';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
-import { Trash2, Plus, Database, Zap, Link2 } from 'lucide-react';
+import { Trash2, Plus, Database, Zap, Link2, Eye, Wand2 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface BindingsPanelProps {
@@ -27,7 +28,7 @@ const DATA_SOURCES: { value: DataSourceType; label: string }[] = [
 ];
 
 const SORT_OPTIONS = [
-  { value: '', label: 'None' },
+  { value: '__none', label: 'None' },
   { value: 'newest', label: 'Newest First' },
   { value: 'oldest', label: 'Oldest First' },
   { value: 'price-asc', label: 'Price: Low to High' },
@@ -38,10 +39,58 @@ const SORT_OPTIONS = [
 const PRODUCT_FIELDS = ['name', 'price', 'original_price', 'image_url', 'description', 'category', 'badge', 'sku', 'in_stock'];
 const COLLECTION_FIELDS = ['name', 'image', 'slug', 'description', 'productCount'];
 
+/** Preset binding configurations per block type */
+const BINDING_PRESETS: Record<string, { label: string; bindings: DataBinding[] }[]> = {
+  ProductCard: [
+    {
+      label: 'Standard Product',
+      bindings: [
+        { propKey: 'text', fieldPath: 'name' },
+        { propKey: 'name', fieldPath: 'name' },
+        { propKey: 'src', fieldPath: 'image_url' },
+        { propKey: 'image', fieldPath: 'image_url' },
+        { propKey: 'price', fieldPath: 'price', transform: 'formatPrice' },
+        { propKey: 'originalPrice', fieldPath: 'original_price', transform: 'formatPrice' },
+        { propKey: 'badge', fieldPath: 'badge' },
+      ],
+    },
+  ],
+  HeroSection: [
+    {
+      label: 'Dynamic Hero',
+      bindings: [
+        { propKey: 'text', fieldPath: 'title' },
+        { propKey: 'heading', fieldPath: 'title' },
+        { propKey: 'subtitle', fieldPath: 'subtitle' },
+        { propKey: 'src', fieldPath: 'image_url' },
+        { propKey: 'ctaText', fieldPath: 'ctaText' },
+        { propKey: 'ctaHref', fieldPath: 'ctaHref' },
+      ],
+    },
+  ],
+  TestimonialSection: [
+    {
+      label: 'Testimonials List',
+      bindings: [
+        { propKey: 'testimonials', fieldPath: 'items' },
+      ],
+    },
+  ],
+  FAQSection: [
+    {
+      label: 'FAQ Items',
+      bindings: [
+        { propKey: 'faqItems', fieldPath: 'items' },
+      ],
+    },
+  ],
+};
+
 export function BindingsPanel({ node, onUpdateProps }: BindingsPanelProps) {
   const blockDef = getBlockDef(node.type);
   const bindings: NodeBindings = (node.props as any).__bindings || { mode: 'manual' };
   const transforms = getAvailableTransforms();
+  const [showPreview, setShowPreview] = useState(false);
 
   const updateBindings = (updated: Partial<NodeBindings>) => {
     onUpdateProps({ __bindings: { ...bindings, ...updated } } as any);
@@ -56,6 +105,10 @@ export function BindingsPanel({ node, onUpdateProps }: BindingsPanelProps) {
     } else {
       updateBindings({ mode: 'manual' });
     }
+  };
+
+  const applyPreset = (preset: { bindings: DataBinding[] }) => {
+    updateBindings({ bindings: preset.bindings });
   };
 
   const addFieldBinding = () => {
@@ -86,6 +139,28 @@ export function BindingsPanel({ node, onUpdateProps }: BindingsPanelProps) {
   const sourceFields = bindings.dataSource?.type === 'products' ? PRODUCT_FIELDS
     : bindings.dataSource?.type === 'collections' ? COLLECTION_FIELDS
     : [];
+
+  // Live preview: resolve bindings with mock data
+  const previewData = useMemo(() => {
+    if (!isActive || !showPreview) return null;
+    try {
+      const mockRenderData = buildMockRenderData();
+      const context = {
+        mode: 'edit' as const,
+        data: mockRenderData,
+        currentItem: bindings.dataSource?.isCollection ? DEFAULT_MOCK_PRODUCTS[0] : undefined,
+      };
+      const resolved = resolveBindings(
+        { ...node, bindings } as any,
+        context
+      );
+      return resolved;
+    } catch {
+      return null;
+    }
+  }, [isActive, showPreview, bindings, node]);
+
+  const presets = BINDING_PRESETS[node.type];
 
   return (
     <div className="p-3 space-y-3">
@@ -121,7 +196,7 @@ export function BindingsPanel({ node, onUpdateProps }: BindingsPanelProps) {
               <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="bound">Bound (data only)</SelectItem>
-                <SelectItem value="hybrid">Hybrid (data + manual)</SelectItem>
+                <SelectItem value="hybrid">Hybrid (data + manual fallback)</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -152,7 +227,7 @@ export function BindingsPanel({ node, onUpdateProps }: BindingsPanelProps) {
               </div>
 
               <div className="flex items-center justify-between">
-                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Is Collection</Label>
+                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Is Collection (list)</Label>
                 <Switch
                   checked={bindings.dataSource?.isCollection ?? false}
                   onCheckedChange={(v) => updateBindings({
@@ -164,6 +239,18 @@ export function BindingsPanel({ node, onUpdateProps }: BindingsPanelProps) {
               {bindings.dataSource?.isCollection && (
                 <>
                   <div className="grid gap-1">
+                    <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Item Variable</Label>
+                    <Input
+                      className="h-8 text-xs font-mono"
+                      value={bindings.dataSource?.itemVariable || ''}
+                      onChange={(e) => updateBindings({
+                        dataSource: { ...bindings.dataSource!, itemVariable: e.target.value || undefined },
+                      })}
+                      placeholder="product"
+                    />
+                  </div>
+
+                  <div className="grid gap-1">
                     <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Category Filter</Label>
                     <Input
                       className="h-8 text-xs"
@@ -172,6 +259,21 @@ export function BindingsPanel({ node, onUpdateProps }: BindingsPanelProps) {
                         dataSource: {
                           ...bindings.dataSource!,
                           query: { ...(bindings.dataSource?.query || {}), category: e.target.value || undefined },
+                        },
+                      })}
+                      placeholder="Leave empty for all"
+                    />
+                  </div>
+
+                  <div className="grid gap-1">
+                    <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Collection Filter</Label>
+                    <Input
+                      className="h-8 text-xs"
+                      value={bindings.dataSource?.query?.collection || ''}
+                      onChange={(e) => updateBindings({
+                        dataSource: {
+                          ...bindings.dataSource!,
+                          query: { ...(bindings.dataSource?.query || {}), collection: e.target.value || undefined },
                         },
                       })}
                       placeholder="Leave empty for all"
@@ -197,18 +299,18 @@ export function BindingsPanel({ node, onUpdateProps }: BindingsPanelProps) {
                   <div className="grid gap-1">
                     <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Sort</Label>
                     <Select
-                      value={bindings.dataSource?.query?.sort || ''}
+                      value={bindings.dataSource?.query?.sort || '__none'}
                       onValueChange={(v) => updateBindings({
                         dataSource: {
                           ...bindings.dataSource!,
-                          query: { ...(bindings.dataSource?.query || {}), sort: (v || undefined) as any },
+                          query: { ...(bindings.dataSource?.query || {}), sort: (v === '__none' ? undefined : v) as any },
                         },
                       })}
                     >
                       <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="None" /></SelectTrigger>
                       <SelectContent>
                         {SORT_OPTIONS.map((o) => (
-                          <SelectItem key={o.value || '__none'} value={o.value || '__none'}>{o.label}</SelectItem>
+                          <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -220,14 +322,41 @@ export function BindingsPanel({ node, onUpdateProps }: BindingsPanelProps) {
 
           <Separator />
 
+          {/* Presets */}
+          {presets && presets.length > 0 && (
+            <>
+              <Collapsible defaultOpen={!(bindings.bindings && bindings.bindings.length > 0)}>
+                <CollapsibleTrigger className="flex items-center gap-1 w-full text-[10px] font-semibold uppercase tracking-wider text-muted-foreground py-1 hover:text-foreground transition-colors">
+                  <Wand2 className="h-3 w-3" /> Quick Presets
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-1 mt-1">
+                  {presets.map((preset, i) => (
+                    <Button
+                      key={i}
+                      variant="outline"
+                      size="sm"
+                      className="text-xs w-full gap-1 justify-start"
+                      onClick={() => applyPreset(preset)}
+                    >
+                      <Wand2 className="h-3 w-3" />
+                      {preset.label}
+                      <span className="ml-auto text-[9px] text-muted-foreground">{preset.bindings.length} fields</span>
+                    </Button>
+                  ))}
+                </CollapsibleContent>
+              </Collapsible>
+              <Separator />
+            </>
+          )}
+
           {/* Field Mappings */}
           <Collapsible defaultOpen>
             <CollapsibleTrigger className="flex items-center gap-1 w-full text-[10px] font-semibold uppercase tracking-wider text-muted-foreground py-1 hover:text-foreground transition-colors">
-              <Link2 className="h-3 w-3" /> Field Mappings
+              <Link2 className="h-3 w-3" /> Field Mappings ({(bindings.bindings || []).length})
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-2 mt-1">
               {(bindings.bindings || []).map((binding, i) => (
-                <div key={i} className="border rounded-md p-2 space-y-1.5 relative">
+                <div key={i} className="border rounded-md p-2 space-y-1.5 relative" style={{ borderColor: 'hsl(var(--border))' }}>
                   <Button
                     variant="ghost" size="icon"
                     className="absolute top-1 right-1 h-5 w-5 text-muted-foreground hover:text-destructive"
@@ -240,7 +369,7 @@ export function BindingsPanel({ node, onUpdateProps }: BindingsPanelProps) {
                     <div className="grid gap-0.5">
                       <Label className="text-[9px] text-muted-foreground">Prop</Label>
                       <Input
-                        className="h-7 text-xs"
+                        className="h-7 text-xs font-mono"
                         value={binding.propKey}
                         onChange={(e) => updateFieldBinding(i, { propKey: e.target.value })}
                         placeholder="text, src, price..."
@@ -259,7 +388,7 @@ export function BindingsPanel({ node, onUpdateProps }: BindingsPanelProps) {
                         </Select>
                       ) : (
                         <Input
-                          className="h-7 text-xs"
+                          className="h-7 text-xs font-mono"
                           value={binding.fieldPath}
                           onChange={(e) => updateFieldBinding(i, { fieldPath: e.target.value })}
                           placeholder="field.path"
@@ -297,7 +426,7 @@ export function BindingsPanel({ node, onUpdateProps }: BindingsPanelProps) {
               ▸ Fallback Props
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-2 mt-1">
-              <p className="text-[9px] text-muted-foreground">Values used when data is unavailable.</p>
+              <p className="text-[9px] text-muted-foreground">Values used when bound data is unavailable.</p>
               {(bindings.bindings || []).filter(b => b.propKey).map((binding, i) => (
                 <div key={i} className="grid gap-0.5">
                   <Label className="text-[9px] text-muted-foreground">{binding.propKey}</Label>
@@ -309,6 +438,29 @@ export function BindingsPanel({ node, onUpdateProps }: BindingsPanelProps) {
                   />
                 </div>
               ))}
+            </CollapsibleContent>
+          </Collapsible>
+
+          <Separator />
+
+          {/* Live Data Preview */}
+          <Collapsible open={showPreview} onOpenChange={setShowPreview}>
+            <CollapsibleTrigger className="flex items-center gap-1 w-full text-[10px] font-semibold uppercase tracking-wider text-muted-foreground py-1 hover:text-foreground transition-colors">
+              <Eye className="h-3 w-3" /> Data Preview
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-1">
+              {previewData ? (
+                <div className="rounded-md border p-2 space-y-1 text-[10px] font-mono overflow-x-auto" style={{ backgroundColor: 'hsl(var(--muted) / 0.2)', maxHeight: '200px', overflowY: 'auto' }}>
+                  {Object.entries(previewData).filter(([k]) => k !== '__bindings').map(([key, value]) => (
+                    <div key={key} className="flex gap-1">
+                      <span className="text-primary font-semibold shrink-0">{key}:</span>
+                      <span className="text-muted-foreground truncate">{typeof value === 'object' ? JSON.stringify(value) : String(value ?? '—')}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-[9px] text-muted-foreground italic">Add field mappings to see resolved data.</p>
+              )}
             </CollapsibleContent>
           </Collapsible>
         </>
