@@ -620,6 +620,10 @@ export const blockRegistry: BlockDefinition[] = [
       { key: 'subtitle', label: 'Subtitle', type: 'text' },
       { key: 'faqLayout', label: 'Layout', type: 'select', options: [{ label: 'Accordion', value: 'accordion' }, { label: 'Grid', value: 'grid' }] },
       { key: 'columns', label: 'Columns (Grid mode)', type: 'select', options: [{ label: '1', value: '1' }, { label: '2', value: '2' }, { label: '3', value: '3' }] },
+      { key: 'faqItems', label: 'FAQ Items', type: 'array', arrayFields: [
+        { key: 'question', label: 'Question', type: 'text', placeholder: 'Your question...' },
+        { key: 'answer', label: 'Answer', type: 'textarea', rows: 2, placeholder: 'Answer...' },
+      ], newItemDefaults: { question: 'New question?', answer: 'Answer here.' }, addLabel: '+ Add FAQ' },
     ],
     description: 'FAQ accordion or grid section with configurable columns',
   },
