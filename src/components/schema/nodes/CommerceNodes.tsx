@@ -434,3 +434,86 @@ export function ProductGridNode({ node, mode }: NodeComponentProps) {
     </div>
   );
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// COLLECTION GRID — Grid of product collections/categories
+// ═══════════════════════════════════════════════════════════════════════════
+export function CollectionGridNode({ node, mode }: NodeComponentProps) {
+  const columns = node.props.columns || 3;
+  const gap = node.props.gap || '1.5rem';
+  const showTitle = node.props.showTitle !== false;
+  const showCount = node.props.showCount !== false;
+
+  // Mock collections for edit/preview mode
+  const mockCollections = [
+    { name: 'Electronics', image: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=400&h=300&fit=crop', count: 24 },
+    { name: 'Clothing', image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=300&fit=crop', count: 18 },
+    { name: 'Accessories', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop', count: 12 },
+    { name: 'Home & Garden', image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=300&fit=crop', count: 31 },
+    { name: 'Sports', image: 'https://images.unsplash.com/photo-1461896836934-bd45ba8fcfbb?w=400&h=300&fit=crop', count: 9 },
+    { name: 'Beauty', image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=300&fit=crop', count: 15 },
+  ];
+
+  const limit = node.props.limit || 6;
+  const collections = mockCollections.slice(0, limit);
+
+  return (
+    <div
+      className="nxr-collection-grid"
+      style={{
+        display: 'grid',
+        gridTemplateColumns: `repeat(${columns}, 1fr)`,
+        gap,
+        ...s(node.style),
+      }}
+      data-node-id={node.id}
+    >
+      {collections.map((col, i) => (
+        <div
+          key={i}
+          style={{
+            position: 'relative',
+            borderRadius: '0.75rem',
+            overflow: 'hidden',
+            cursor: 'pointer',
+            transition: 'transform 0.2s',
+          }}
+        >
+          <img
+            src={col.image}
+            alt={col.name}
+            style={{
+              width: '100%',
+              height: '200px',
+              objectFit: 'cover',
+              display: 'block',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundColor: 'rgba(0,0,0,0.35)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.25rem',
+            }}
+          >
+            {showTitle && (
+              <p style={{ color: '#fff', fontWeight: 700, fontSize: '1.125rem' }}>
+                {col.name}
+              </p>
+            )}
+            {showCount && (
+              <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.8rem' }}>
+                {col.count} products
+              </p>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}

@@ -5,14 +5,14 @@ export type BuiltInNodeType =
   | 'Section' | 'Container' | 'Grid' | 'Stack'
   | 'Text' | 'Image' | 'Divider' | 'Badge'
   | 'Button' | 'Card' | 'Input'
-  | 'ProductCard'
+  | 'ProductCard' | 'ProductGrid' | 'CollectionGrid'
   | 'Navbar' | 'Footer'
   | 'AnnouncementBar' | 'FeatureBar' | 'TestimonialCard' | 'NewsletterSection'
-  | 'HeroSection'
+  | 'HeroSection' | 'ImageBanner' | 'RichTextSection' | 'CTASection'
+  | 'TestimonialSection' | 'FAQSection'
   | 'Accordion' | 'TabsBlock' | 'VideoEmbed'
   | 'Spacer' | 'Icon' | 'SocialIcons'
-  | 'FormBlock'
-  | 'ProductGrid';
+  | 'FormBlock';
 
 /** Extensible node type — accepts all built-in types plus any custom string. */
 export type NodeType = BuiltInNodeType | (string & {});
